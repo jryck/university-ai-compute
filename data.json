@@ -4549,5 +4549,259 @@
     "Hopper",
     "Blackwell",
     "Rubin"
+  ],
+  "research_subset": [
+    {
+      "rd_rank": 1,
+      "institution": "Johns Hopkins University",
+      "rd_fy2024_m": "4100",
+      "control_model": "Condo/institutional",
+      "documented_gpus": 144,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Rockfish (NSF-MRI) + DSAI",
+      "access_notes": "Rockfish is institution-operated condo/ACCESS; DSAI unresolved",
+      "primary_source": "docs.arch.jhu.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 2,
+      "institution": "University of Pennsylvania",
+      "rd_fy2024_m": "2200",
+      "control_model": "Dedicated institutional",
+      "documented_gpus": 248,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Betty (DGX B200 SuperPOD",
+      "access_notes": " 31x8) + CBICA medical condo (128)",
+      "primary_source": "Betty = new (2025) university-wide dedicated cluster; CBICA is medical condo",
+      "completeness": "parcc.upenn.edu",
+      "null": [
+        "partial"
+      ]
+    },
+    {
+      "rd_rank": 3,
+      "institution": "University of California San Francisco",
+      "rd_fy2024_m": "2100",
+      "control_model": "Minimal / cloud",
+      "documented_gpus": 0,
+      "count_type": "unresolved",
+      "key_systems": "Wynton (shared) + cloud",
+      "access_notes": "Biomedical; little documented owned AI GPU; cloud-reliant",
+      "primary_source": "wynton.ucsf.edu",
+      "completeness": "unknown"
+    },
+    {
+      "rd_rank": 4,
+      "institution": "University of Michigan Ann Arbor",
+      "rd_fy2024_m": "2100",
+      "control_model": "Condo",
+      "documented_gpus": 0,
+      "count_type": "unresolved",
+      "key_systems": "Great Lakes + Armis2 (condo rate model)",
+      "access_notes": "Condo/cost-share; per-model counts not published",
+      "primary_source": "documentation.its.umich.edu",
+      "completeness": "unknown"
+    },
+    {
+      "rd_rank": 5,
+      "institution": "University of Wisconsin-Madison",
+      "rd_fy2024_m": "1900",
+      "control_model": "Institutional shared (modest)",
+      "documented_gpus": 72,
+      "count_type": "verified_lower_bound",
+      "key_systems": "CHTC GPU Lab (40 A100 + 32 H100)",
+      "access_notes": "Free centrally-managed shared resource; modest",
+      "primary_source": "chtc.cs.wisc.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 6,
+      "institution": "University of California Los Angeles",
+      "rd_fy2024_m": "1900",
+      "control_model": "Condo",
+      "documented_gpus": 0,
+      "count_type": "unresolved",
+      "key_systems": "Hoffman2 (800+ nodes condo)",
+      "access_notes": "Condo; per-model counts not published",
+      "primary_source": "hpc.oarc.ucla.edu",
+      "completeness": "unknown"
+    },
+    {
+      "rd_rank": 7,
+      "institution": "University of California San Diego",
+      "rd_fy2024_m": "1900",
+      "control_model": "National facility (NSF)",
+      "documented_gpus": 344,
+      "count_type": "verified_lower_bound",
+      "key_systems": "SDSC: Expanse (208 V100 + 136 H100) + Voyager (336 Gaudi2)",
+      "access_notes": "NSF-funded, nationally allocated via ACCESS; not institutional",
+      "primary_source": "sdsc.edu",
+      "completeness": "high"
+    },
+    {
+      "rd_rank": 8,
+      "institution": "University of Washington Seattle",
+      "rd_fy2024_m": "1700",
+      "control_model": "Condo",
+      "documented_gpus": 954,
+      "count_type": "aggregate",
+      "key_systems": "Hyak klone (954 GPU cards",
+      "access_notes": " condo)",
+      "primary_source": "Explicit condo model; PI-contributed; per-model not published",
+      "completeness": "hyak.uw.edu",
+      "null": [
+        "partial"
+      ]
+    },
+    {
+      "rd_rank": 9,
+      "institution": "Stanford University",
+      "rd_fy2024_m": "1600",
+      "control_model": "Dedicated + condo",
+      "documented_gpus": 248,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Marlowe (248 H100",
+      "access_notes": " dedicated) + Sherlock (condo)",
+      "primary_source": "Marlowe dedicated institutional; Sherlock condo/unresolved",
+      "completeness": "srcc.stanford.edu",
+      "null": [
+        "partial"
+      ]
+    },
+    {
+      "rd_rank": 10,
+      "institution": "Cornell University",
+      "rd_fy2024_m": "1600",
+      "control_model": "Condo",
+      "documented_gpus": 0,
+      "count_type": "aggregate",
+      "key_systems": "Shared cluster (755 GPUs / 70 owners) + Weill SCU (251)",
+      "access_notes": "Condo (70 resource owners); Weill medical separate",
+      "primary_source": "it.coecis.cornell.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 11,
+      "institution": "University of North Carolina Chapel Hill",
+      "rd_fy2024_m": "1600",
+      "control_model": "Condo",
+      "documented_gpus": 0,
+      "count_type": "unresolved",
+      "key_systems": "Longleaf / Dogwood (condo)",
+      "access_notes": "Condo; per-model counts not published",
+      "primary_source": "help.rc.unc.edu",
+      "completeness": "unknown"
+    },
+    {
+      "rd_rank": 12,
+      "institution": "Ohio State University",
+      "rd_fy2024_m": "1600",
+      "control_model": "State facility",
+      "documented_gpus": 904,
+      "count_type": "verified_lower_bound",
+      "key_systems": "OSC: Ascend (776 A100) + Cardinal (128 H100)",
+      "access_notes": "Ohio Supercomputer Center = STATE facility serving all Ohio, not just OSU",
+      "primary_source": "osc.edu",
+      "completeness": "high"
+    },
+    {
+      "rd_rank": 13,
+      "institution": "Duke University",
+      "rd_fy2024_m": "1600",
+      "control_model": "Condo",
+      "documented_gpus": 28,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Duke Compute Cluster (28 A100 + condo)",
+      "access_notes": "Condo model; small central",
+      "primary_source": "oit-rc.pages.oit.duke.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 14,
+      "institution": "University of Maryland College Park",
+      "rd_fy2024_m": "1500",
+      "control_model": "Institutional (modest)",
+      "documented_gpus": 80,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Zaratan (80 A100)",
+      "access_notes": "State-funded institutional cluster; modest",
+      "primary_source": "hpcc.umd.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 15,
+      "institution": "Georgia Institute of Technology",
+      "rd_fy2024_m": "1500",
+      "control_model": "Dedicated + condo",
+      "documented_gpus": 344,
+      "count_type": "verified_lower_bound",
+      "key_systems": "AI Makerspace (160 H100 + 184 H200",
+      "access_notes": " NVIDIA partner) + PACE (condo)",
+      "primary_source": "AI Makerspace dedicated (student); PACE condo",
+      "completeness": "pace.gatech.edu",
+      "null": [
+        "partial"
+      ]
+    },
+    {
+      "rd_rank": 16,
+      "institution": "Yale University",
+      "rd_fy2024_m": "1500",
+      "control_model": "Institutional shared",
+      "documented_gpus": 100,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Grace + McCleary + Misha (Wu Tsai)",
+      "access_notes": "Centrally-managed shared + a few dedicated (Misha); modest per-cluster",
+      "primary_source": "docs.ycrc.yale.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 17,
+      "institution": "University of Pittsburgh",
+      "rd_fy2024_m": "1500",
+      "control_model": "National facility (NSF)",
+      "documented_gpus": 264,
+      "count_type": "verified_lower_bound",
+      "key_systems": "PSC Bridges-2 (264 V100)",
+      "access_notes": "NSF-funded, nationally allocated via ACCESS; joint w/ CMU; not institutional",
+      "primary_source": "psc.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 18,
+      "institution": "New York University",
+      "rd_fy2024_m": "1500",
+      "control_model": "Dedicated institutional",
+      "documented_gpus": 1108,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Greene (332) + Torch (776)",
+      "access_notes": "Institution-operated; ownership/funding unverified but centrally run",
+      "primary_source": "nyu.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 19,
+      "institution": "Harvard University",
+      "rd_fy2024_m": "1500",
+      "control_model": "Dedicated institutional",
+      "documented_gpus": 1144,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Kempner (1144) + Cannon (aggregate ~2000 unresolved)",
+      "access_notes": "Kempner centrally-funded/donation; Cannon overlap unresolved",
+      "primary_source": "kempnerinstitute.harvard.edu",
+      "completeness": "partial"
+    },
+    {
+      "rd_rank": 20,
+      "institution": "Columbia University",
+      "rd_fy2024_m": "1400",
+      "control_model": "Condo",
+      "documented_gpus": 230,
+      "count_type": "verified_lower_bound",
+      "key_systems": "Insomnia (230 GPUs / 21 groups) + Ginsburg (condo)",
+      "access_notes": "Insomnia = joint purchase by 21 research groups (condo)",
+      "primary_source": "cuit.columbia.edu",
+      "completeness": "partial"
+    }
   ]
 }

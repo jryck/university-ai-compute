@@ -5,6 +5,18 @@
 An interactive dashboard on AI compute across US research universities — who owns it,
 who can access it, and how it maps to institutional wealth and research spending.
 
+## Research output
+
+- **[`DATA_INSIGHT_DRAFT.md`](DATA_INSIGHT_DRAFT.md)** — *"At most leading US research
+  universities, the AI compute isn't the university's."* Of the 20 highest-R&D US
+  universities (NSF HERD FY2024), only **5** run a large dedicated institution-controlled
+  GPU cluster; the rest rely on **condo** (PI-owned) hardware or **NSF/state shared
+  facilities**. Based on primary-source classification; counts are documented lower bounds.
+- **[`herd_universe.csv`](herd_universe.csv)** — the independent sample (top 50 by R&D,
+  unbiased vs. GPU holdings). **[`research_subset.csv`](research_subset.csv)** — the top-20
+  control-model classification with sources.
+- The **"Research: who controls the compute?"** section on the dashboard is the chart.
+
 ## Data quality & methodology
 
 An **independently source-verified, auditable** dataset (10-university pilot done; 38

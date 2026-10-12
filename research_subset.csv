@@ -1,0 +1,21 @@
+rd_rank,institution,rd_fy2024_m,control_model,documented_gpus,count_type,key_systems,access_notes,primary_source,completeness
+1,Johns Hopkins University,4100,Condo/institutional,144,verified_lower_bound,Rockfish (NSF-MRI) + DSAI,Rockfish is institution-operated condo/ACCESS; DSAI unresolved,docs.arch.jhu.edu,partial
+2,University of Pennsylvania,2200,Dedicated institutional,248,verified_lower_bound,Betty (DGX B200 SuperPOD, 31x8) + CBICA medical condo (128),"Betty = new (2025) university-wide dedicated cluster; CBICA is medical condo",parcc.upenn.edu,partial
+3,University of California San Francisco,2100,Minimal / cloud,0,unresolved,Wynton (shared) + cloud,"Biomedical; little documented owned AI GPU; cloud-reliant",wynton.ucsf.edu,unknown
+4,University of Michigan Ann Arbor,2100,Condo,0,unresolved,Great Lakes + Armis2 (condo rate model),Condo/cost-share; per-model counts not published,documentation.its.umich.edu,unknown
+5,University of Wisconsin-Madison,1900,Institutional shared (modest),72,verified_lower_bound,CHTC GPU Lab (40 A100 + 32 H100),"Free centrally-managed shared resource; modest",chtc.cs.wisc.edu,partial
+6,University of California Los Angeles,1900,Condo,0,unresolved,Hoffman2 (800+ nodes condo),Condo; per-model counts not published,hpc.oarc.ucla.edu,unknown
+7,University of California San Diego,1900,National facility (NSF),344,verified_lower_bound,SDSC: Expanse (208 V100 + 136 H100) + Voyager (336 Gaudi2),"NSF-funded, nationally allocated via ACCESS; not institutional",sdsc.edu,high
+8,University of Washington Seattle,1700,Condo,954,aggregate,Hyak klone (954 GPU cards, condo),"Explicit condo model; PI-contributed; per-model not published",hyak.uw.edu,partial
+9,Stanford University,1600,Dedicated + condo,248,verified_lower_bound,Marlowe (248 H100, dedicated) + Sherlock (condo),Marlowe dedicated institutional; Sherlock condo/unresolved,srcc.stanford.edu,partial
+10,Cornell University,1600,Condo,0,aggregate,Shared cluster (755 GPUs / 70 owners) + Weill SCU (251),"Condo (70 resource owners); Weill medical separate",it.coecis.cornell.edu,partial
+11,University of North Carolina Chapel Hill,1600,Condo,0,unresolved,Longleaf / Dogwood (condo),Condo; per-model counts not published,help.rc.unc.edu,unknown
+12,Ohio State University,1600,State facility,904,verified_lower_bound,OSC: Ascend (776 A100) + Cardinal (128 H100),"Ohio Supercomputer Center = STATE facility serving all Ohio, not just OSU",osc.edu,high
+13,Duke University,1600,Condo,28,verified_lower_bound,Duke Compute Cluster (28 A100 + condo),Condo model; small central,oit-rc.pages.oit.duke.edu,partial
+14,University of Maryland College Park,1500,Institutional (modest),80,verified_lower_bound,Zaratan (80 A100),State-funded institutional cluster; modest,hpcc.umd.edu,partial
+15,Georgia Institute of Technology,1500,Dedicated + condo,344,verified_lower_bound,AI Makerspace (160 H100 + 184 H200, NVIDIA partner) + PACE (condo),AI Makerspace dedicated (student); PACE condo,pace.gatech.edu,partial
+16,Yale University,1500,Institutional shared,100,verified_lower_bound,Grace + McCleary + Misha (Wu Tsai),"Centrally-managed shared + a few dedicated (Misha); modest per-cluster",docs.ycrc.yale.edu,partial
+17,University of Pittsburgh,1500,National facility (NSF),264,verified_lower_bound,PSC Bridges-2 (264 V100),"NSF-funded, nationally allocated via ACCESS; joint w/ CMU; not institutional",psc.edu,partial
+18,New York University,1500,Dedicated institutional,1108,verified_lower_bound,Greene (332) + Torch (776),Institution-operated; ownership/funding unverified but centrally run,nyu.edu,partial
+19,Harvard University,1500,Dedicated institutional,1144,verified_lower_bound,Kempner (1144) + Cannon (aggregate ~2000 unresolved),Kempner centrally-funded/donation; Cannon overlap unresolved,kempnerinstitute.harvard.edu,partial
+20,Columbia University,1400,Condo,230,verified_lower_bound,Insomnia (230 GPUs / 21 groups) + Ginsburg (condo),"Insomnia = joint purchase by 21 research groups (condo)",cuit.columbia.edu,partial

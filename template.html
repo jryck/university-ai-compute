@@ -203,6 +203,22 @@
   </section>
 
   <section>
+    <h2>Research: who controls the compute?</h2>
+    <p class="sub" style="margin-bottom:6px"><b>At most leading US research universities, the AI compute isn't the university's.</b>
+      Among the 20 US universities with the largest R&amp;D budgets (NSF HERD FY2024), only <b>5</b> run a large <em>dedicated,
+      institution-controlled</em> GPU cluster. In the rest, the GPUs are owned by individual labs (the "condo" model) or by
+      federal/state agencies (NSF/state shared facilities) — the university operates compute it doesn't own.</p>
+    <p class="tl-note" style="margin:0 0 14px">Independent, unbiased sample (ranked by R&amp;D, not by GPU holdings). Bars are
+      <b>documented lower bounds</b> from each university's own research-computing docs; hatched = aggregate/not-per-model;
+      "not published" = condo/aggregate clusters that disclose no count. Full write-up:
+      <a href="https://github.com/jryck/university-ai-compute/blob/main/DATA_INSIGHT_DRAFT.md" target="_blank" rel="noopener">DATA_INSIGHT_DRAFT.md</a>.</p>
+    <div class="card">
+      <div class="legend" id="ctrl-legend" style="margin-bottom:12px"></div>
+      <div class="bars" id="research-bars"></div>
+    </div>
+  </section>
+
+  <section>
     <h2>At a glance</h2>
     <div class="tiles" id="tiles"></div>
   </section>
@@ -691,7 +707,41 @@ function renderLabs(){
     +`* approximate. Different accelerator types; not directly comparable to the H100-equivalent metric.`;
 }
 
-drawScatter(); renderBars(); drawTimeline(); renderHead(); renderBody(); renderLabs();
+/* ---- Research chart: control-model classification (top 20 by R&D) ---- */
+const CTRL_COLORS = {'Dedicated institutional':'#2a78d6','Institutional shared':'#1baf7a',
+  'Condo':'#eda100','National / state facility':'#4a3aa7','Minimal / cloud':'#898781'};
+function ctrlCat(m){
+  if(/Dedicated/.test(m)) return 'Dedicated institutional';
+  if(/National|State facility/.test(m)) return 'National / state facility';
+  if(/Minimal/.test(m)) return 'Minimal / cloud';
+  if(/[Ii]nstitutional/.test(m)) return 'Institutional shared';
+  return 'Condo';
+}
+function renderResearch(){
+  const rs = PAYLOAD.research_subset||[];
+  if(!rs.length) return;
+  document.getElementById('ctrl-legend').innerHTML = Object.entries(CTRL_COLORS).map(([k,c])=>
+    `<span><i class="dot" style="background:${c}"></i>${k}</span>`).join('');
+  const max = Math.max(...rs.map(r=>r.documented_gpus), 1);
+  document.getElementById('research-bars').innerHTML = rs.sort((a,b)=>a.rd_rank-b.rd_rank).map(r=>{
+    const cat=ctrlCat(r.control_model), col=CTRL_COLORS[cat];
+    const hatch = r.count_type!=='verified_lower_bound';
+    const seg = r.documented_gpus>0
+      ? `<div class="bar-seg" style="width:${r.documented_gpus/max*100}%;background:${col};${hatch?'opacity:.55;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 2px,transparent 2px 5px)':''}" data-t="${r.institution} · ${cat} · ${r.key_systems}"></div>`
+      : `<div class="bar-seg" style="width:3px;background:${col};opacity:.4" data-t="${r.institution} · ${cat} · count not published"></div>`;
+    const label = r.documented_gpus>0 ? `≥${fmt(r.documented_gpus)}` : `<span style="color:var(--muted)">not published</span>`;
+    return `<div class="bar-row" style="grid-template-columns:200px 1fr 92px">`
+      +`<div class="blabel" title="${r.control_model}">#${r.rd_rank} ${shortName(r.institution)}</div>`
+      +`<div class="bar-track">${seg}</div>`
+      +`<div class="bar-val">${label}</div></div>`;
+  }).join('');
+  document.querySelectorAll('#research-bars .bar-seg').forEach(el=>{
+    el.addEventListener('mousemove', e=>showTip(el.dataset.t, e.clientX, e.clientY));
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+
+drawScatter(); renderBars(); drawTimeline(); renderHead(); renderBody(); renderLabs(); renderResearch();
 addEventListener('resize', ()=>{ /* svg is viewBox-scaled; nothing needed */ });
 </script>
 </body>

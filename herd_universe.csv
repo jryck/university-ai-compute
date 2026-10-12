@@ -1,0 +1,51 @@
+rank,institution,rd_fy2024_usd_millions,in_gpu_pilot,notes
+1,Johns Hopkins University,4100,yes,incl. Applied Physics Lab
+2,University of Pennsylvania,2200,no,
+3,University of California San Francisco,2100,no,pure biomedical; no undergrad
+4,University of Michigan Ann Arbor,2100,no,
+5,University of Wisconsin-Madison,1900,no,
+6,University of California Los Angeles,1900,no,
+7,University of California San Diego,1900,no,hosts SDSC (NSF facility)
+8,University of Washington Seattle,1700,no,
+9,Stanford University,1600,yes,
+10,Cornell University,1600,no,
+11,University of North Carolina Chapel Hill,1600,no,
+12,Ohio State University,1600,no,
+13,Duke University,1600,no,
+14,University of Maryland College Park,1500,no,
+15,Georgia Institute of Technology,1500,no,
+16,Yale University,1500,no,
+17,University of Pittsburgh,1500,no,hosts PSC (NSF facility, w/ CMU)
+18,New York University,1500,yes,
+19,Harvard University,1500,yes,
+20,Columbia University,1400,no,
+21,University of Minnesota Twin Cities,1400,no,
+22,Texas A&M University,1400,no,
+23,UT MD Anderson Cancer Center,1400,no,cancer center
+24,Vanderbilt University,1300,no,
+25,Pennsylvania State University,1300,no,
+26,University of Florida,1300,yes,
+27,University of Southern California,1300,no,
+28,Northwestern University,1300,no,
+29,Emory University,1200,no,
+30,Washington University in St. Louis,1200,no,
+31,University of Texas at Austin,1100,yes,hosts TACC (NSF facility)
+32,University of California Berkeley,1100,no,adjacent to NERSC/LBNL (not UC-owned compute)
+33,Massachusetts Institute of Technology,1100,yes,
+34,Icahn School of Medicine at Mount Sinai,1000,no,medical
+35,University of Arizona,1000,no,
+36,University of California Davis,1000,no,
+37,Arizona State University,1000,no,
+38,Michigan State University,931,no,
+39,Purdue University,931,no,hosts Anvil (NSF ACCESS)
+40,University of Illinois Urbana-Champaign,908,yes,hosts NCSA (NSF facility)
+41,Indiana University Bloomington,897,no,hosts Jetstream2 (NSF)
+42,Baylor College of Medicine,881,no,medical
+43,UT Southwestern Medical Center,869,no,medical
+44,University of Alabama at Birmingham,866,no,
+45,Rutgers University New Brunswick,837,no,
+46,University of Virginia,814,no,
+47,University of Utah,789,no,
+48,Boston University,784,no,
+49,University of Colorado Anschutz,742,no,medical campus
+50,University of Cincinnati,740,no,

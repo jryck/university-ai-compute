@@ -586,9 +586,17 @@ def main():
         'accelerator': n[5], 'top500': n[6], 'note': n[7], 'highlight': n[8],
     } for n in NATIONAL_LABS]
 
+    research_subset = []
+    if os.path.exists('research_subset.csv'):
+        for rr in csv.DictReader(open('research_subset.csv')):
+            rr['rd_rank'] = int(rr['rd_rank'])
+            rr['documented_gpus'] = int(rr['documented_gpus'] or 0)
+            research_subset.append(rr)
+
     payload = {'meta': meta, 'schools': out, 'milestones': milestones,
                'generations': gens, 'national_labs': national_labs,
-               'funding_models': FUNDING_MODELS, 'gens_order': GENS_ORDER}
+               'funding_models': FUNDING_MODELS, 'gens_order': GENS_ORDER,
+               'research_subset': research_subset}
     json.dump(payload, open('data.json', 'w'), indent=2)
 
     # archive a dated snapshot so the per-school series accumulates over rebuilds.
