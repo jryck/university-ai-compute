@@ -217,41 +217,62 @@ MILESTONES = [
 # legacy row), 'facility_models' (the NSF national-facility slice), 'cloud_models'
 # (reserved cloud, NOT owned hardware), 'planned_models' (announced/under-construction,
 # excluded from operational totals). Sources documented per entry.
+# Audited schools are now in clusters.csv (the verified spine). This legacy-era
+# override remains only for schools with a known facility split but no full cluster
+# audit yet (Texas A&M / ACES). Marked as legacy-adjusted, not verified.
 TIER_OVERRIDES = {
-    'University of Illinois Urbana-Champaign': {
-        # Removes 608 GH200 double-counted as H100_SXM (DeltaAI Grace Hopper counted once as GH200).
-        'owned': {'H100_SXM': 4, 'GH200': 608, 'A100_40GB': 440, 'A40': 400, 'H200': 64,
-                  'V100': 64, 'A10': 46, 'A100_80GB': 24},
-        'facility_models': {'GH200': 608, 'A100_40GB': 440, 'A40': 400, 'H200': 64, 'V100': 64},
-        'facility_systems': 'NCSA: Delta, DeltaAI, HAL — NSF-funded, nationally allocated (ACCESS)',
-        'source': 'NCSA Delta/DeltaAI user docs; gpusperstudent notes. Double-count of DeltaAI GH200 corrected.',
-    },
-    'University of Texas - Austin': {
-        # Vista (600 Grace Hopper) counted once as GH200, not also as H200. Decommissioned
-        # Longhorn/Maverick2 (424 V100, 6 P100) removed from operational.
-        'owned': {'GH200': 600, 'A100_40GB': 252, 'H100_PCIe': 8},
-        'facility_models': {'GH200': 600},
-        'facility_systems': 'TACC: Vista — NSF national facility. Lonestar6 (A100/H100) is UT-funded.',
-        'source': 'TACC Vista/Lonestar6 docs. GH200 double-count + decommissioned Longhorn/Maverick2 removed.',
-    },
-    'Carnegie Mellon University': {
-        # 296 H100 are Google Cloud reserved-instance VMs — NOT owned hardware.
-        'owned': {'A40': 29, 'RTX_A6000': 4, 'L40S': 18, 'P100': 20},
-        'cloud_models': {'H100_SXM': 296},
-        'source': 'cmu.edu/rcd/faq.html — 296 H100 are GCP reserved-instance VMs, reclassified from owned.',
-    },
-    'Oregon State University': {
-        # 150 Rubin belong to the Huang Complex supercomputer, under construction (opens 2027).
-        'owned': {'A100_80GB': 8, 'A40': 48, 'RTX_A6000': 32, 'V100': 24, 'P100': 12},
-        'planned_models': {'Rubin': 150},
-        'source': 'huangcomplex.oregonstate.edu/FAQ — Huang Complex completes end-2026, opens 2027; Rubin not operational.',
-    },
     'Texas A&M University': {
         'facility_models': {'H100_PCIe': 30, 'GH200': 1},
         'facility_systems': 'ACES — NSF-funded, ACCESS-allocated (DGX SuperPOD is institutional)',
-        'source': 'gpusperstudent notes; ACES is NSF/ACCESS.',
+        'source': 'gpusperstudent notes; ACES is NSF/ACCESS. Not yet independently cluster-audited.',
     },
 }
+
+# Access models that count as the university operating a national/shared facility.
+FACILITY_ACCESS = {'national-allocation'}
+FEDERAL_OWNERS = ('NSF', 'US (NSF)', 'federal')
+
+
+def parse_clusters(path='clusters.csv'):
+    """Aggregate the verified cluster-level inventory per university. Returns, per
+    school: operational owned-GPU model dict (reconcilable), the national-facility
+    slice, reserved-cloud, planned, any aggregate/unresolved clusters, sources, and
+    a coverage flag ('verified' = all resolved & confident; 'partial' = gaps)."""
+    import os
+    if not os.path.exists(path):
+        return {}
+    agg = {}
+    for r in csv.DictReader(open(path)):
+        uni = r['university']
+        d = agg.setdefault(uni, {'owned': {}, 'facility': {}, 'cloud': {}, 'planned': {},
+                                 'aggregate': [], 'sources': set(), 'partial': False,
+                                 'source_dates': set()})
+        d['sources'].add(r['source_url'])
+        d['source_dates'].add(r.get('source_date', ''))
+        model, cnt, status = r['gpu_model'], r['gpu_count'], r['status']
+        access, owner, conf = r['access_model'], r['owner'], r['confidence']
+        # unresolved: aggregate/mixed clusters or missing counts -> partial coverage
+        if model == 'mixed' or not cnt.strip():
+            d['aggregate'].append({'cluster': r['cluster_name'], 'count': cnt or '?', 'note': r['notes']})
+            d['partial'] = True
+            continue
+        cnt = int(cnt)
+        if status == 'planned':
+            d['planned'][model] = d['planned'].get(model, 0) + cnt
+            continue
+        if status in ('retired', 'uncertain'):
+            d['partial'] = True
+            continue  # excluded from operational owned
+        if access == 'reserved-cloud':
+            d['cloud'][model] = d['cloud'].get(model, 0) + cnt
+            continue
+        # operational, owned/operated by the university (institutional or facility)
+        d['owned'][model] = d['owned'].get(model, 0) + cnt
+        if access in FACILITY_ACCESS or any(f in owner for f in FEDERAL_OWNERS):
+            d['facility'][model] = d['facility'].get(model, 0) + cnt
+        if conf == 'low':
+            d['partial'] = True
+    return agg
 
 
 # Primary funding model for each school's compute. Documented where a dominant
@@ -327,18 +348,20 @@ NATIONAL_LABS = [
 # composition/vintage. (P100=Pascal, V100=Volta, A100/A40/A10/A6000=Ampere,
 # L40S=Ada Lovelace, H100/H200/GH200=Hopper, B200/B100=Blackwell, Rubin=Rubin.)
 GEN_OF = {
-    'P100': 'Pascal', 'V100': 'Volta',
-    'A100_80GB': 'Ampere', 'A100_40GB': 'Ampere', 'A40': 'Ampere', 'A10': 'Ampere',
-    'RTX_A6000': 'Ampere', 'L40S': 'Ada',
-    'H100_SXM': 'Hopper', 'H100_PCIe': 'Hopper', 'H200': 'Hopper', 'GH200': 'Hopper',
-    'B200': 'Blackwell', 'B100': 'Blackwell', 'Rubin': 'Rubin',
+    'P100': 'Pascal', 'V100': 'Volta', 'RTX8000': 'Turing',
+    'A100_80GB': 'Ampere', 'A100_40GB': 'Ampere', 'A100': 'Ampere', 'A40': 'Ampere',
+    'A10': 'Ampere', 'RTX_A6000': 'Ampere',
+    'L40S': 'Ada', 'L4': 'Ada',
+    'H100_SXM': 'Hopper', 'H100_PCIe': 'Hopper', 'H100': 'Hopper', 'H200': 'Hopper', 'GH200': 'Hopper',
+    'B200': 'Blackwell', 'B100': 'Blackwell', 'RTX_PRO_6000': 'Blackwell', 'Rubin': 'Rubin',
 }
-# Price-based weights (NOT performance): approximate share of the source's value-
-# derived "H100 price-equivalent", used only to apportion that metric across gens.
-GEN_W = {'P100': 0.05, 'V100': 0.12, 'A100_80GB': 0.6, 'A100_40GB': 0.5, 'A40': 0.2,
-         'A10': 0.15, 'RTX_A6000': 0.25, 'L40S': 0.4, 'H100_SXM': 1.0, 'H100_PCIe': 0.9,
-         'H200': 1.1, 'GH200': 1.0, 'B200': 2.2, 'B100': 1.8, 'Rubin': 3.0}
-GENS_ORDER = ['Pascal', 'Volta', 'Ampere', 'Ada', 'Hopper', 'Blackwell', 'Rubin']
+# Price-based weights (NOT performance): approximate share of the value-derived
+# "H100 price-equivalent", used only to apportion that metric across generations.
+GEN_W = {'P100': 0.05, 'V100': 0.12, 'RTX8000': 0.1, 'A100_80GB': 0.6, 'A100_40GB': 0.5,
+         'A100': 0.55, 'A40': 0.2, 'A10': 0.15, 'RTX_A6000': 0.25, 'L40S': 0.4, 'L4': 0.15,
+         'H100_SXM': 1.0, 'H100_PCIe': 0.9, 'H100': 1.0, 'H200': 1.1, 'GH200': 1.0,
+         'B200': 2.2, 'B100': 1.8, 'RTX_PRO_6000': 0.8, 'Rubin': 3.0}
+GENS_ORDER = ['Pascal', 'Volta', 'Turing', 'Ampere', 'Ada', 'Hopper', 'Blackwell', 'Rubin']
 
 
 def gen_split(gpus, total_h100e):
@@ -370,6 +393,7 @@ def num(r, k):
 
 def main():
     alloc_data = json.load(open('alloc.json')) if os.path.exists('alloc.json') else {}
+    clusters = parse_clusters()
     rows = list(csv.DictReader(open('raw_gpus.csv')))
     rows.sort(key=lambda r: num(r, 'h100_equivalent'), reverse=True)
     top = rows[:50]
@@ -379,12 +403,29 @@ def main():
         name = r['university']
         legacy_gpus = {m: int(num(r, m)) for m in GPU_MODELS if num(r, m) > 0}
 
-        # apply hardware-level corrections where audited; else use the legacy row.
+        # SPINE: verified cluster records first; TIER_OVERRIDES next; legacy last.
+        cl = clusters.get(name)
         ov = TIER_OVERRIDES.get(name, {})
-        gpus = ov.get('owned', legacy_gpus)              # operational owned-GPU model dict
-        facility_models = ov.get('facility_models', {})
-        cloud_models = ov.get('cloud_models', {})
-        planned_models = ov.get('planned_models', {})
+        aggregate_clusters, sources = [], []
+        if cl:
+            gpus = dict(cl['owned'])
+            facility_models = cl['facility']
+            cloud_models = cl['cloud']
+            planned_models = cl['planned']
+            verification = 'partial' if cl['partial'] else 'verified'
+            aggregate_clusters = cl['aggregate']
+            sources = sorted(u for u in cl['sources'] if u)
+        elif ov:
+            gpus = dict(ov.get('owned', legacy_gpus))
+            facility_models = ov.get('facility_models', {})
+            cloud_models = ov.get('cloud_models', {})
+            planned_models = ov.get('planned_models', {})
+            verification = 'legacy-adjusted'
+            sources = [ov.get('source', '')]
+        else:
+            gpus = legacy_gpus
+            facility_models, cloud_models, planned_models = {}, {}, {}
+            verification = 'legacy'
 
         def h100e_of(g):  # transparent price-equivalent: sum(count * price-weight)
             return round(sum(g.get(m, 0) * GEN_W.get(m, 0.3) for m in g), 1)
@@ -398,7 +439,6 @@ def main():
         inst_h100e = round(h100e - facility_h100e, 1)
         cloud_gpus = sum(cloud_models.values())
         planned_gpus = sum(planned_models.values())
-        verification = 'audited' if ov else 'legacy'     # audited = corrected vs primary source
         endow, fy, enote = ENDOWMENTS.get(name, (None, None, 'endowment not found'))
         endow_prior = ENDOWMENTS_FY24.get(name)
         # YoY change only meaningful when current figure is FY2025 (same basis)
@@ -427,13 +467,15 @@ def main():
             'institutional_h100e': inst_h100e,
             'facility_gpus': facility_gpus,
             'facility_h100e': facility_h100e,
-            'facility_systems': ov.get('facility_systems', ''),
+            'facility_systems': ov.get('facility_systems', '') or ('NSF / national facility (see cluster records)' if (cl and facility_gpus > 0) else ''),
             'has_facility': facility_h100e > 0,
             'cloud_gpus': cloud_gpus,
             'cloud_models': cloud_models,
             'planned_gpus': planned_gpus,
             'planned_models': planned_models,
             'verification': verification,
+            'sources': sources,
+            'aggregate_clusters': aggregate_clusters,
             'correction_source': ov.get('source', ''),
             'gen_h100e': gen_split(gpus, h100e),
             'gen_count': gen_count(gpus),

@@ -15,8 +15,8 @@
     --accent-wash: rgba(42,120,214,0.07);
     --chip: #f0efec;
     /* GPU generations — ordinal blue ramp, light→dark = older→newer */
-    --gen-Pascal: #b7d3f6; --gen-Volta: #86b6ef; --gen-Ampere: #5598e7; --gen-Ada: #2a78d6;
-    --gen-Hopper: #1c5cab; --gen-Blackwell: #104281; --gen-Rubin: #0a2a54;
+    --gen-Pascal: #cde2fb; --gen-Volta: #b7d3f6; --gen-Turing: #86b6ef; --gen-Ampere: #5598e7;
+    --gen-Ada: #2a78d6; --gen-Hopper: #1c5cab; --gen-Blackwell: #104281; --gen-Rubin: #0a2a54;
     --up: #006300; --down: #d03b3b;
   }
   @media (prefers-color-scheme: dark) {
@@ -28,8 +28,8 @@
       --accent-wash: rgba(57,135,229,0.13);
       --chip: #262624;
       /* dark: reverse the ramp so newest reads brightest on the dark surface */
-      --gen-Pascal: #133f78; --gen-Volta: #184f95; --gen-Ampere: #2a78d6; --gen-Ada: #3987e5;
-      --gen-Hopper: #6da7ec; --gen-Blackwell: #9ec5f4; --gen-Rubin: #cde2fb;
+      --gen-Pascal: #0d2e5c; --gen-Volta: #133f78; --gen-Turing: #184f95; --gen-Ampere: #2a78d6;
+      --gen-Ada: #3987e5; --gen-Hopper: #6da7ec; --gen-Blackwell: #9ec5f4; --gen-Rubin: #cde2fb;
       --up: #0ca30c; --down: #e66767;
     }
   }
@@ -143,6 +143,12 @@
   .name-cell .nm { font-weight: 550; color: var(--text-primary); }
   .expand { color: var(--muted); font-size: 11px; cursor: pointer; }
   .flag { color: var(--muted); font-size: 11px; }
+  .vbadge { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;
+    border-radius: 4px; padding: 1px 5px; white-space: nowrap; }
+  .vb-verified { color: #006300; background: rgba(12,163,12,0.12); }
+  .vb-partial { color: #9a6700; background: rgba(250,178,25,0.16); }
+  .vb-legacy { color: var(--muted); background: var(--chip); }
+  @media (prefers-color-scheme: dark) { .vb-verified { color: #4fd14f; } .vb-partial { color: #f3c04e; } }
   .nsf-badge { font-size: 10px; color: var(--accent); border: 1px solid var(--accent);
     border-radius: 5px; padding: 1px 5px; white-space: nowrap; opacity: .85; }
   .gpubar { display: inline-flex; height: 9px; border-radius: 3px; overflow: hidden;
@@ -256,7 +262,17 @@
 
   <section>
     <h2>All 50 schools</h2>
+    <p class="tl-note" style="margin:-4px 0 12px">Each school is badged by data provenance:
+      <span class="vbadge vb-verified">verified</span> (per-model counts from primary sources),
+      <span class="vbadge vb-partial">partial</span> (some clusters verified, inventory incomplete),
+      <span class="vbadge vb-legacy">legacy</span> (unverified GPUs-Per-Student candidate data — likely overstated).
+      Only 10 pilot schools are audited so far.</p>
     <div class="controls">
+      <div class="seg" id="verif-seg">
+        <button data-v="All" class="on">All</button>
+        <button data-v="verified">Verified + partial</button>
+        <button data-v="legacy">Legacy only</button>
+      </div>
       <div class="seg" id="sector-seg">
         <button data-s="All" class="on">All</button>
         <button data-s="Public">Public</button>
@@ -545,7 +561,13 @@ const COLS = [
   {k:'nairr_projects', t:'NAIRR', num:true},
   {k:'funding_model', t:'Funding', num:false},
 ];
-let sortK='_h100e', sortDir=-1, sectorFilter='All', query='';
+let sortK='_h100e', sortDir=-1, sectorFilter='All', verifFilter='All', query='';
+function vbadge(d){
+  const map={verified:['vb-verified','verified'],partial:['vb-partial','partial'],
+    'legacy-adjusted':['vb-legacy','legacy·adj'],legacy:['vb-legacy','legacy']};
+  const v=map[d.verification]||map.legacy;
+  return `<span class="vbadge ${v[0]}" title="Data provenance: ${d.verification}">${v[1]}</span>`;
+}
 
 function renderHead(){
   document.getElementById('thead-row').innerHTML = COLS.map(c=>
@@ -580,11 +602,17 @@ function gpuBreakdown(d){
     +extra
     +tier
     +`<div style="margin-bottom:4px"><b>Funding model:</b> ${d.funding_model}${d.funding_conf==='inferred'?' (inferred default)':''} — ${d.funding_note}</div>`
+    +`<div style="margin-bottom:4px"><b>Data provenance:</b> ${d.verification}`
+      + `${d.cloud_gpus?` · ${fmt(d.cloud_gpus)} GPUs reserved cloud (not owned)`:''}`
+      + `${d.planned_gpus?` · ${fmt(d.planned_gpus)} GPUs planned (not operational)`:''}`
+      + `${(d.aggregate_clusters&&d.aggregate_clusters.length)?' · unresolved aggregate clusters: '+d.aggregate_clusters.map(a=>a.cluster).join(', '):''}</div>`
+    + ((d.sources&&d.sources.length)?`<div style="margin-bottom:4px"><b>Sources:</b> ${d.sources.map(u=>`<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\//,'').split('/')[0]}</a>`).join(' · ')}</div>`:'')
     +`<div><b>Endowment note:</b> ${d.endowment_note||'—'}</div>`
-    +`<div style="margin-top:6px"><b>GPU notes:</b> ${d.notes}</div>`;
+    +`<div style="margin-top:6px"><b>Legacy GPU notes:</b> ${d.notes}</div>`;
 }
 function renderBody(){
   let rows = DATA.filter(d=> (sectorFilter==='All'||d.sector===sectorFilter)
+    && (verifFilter==='All' || (verifFilter==='verified'?(d.verification==='verified'||d.verification==='partial'):(d.verification==='legacy'||d.verification==='legacy-adjusted')))
     && d.name.toLowerCase().includes(query));
   rows.sort((a,b)=>{ const av=a[sortK], bv=b[sortK];
     if(typeof av==='string') return av.localeCompare(bv)*sortDir;
@@ -597,6 +625,7 @@ function renderBody(){
     tr.innerHTML =
       `<td><div class="name-cell"><span class="sector-dot" style="background:${c}"></span>`
       +`<span class="nm">${d.name.replace(' (MIT)','')}</span>${flag}`
+      +`${vbadge(d)}`
       +`${d.has_facility?'<span class="nsf-badge" title="Hosts an NSF national facility; most of its compute is federally funded and nationally allocated, not institutional">NSF facility</span>':''}`
       +`<span class="expand" data-x>▸</span></div></td>`
       +`<td>${fmt(d._gpus)}</td>`
@@ -630,6 +659,10 @@ document.querySelectorAll('#color-seg button').forEach(b=>b.onclick=()=>{
 document.querySelectorAll('#sector-seg button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#sector-seg button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); sectorFilter=b.dataset.s; renderBody();
+});
+document.querySelectorAll('#verif-seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#verif-seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); verifFilter=b.dataset.v; renderBody();
 });
 document.getElementById('search').oninput = e=>{ query=e.target.value.toLowerCase(); renderBody(); };
 

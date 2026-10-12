@@ -17,16 +17,16 @@
     },
     {
       "name": "New York University",
-      "total_gpus": 2134,
-      "h100_equivalent": 1339.3,
-      "gpu_value_usd": 46875500,
+      "total_gpus": 1108,
+      "h100_equivalent": 596.6,
+      "gpu_value_usd": 20881000,
       "endowment_b": 7.28
     },
     {
       "name": "University of Florida",
-      "total_gpus": 1752,
-      "h100_equivalent": 1857.6,
-      "gpu_value_usd": 65016000,
+      "total_gpus": 1104,
+      "h100_equivalent": 1198.8,
+      "gpu_value_usd": 41958000,
       "endowment_b": 2.69
     },
     {
@@ -38,30 +38,30 @@
     },
     {
       "name": "Princeton University",
-      "total_gpus": 2092,
-      "h100_equivalent": 1143.2,
-      "gpu_value_usd": 40012000,
+      "total_gpus": 756,
+      "h100_equivalent": 646.2,
+      "gpu_value_usd": 22617000,
       "endowment_b": 36.42
     },
     {
       "name": "Stanford University",
-      "total_gpus": 1822,
-      "h100_equivalent": 1016.5,
-      "gpu_value_usd": 35577500,
+      "total_gpus": 248,
+      "h100_equivalent": 248.0,
+      "gpu_value_usd": 8680000,
       "endowment_b": 40.79
     },
     {
       "name": "Harvard University",
-      "total_gpus": 1258,
-      "h100_equivalent": 837.8,
-      "gpu_value_usd": 29323000,
+      "total_gpus": 1144,
+      "h100_equivalent": 1076.0,
+      "gpu_value_usd": 37660000,
       "endowment_b": 56.9
     },
     {
       "name": "Massachusetts Institute of Technology (MIT)",
-      "total_gpus": 1636,
-      "h100_equivalent": 494.7,
-      "gpu_value_usd": 17314500,
+      "total_gpus": 448,
+      "h100_equivalent": 53.8,
+      "gpu_value_usd": 1883000,
       "endowment_b": 27.37
     },
     {
@@ -87,16 +87,16 @@
     },
     {
       "name": "Carnegie Mellon University",
-      "total_gpus": 71,
-      "h100_equivalent": 15.0,
-      "gpu_value_usd": 525000,
+      "total_gpus": 0,
+      "h100_equivalent": 0,
+      "gpu_value_usd": 0,
       "endowment_b": 4.29
     },
     {
       "name": "Johns Hopkins University",
-      "total_gpus": 484,
-      "h100_equivalent": 304.1,
-      "gpu_value_usd": 10643500,
+      "total_gpus": 144,
+      "h100_equivalent": 72.8,
+      "gpu_value_usd": 2548000,
       "endowment_b": 13.73
     },
     {

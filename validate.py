@@ -47,7 +47,7 @@ def main():
     # --- regression cases ---
     il = schools.get('University of Illinois Urbana-Champaign')
     check(il and il['total_gpus'] == 1650, f"[reg] Illinois owned should be 1650, got {il and il['total_gpus']}")
-    check(il and il['facility_gpus'] == 1576, f"[reg] Illinois facility should be 1576, got {il and il['facility_gpus']}")
+    check(il and il['facility_gpus'] == 1512, f"[reg] Illinois NCSA facility (Delta/DeltaAI, nationally allocated) should be 1512, got {il and il['facility_gpus']}")
     ut = schools.get('University of Texas - Austin')
     check(ut and ut['total_gpus'] == 860, f"[reg] UT Austin owned should be 860, got {ut and ut['total_gpus']}")
     cmu = schools.get('Carnegie Mellon University')

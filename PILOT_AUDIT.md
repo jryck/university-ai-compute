@@ -74,7 +74,8 @@ sample.** Per instruction, work stops here for review before expanding to the ot
 3. **Schema gaps:** legacy omits models that primary sources show (RTX PRO 6000, L4, RTX8000), so even its model mix is incomplete.
 
 ## Status of the dashboard after this pilot
-- Audited corrections are **live** for Illinois, UT Austin, CMU, Oregon State (per-model, reconciled). Harvard/Stanford/MIT/JHU/Princeton/NYU corrections are **captured in `clusters.csv`** but the dashboard university rows for those still show legacy pending the verified-inventory migration (Phase 2). Each row should be badged verified/legacy in the UI — not yet done.
+- **Phase 2 done:** the dashboard now **derives all audited schools from `clusters.csv`**, not GPUs Per Student. Every school carries a provenance badge — `verified` / `partial` / `legacy` / `legacy-adjusted` — and a verification filter. The 10 pilot schools (+ Oregon State) are verified/partial from primary sources; the other 40 remain `legacy` (clearly marked, likely overstated) until audited. Expand each row for per-school sources, cloud/planned splits, and unresolved aggregate clusters.
+- Remaining UI gap: the scatter/bar charts still plot legacy and verified points with the same styling (the table distinguishes them). Per-point provenance styling is a Phase-2b polish.
 - Funding default is now **Unknown** (not Institutional). Generation classes corrected (Pascal/Ada/Rubin). Metric relabeled **H100 price-equivalent** (value ÷ $35k), not performance.
 
 ## Recommended next steps (post-pilot)
