@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US University Compute vs. Endowment</title>
+<style>
+  :root {
+    --page: #f9f9f7; --surface: #fcfcfb;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --public: #2a78d6;   /* series 1 blue */
+    --private: #1baf7a;  /* series 2 aqua */
+    --accent: #2a78d6;
+    --accent-wash: rgba(42,120,214,0.07);
+    --chip: #f0efec;
+    /* GPU generations — ordinal blue ramp, light→dark = older→newer */
+    --gen-Volta: #86b6ef; --gen-Ampere: #3987e5; --gen-Hopper: #1c5cab; --gen-Blackwell: #0d366b;
+    --up: #006300; --down: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #0d0d0d; --surface: #1a1a19;
+      --text-primary: #ffffff; --text-secondary: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+      --public: #3987e5; --private: #199e70; --accent: #3987e5;
+      --accent-wash: rgba(57,135,229,0.13);
+      --chip: #262624;
+      /* dark: reverse the ramp so newest reads brightest on the dark surface */
+      --gen-Volta: #184f95; --gen-Ampere: #3987e5; --gen-Hopper: #6da7ec; --gen-Blackwell: #b7d3f6;
+      --up: #0ca30c; --down: #e66767;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--page); color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5; font-size: 15px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 24px 80px; }
+  header h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .sub { color: var(--text-secondary); max-width: 760px; margin: 0 0 4px; }
+  .asof { color: var(--muted); font-size: 13px; margin: 10px 0 0; }
+  .asof b { color: var(--text-secondary); font-weight: 600; }
+  section { margin-top: 36px; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em;
+       color: var(--muted); font-weight: 600; margin: 0 0 14px; }
+
+  /* stat tiles */
+  .lead-finding { display: flex; gap: 20px; align-items: center; background: var(--accent-wash);
+    border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 14px;
+    padding: 20px 24px; margin-bottom: 14px; }
+  .lf-big { font-size: 46px; font-weight: 700; color: var(--accent); line-height: 1; flex: none;
+    letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .lf-txt { color: var(--text-secondary); font-size: 15px; }
+  .lf-txt b { color: var(--text-primary); }
+  .findings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .finding { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; color: var(--text-secondary); font-size: 14px; }
+  .finding b { color: var(--text-primary); }
+  @media (max-width: 720px) { .findings { grid-template-columns: 1fr; }
+    .lead-finding { flex-direction: column; align-items: flex-start; gap: 10px; } }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .tiles { grid-template-columns: repeat(2,1fr); } }
+  .tile { background: var(--surface); border: 1px solid var(--border);
+          border-radius: 12px; padding: 16px 18px; }
+  .tile .v { font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
+  .tile .l { color: var(--text-secondary); font-size: 13px; margin-top: 2px; }
+
+  /* chart */
+  .card { background: var(--surface); border: 1px solid var(--border);
+          border-radius: 14px; padding: 20px; }
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline;
+                flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+  .chart-head .hint { color: var(--muted); font-size: 12.5px; }
+  .chart-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .legend { display: flex; gap: 18px; margin: 2px 0 10px; font-size: 13px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; color: var(--text-secondary); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-label { fill: var(--muted); font-size: 12px; }
+  .tick text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .tick line { stroke: var(--grid); stroke-width: 1; }
+  .pt { stroke: var(--surface); stroke-width: 2; cursor: pointer; transition: r .1s; }
+  .pt-label { fill: var(--text-secondary); font-size: 11px; font-weight: 500; pointer-events: none; }
+  .refline { stroke: var(--axis); stroke-width: 1; stroke-dasharray: 4 4; }
+  .refline-txt { fill: var(--muted); font-size: 10.5px; }
+  .tl-lane { stroke: var(--grid); stroke-width: 1; }
+  .tl-lane-label { fill: var(--text-secondary); font-size: 12px; font-weight: 500; }
+  .tl-year { fill: var(--muted); font-size: 11px; }
+  .tl-year-line { stroke: var(--grid); stroke-width: 1; }
+  .tl-dot { stroke: var(--surface); stroke-width: 1.5; cursor: pointer; }
+  .tl-sys { fill: var(--text-secondary); font-size: 10.5px; pointer-events: none; }
+  .tl-note { color: var(--muted); font-size: 12px; margin: 12px 0 0; }
+  .genkey { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .bars { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+  .bar-row { display: grid; grid-template-columns: 184px 1fr 64px; align-items: center; gap: 12px; font-size: 12px; }
+  .bar-row .blabel { text-align: right; color: var(--text-secondary); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { height: 16px; border-radius: 4px; background: var(--chip); display: flex; overflow: hidden; }
+  .bar-seg { height: 100%; cursor: pointer; }
+  .bar-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  @media (max-width: 640px) { .bar-row { grid-template-columns: 120px 1fr 52px; font-size: 11px; } }
+
+  .tooltip { position: fixed; pointer-events: none; z-index: 20; opacity: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18); border-radius: 10px;
+    padding: 10px 12px; font-size: 12.5px; max-width: 260px; transition: opacity .08s; }
+  .tooltip b { font-size: 13px; }
+  .tooltip .row { display: flex; justify-content: space-between; gap: 16px; color: var(--text-secondary); }
+  .tooltip .row span:last-child { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+  /* controls */
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+  .seg button { border: 0; background: transparent; color: var(--text-secondary);
+    padding: 7px 14px; font: inherit; font-size: 13px; cursor: pointer; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  input[type=search] { flex: 1; min-width: 180px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 9px; padding: 8px 12px;
+    font: inherit; font-size: 14px; color: var(--text-primary); }
+
+  /* table */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 760px; }
+  thead th { text-align: right; padding: 11px 12px; color: var(--muted);
+    font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--border); cursor: pointer; white-space: nowrap;
+    background: var(--surface); position: sticky; top: 0; }
+  thead th:first-child, tbody td:first-child { text-align: left; }
+  thead th.sorted { color: var(--text-primary); }
+  thead th .arr { opacity: .6; font-size: 10px; }
+  tbody td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: var(--chip); }
+  tbody tr.detail td { background: var(--page); font-variant-numeric: normal;
+    text-align: left; color: var(--text-secondary); font-size: 12.5px; padding: 12px 16px; }
+  .name-cell { display: flex; align-items: center; gap: 9px; }
+  .sector-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .name-cell .nm { font-weight: 550; color: var(--text-primary); }
+  .expand { color: var(--muted); font-size: 11px; cursor: pointer; }
+  .flag { color: var(--muted); font-size: 11px; }
+  .nsf-badge { font-size: 10px; color: var(--accent); border: 1px solid var(--accent);
+    border-radius: 5px; padding: 1px 5px; white-space: nowrap; opacity: .85; }
+  .gpubar { display: inline-flex; height: 9px; border-radius: 3px; overflow: hidden;
+            vertical-align: middle; margin-left: 4px; }
+  .gpubar i { height: 100%; display: inline-block; }
+  .modelchip { display: inline-block; background: var(--chip); border-radius: 6px;
+    padding: 2px 8px; margin: 2px 4px 2px 0; font-size: 11.5px; color: var(--text-secondary); }
+  footer { margin-top: 48px; color: var(--muted); font-size: 12.5px; }
+  footer ul { padding-left: 18px; }
+  footer a, .sub a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>The State of US University AI Compute</h1>
+    <p class="sub">Who owns AI compute, who can access it, and who's been left behind — across the 50 top US research
+      universities. Owned GPU fleets and their vintage, the federal supercomputers in their orbit, competitive national
+      allocations, and how it all lines up against endowments and research spending.</p>
+    <p class="asof" id="asof"></p>
+  </header>
+
+  <section>
+    <h2>Key findings</h2>
+    <div class="lead-finding">
+      <div class="lf-big" id="lf-invert">—</div>
+      <div class="lf-txt"><b>The wealthiest universities own the <em>least</em> compute per dollar.</b> Harvard and Yale
+        hold just 8–13 H100-equivalents per $B of endowment; Florida and Oregon State, 250–440. At the top end, wealth and
+        owned compute are essentially <em>inversely</em> related — the richest schools could buy far more, and don't.</div>
+    </div>
+    <div class="findings">
+      <div class="finding"><b>Access ≠ ownership — two different strategies.</b> USC, Michigan and Notre Dame each win
+        ~1–1.5M national supercomputing node-hours while owning only ~30–40 H100-equivalents. GPU-rich NYU and Texas A&amp;M
+        win almost none — they run on owned hardware. Stanford, Princeton and Illinois do both.</div>
+      <div class="finding"><b>Donations and federal labs built the biggest fleets — not endowments.</b> Florida's came
+        from an NVIDIA gift; Illinois's and UT Austin's are NSF national facilities. Only 9 of 50 schools' compute is
+        primarily non-institutional — but they include the very top of the owned-compute ranking.</div>
+      <div class="finding"><b>Research scale ≠ compute.</b> Johns Hopkins — #1 in the US for R&amp;D spending — owns
+        almost no GPU. Biomedical research isn't compute-bound; owned GPU is a signal of <em>AI-specific</em> ambition,
+        not research size.</div>
+      <div class="finding"><b>Fleet vintage varies widely.</b> Florida skipped the Hopper generation entirely
+        (Ampere → Blackwell); NYU and RPI still carry large legacy V100 fleets that look big by GPU count but contribute
+        little effective compute. The composition, not just the count, tells the story.</div>
+    </div>
+    <p class="tl-note" id="lf-context"></p>
+  </section>
+
+  <section>
+    <h2>At a glance</h2>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section>
+    <h2>Compute vs. endowment</h2>
+    <div class="card">
+      <div class="chart-controls">
+        <div class="seg" id="color-seg">
+          <button data-c="sector" class="on">Color: Sector</button>
+          <button data-c="funding">Color: Funding</button>
+        </div>
+        <div class="seg" id="basis-seg">
+          <button data-b="all" class="on">All compute</button>
+          <button data-b="inst">Institutional only</button>
+        </div>
+        <div class="seg" id="xmode-seg">
+          <button data-x="endow" class="on">vs. Endowment</button>
+          <button data-x="rd">vs. R&amp;D spending</button>
+        </div>
+      </div>
+      <div class="chart-head">
+        <div class="legend" id="scatter-legend"></div>
+        <div class="hint" id="scatter-hint"></div>
+      </div>
+      <div id="scatter"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Owned compute, by GPU generation</h2>
+    <div class="card">
+      <div class="chart-head">
+        <div class="legend" id="bar-legend"></div>
+        <div class="seg" id="barmode-seg">
+          <button data-m="h100e" class="on">Effective compute (H100e)</button>
+          <button data-m="count">GPU count</button>
+        </div>
+      </div>
+      <div class="hint" id="bar-hint" style="text-align:right;margin-bottom:10px"></div>
+      <div class="bars" id="bars"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The AI compute buildout, 2019–2026</h2>
+    <div class="card">
+      <div class="chart-head">
+        <div class="legend" id="gen-legend"></div>
+        <div class="hint">Marquee announced systems · dot size = GPUs added · hover for detail</div>
+      </div>
+      <div id="timeline"></div>
+      <p class="tl-note">Tracks flagship clusters, not every node — it shows the generational wave and who funds it
+        (NVIDIA donations → NSF national facilities → state grants). Owned compute only; rented/cloud is not publicly disclosed.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>All 50 schools</h2>
+    <div class="controls">
+      <div class="seg" id="sector-seg">
+        <button data-s="All" class="on">All</button>
+        <button data-s="Public">Public</button>
+        <button data-s="Private">Private</button>
+      </div>
+      <input type="search" id="search" placeholder="Filter schools…">
+    </div>
+    <div class="tbl-wrap">
+      <table id="tbl">
+        <thead><tr id="thead-row"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tier 3: National labs in the university orbit</h2>
+    <p class="sub" style="margin-bottom:14px">Federal (mostly DOE) facilities a university <em>manages or operates</em> — not
+      institutionally owns. Shown as <b>context only</b>: these are <b>not</b> counted in any figure above. They run largely
+      non-NVIDIA accelerators, so counts are native units, not H100-equivalents. This is where Berkeley's real compute lives.</p>
+    <div class="tbl-wrap">
+      <table id="labtbl">
+        <thead><tr>
+          <th style="text-align:left">National lab</th>
+          <th style="text-align:left">Managing university / consortium</th>
+          <th style="text-align:left">Flagship system</th>
+          <th>GPUs / accelerators</th>
+          <th style="text-align:left">Type</th>
+          <th>TOP500</th>
+        </tr></thead>
+        <tbody id="labbody"></tbody>
+      </table>
+    </div>
+    <p class="tl-note" id="lab-note"></p>
+  </section>
+
+  <footer id="footer"></footer>
+</div>
+<div class="tooltip" id="tip"></div>
+
+<script>
+const PAYLOAD = __DATA_JSON__;
+const DATA = PAYLOAD.schools, META = PAYLOAD.meta;
+const cssvar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = n => n==null ? '—' : n.toLocaleString('en-US');
+const money = n => n>=1e9 ? '$'+(n/1e9).toFixed(2)+'B' : '$'+(n/1e6).toFixed(0)+'M';
+const shortName = s => s.replace(' (MIT)','').replace('University of ','U. ')
+  .replace(' Urbana-Champaign',' (UIUC)').replace('Massachusetts Institute of Technology','MIT')
+  .replace(' - ',' ').replace(', Los Angeles',' LA').replace('California Institute of Technology','Caltech');
+
+/* ---- as-of + footer ---- */
+document.getElementById('asof').innerHTML =
+  `<b>GPU data:</b> ${META.gpu_data_asof} &nbsp;·&nbsp; <b>Endowments:</b> ${META.endowment_data_asof} &nbsp;·&nbsp; <b>R&D:</b> ${META.rd_data_asof}`;
+document.getElementById('footer').innerHTML =
+  `<p><b>Sources.</b> GPU inventory: ${META.gpu_source}. Endowments: ${META.endowment_source}. R&D: ${META.rd_source}. National access: ${META.alloc_source}. Built ${META.built}.</p>`
+  + '<p><b>Caveats.</b></p><ul>' + META.caveats.map(c=>`<li>${c}</li>`).join('')
+  + '<li>* R&D figure is an estimate (school not individually verified in NSF HERD top-100).</li></ul>';
+
+/* ---- stat tiles ---- */
+const totGPU = DATA.reduce((a,x)=>a+x.total_gpus,0);
+const totH100e = DATA.reduce((a,x)=>a+x.h100_equivalent,0);
+const totVal = DATA.reduce((a,x)=>a+x.gpu_value_usd,0);
+const tiles = [
+  [fmt(DATA.length), 'research universities'],
+  [fmt(totGPU), 'GPUs catalogued'],
+  [fmt(Math.round(totH100e)), 'H100-equivalents of compute'],
+  [money(totVal), 'est. aggregate GPU value'],
+];
+document.getElementById('tiles').innerHTML = tiles.map(t=>
+  `<div class="tile"><div class="v">${t[0]}</div><div class="l">${t[1]}</div></div>`).join('');
+
+/* ---- key findings: lead number + context line ---- */
+(function(){
+  const ratios = DATA.filter(d=>d.h100e_per_b_endowment).map(d=>d.h100e_per_b_endowment);
+  const spread = Math.round(Math.max(...ratios)/Math.min(...ratios));
+  document.getElementById('lf-invert').textContent = spread+'×';
+  document.getElementById('lf-context').innerHTML =
+    `For context: all 50 universities own ~${fmt(Math.round(totH100e))} H100-equivalents <em>combined</em>. `
+    +`That industry and the national labs dwarf academia is well known — federal leadership systems alone hold `
+    +`roughly 5.5× all 50 schools put together, and a single frontier cluster more still. The question this tool answers `
+    +`isn't the size of that gap, but how the 50 divide the compute they <em>do</em> have — and how unevenly it maps to `
+    +`wealth, research, and ownership.`;
+})();
+
+/* ---- scatter (log-log, hand-built SVG) ---- */
+const tip = document.getElementById('tip');
+function showTip(html, x, y){ tip.innerHTML=html; tip.style.opacity=1;
+  tip.style.left=Math.min(x+14, innerWidth-tip.offsetWidth-10)+'px';
+  tip.style.top=(y+14)+'px'; }
+function hideTip(){ tip.style.opacity=0; }
+
+const XMODES = {
+  endow: {key:'endowment_b', ratio:'_reEndow', axis:'Endowment (log, $B) — most recent fiscal year',
+          fmt:v=>'$'+(v<1?v:v)+'B', unit:'$B endowment'},
+  rd:    {key:'rd_expenditure_b', ratio:'_reRd', axis:'R&D expenditure (log, $B) — NSF HERD FY2024',
+          fmt:v=>'$'+(v<1?v:v)+'B', unit:'$B R&D'},
+};
+let xMode='endow', basis='all', colorBy='sector';
+// funding-model palette (categorical slots: blue, aqua, yellow, violet)
+const FUND_COLORS = {'Institutional':'#2a78d6','NSF facility':'#1baf7a','Vendor donation':'#eda100','Mixed':'#4a3aa7'};
+const dotColor = d => colorBy==='sector'
+  ? (d.sector==='Public'?cssvar('--public'):cssvar('--private'))
+  : (FUND_COLORS[d.funding_model]||'#898781');
+function renderLegend(){
+  const items = colorBy==='sector'
+    ? [['Public',cssvar('--public')],['Private',cssvar('--private')]]
+    : (PAYLOAD.funding_models||[]).map(m=>[m,FUND_COLORS[m]]);
+  document.getElementById('scatter-legend').innerHTML = items.map(([l,c])=>
+    `<span><i class="dot" style="background:${c}"></i>${l}</span>`).join('');
+}
+
+// compute active-basis fields on every row (all compute vs institutional-only)
+function prep(){
+  DATA.forEach(d=>{
+    d._h100e = basis==='inst' ? d.institutional_h100e : d.h100_equivalent;
+    d._gpus  = basis==='inst' ? d.institutional_gpus  : d.total_gpus;
+    d._reEndow = d.endowment_b ? Math.round(d._h100e/d.endowment_b*10)/10 : null;
+    d._reRd    = d.rd_expenditure_b ? Math.round(d._h100e/d.rd_expenditure_b*10)/10 : null;
+  });
+}
+prep();
+
+function drawScatter(){
+  renderLegend();
+  const cfg=XMODES[xMode], XK=cfg.key;
+  document.getElementById('scatter-hint').textContent =
+    `${basis==='inst'?'Institutional compute only (NSF national facilities excluded) · ':''}log axes · dashed line = median · hover for detail`;
+  const pts = DATA.filter(d=>d[XK] && d._h100e>0);
+  const W=1080, H=560, m={t:18,r:24,b:52,l:60};
+  const iw=W-m.l-m.r, ih=H-m.t-m.b;
+  const xs = pts.map(d=>d[XK]), ys = pts.map(d=>d._h100e);
+  const xmin=Math.min(...xs), xmax=Math.max(...xs), ymin=Math.min(...ys), ymax=Math.max(...ys);
+  const lx=v=>Math.log10(v);
+  const x0=Math.floor(lx(xmin)), x1=Math.ceil(lx(xmax));
+  const y0=Math.floor(lx(ymin)), y1=Math.ceil(lx(ymax));
+  const X=v=> m.l + (lx(v)-x0)/(x1-x0)*iw;
+  const Y=v=> m.t + ih - (lx(v)-y0)/(y1-y0)*ih;
+
+  const medianRatio = (()=>{ const r=pts.map(d=>d._h100e/d[XK]).sort((a,b)=>a-b);
+    return r[Math.floor(r.length/2)]; })();
+
+  const tickVals = e=>{ const a=[]; for(let p=e[0];p<=e[1];p++){ for(const f of [1,2,5]){ const v=f*Math.pow(10,p); a.push(v);} } return a; };
+  let g='';
+  // x ticks
+  tickVals([x0,x1]).filter(v=>v>=xmin*0.5&&v<=xmax*2).forEach(v=>{
+    g+=`<g class="tick"><line x1="${X(v)}" y1="${m.t}" x2="${X(v)}" y2="${m.t+ih}"/>`
+     +`<text x="${X(v)}" y="${m.t+ih+18}" text-anchor="middle">$${v<1?v:v}B</text></g>`; });
+  // y ticks
+  tickVals([y0,y1]).filter(v=>v>=ymin*0.5&&v<=ymax*2).forEach(v=>{
+    g+=`<g class="tick"><line x1="${m.l}" y1="${Y(v)}" x2="${m.l+iw}" y2="${Y(v)}"/>`
+     +`<text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end">${v>=1000?(v/1000)+'k':v}</text></g>`; });
+  // median ratio reference line: y = ratio * x
+  g+=`<clipPath id="plotclip"><rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}"/></clipPath>`;
+  const rx0=Math.pow(10,x0), rx1=Math.pow(10,x1);
+  g+=`<g clip-path="url(#plotclip)"><line class="refline" x1="${X(rx0)}" y1="${Y(medianRatio*rx0)}" x2="${X(rx1)}" y2="${Y(medianRatio*rx1)}"/></g>`;
+  g+=`<text class="refline-txt" x="${m.l+iw}" y="${Y(medianRatio*rx1)-6}" text-anchor="end">median ≈ ${Math.round(medianRatio)} H100e per ${cfg.unit}</text>`;
+  // axis labels
+  g+=`<text class="axis-label" x="${m.l+iw/2}" y="${H-6}" text-anchor="middle">${cfg.axis}</text>`;
+  g+=`<text class="axis-label" transform="translate(16,${m.t+ih/2}) rotate(-90)" text-anchor="middle">H100-equivalent compute (log)</text>`;
+  // points — label a small "story" set, staggering above/below to avoid collisions
+  const labels = {
+    'University of Florida':[1,-8], 'University of Illinois Urbana-Champaign':[1,-8],
+    'Oregon State University':[1,4], 'Harvard University':[-1,16],
+    'Massachusetts Institute of Technology (MIT)':[1,4], 'New York University':[1,14],
+  };
+  pts.forEach(d=>{
+    const c = dotColor(d);
+    const r = 5 + Math.sqrt(d._gpus)/9;
+    g+=`<circle class="pt" cx="${X(d[XK])}" cy="${Y(d._h100e)}" r="${r}" fill="${c}" data-i="${DATA.indexOf(d)}"/>`;
+    if(labels[d.name]){ const [dir,dy]=labels[d.name];
+      const tx = dir>0 ? X(d[XK])+r+4 : X(d[XK])-r-4;
+      g+=`<text class="pt-label" x="${tx}" y="${Y(d._h100e)+dy}" text-anchor="${dir>0?'start':'end'}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${shortName(d.name)}</text>`;
+    }
+  });
+  document.getElementById('scatter').innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scatter of H100-equivalent compute versus endowment">${g}</svg>`;
+
+  document.querySelectorAll('.pt').forEach(el=>{
+    el.addEventListener('mousemove', e=>{
+      const d=DATA[+el.dataset.i];
+      showTip(`<b>${d.name}</b><br><div class="row"><span>Sector</span><span>${d.sector}</span></div>`
+       +`<div class="row"><span>${basis==='inst'?'Institutional GPUs':'Total GPUs'}</span><span>${fmt(d._gpus)}</span></div>`
+       +`<div class="row"><span>H100-equiv</span><span>${fmt(Math.round(d._h100e))}${basis==='all'?'':' (inst.)'}</span></div>`
+       +(d.has_facility?`<div class="row"><span>of which NSF facility</span><span>${fmt(Math.round(d.facility_h100e))}</span></div>`:'')
+       +`<div class="row"><span>Endowment</span><span>$${d.endowment_b}B (FY${d.endowment_fy})</span></div>`
+       +`<div class="row"><span>R&D (FY24)</span><span>${d.rd_expenditure_b!=null?'$'+d.rd_expenditure_b+'B'+(d.rd_approx?'*':''):'—'}</span></div>`
+       +`<div class="row"><span>H100e / ${cfg.unit}</span><span>${d[cfg.ratio]??'—'}</span></div>`
+       +`<div class="row"><span>Funding</span><span>${d.funding_model}${d.funding_conf==='inferred'?' (inferred)':''}</span></div>`, e.clientX, e.clientY);
+      el.setAttribute('r', 5 + Math.sqrt(d._gpus)/9 + 2);
+    });
+    el.addEventListener('mouseleave', e=>{ hideTip(); const d=DATA[+el.dataset.i];
+      el.setAttribute('r', 5 + Math.sqrt(d._gpus)/9); });
+  });
+}
+
+/* ---- owned compute by generation (stacked bars) ---- */
+let barMode='h100e';
+document.getElementById('bar-legend').innerHTML = (PAYLOAD.gens_order||[]).map(g=>
+  `<span><i class="genkey" style="background:var(--gen-${g})"></i>${g}</span>`).join('');
+function renderBars(){
+  const GO=PAYLOAD.gens_order, key = barMode==='h100e'?'gen_h100e':'gen_count';
+  const rows = DATA.map(d=>({d, segs:d[key], tot:GO.reduce((a,g)=>a+d[key][g],0)}))
+    .filter(r=>r.tot>0).sort((a,b)=>b.tot-a.tot);
+  const max = rows[0].tot;
+  document.getElementById('bar-hint').textContent = barMode==='h100e'
+    ? 'Bar length = H100-equivalent compute; older GPUs are discounted, so legacy fleets look small'
+    : 'Bar length = raw GPU count; reveals legacy hardware (e.g. old V100 fleets) the H100e view hides';
+  document.getElementById('bars').innerHTML = rows.map(r=>{
+    const segs = GO.filter(g=>r.segs[g]>0).map(g=>
+      `<div class="bar-seg" style="width:${r.segs[g]/max*100}%;background:var(--gen-${g})" `
+      +`data-t="${shortName(r.d.name)} · ${g}: ${fmt(Math.round(r.segs[g]))}"></div>`).join('');
+    return `<div class="bar-row"><div class="blabel">${shortName(r.d.name)}</div>`
+      +`<div class="bar-track">${segs}</div>`
+      +`<div class="bar-val">${fmt(Math.round(r.tot))}</div></div>`;
+  }).join('');
+  document.querySelectorAll('#bars .bar-seg').forEach(el=>{
+    el.addEventListener('mousemove', e=>showTip(el.dataset.t, e.clientX, e.clientY));
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+document.querySelectorAll('#barmode-seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#barmode-seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); barMode=b.dataset.m; renderBars();
+});
+
+/* ---- buildout timeline (swimlanes by school) ---- */
+const MS = PAYLOAD.milestones, GENS = PAYLOAD.generations;
+document.getElementById('gen-legend').innerHTML = GENS.map(g=>
+  `<span><i class="genkey" style="background:var(--gen-${g})"></i>${g}</span>`).join('');
+
+function drawTimeline(){
+  const toMonths = d => { const [y,m]=d.split('-').map(Number); return y*12+(m-1); };
+  const t0 = toMonths('2019-01'), t1 = toMonths('2026-12');
+  // lanes = schools with milestones, ordered by their earliest deployment
+  const lanes = [...new Set(MS.map(m=>m.name))]
+    .sort((a,b)=> Math.min(...MS.filter(m=>m.name===a).map(m=>toMonths(m.date)))
+                - Math.min(...MS.filter(m=>m.name===b).map(m=>toMonths(m.date))));
+  const W=1080, m={t:26,r:28,b:28,l:168}, laneH=42;
+  const H = m.t + lanes.length*laneH + m.b, iw=W-m.l-m.r;
+  const X = d => m.l + (toMonths(d)-t0)/(t1-t0)*iw;
+  const laneY = i => m.t + i*laneH + laneH/2;
+  let g='';
+  // year gridlines
+  for(let y=2019; y<=2026; y++){ const x=X(y+'-01');
+    g+=`<line class="tl-year-line" x1="${x}" y1="${m.t-6}" x2="${x}" y2="${H-m.b}"/>`
+     +`<text class="tl-year" x="${x}" y="${m.t-12}" text-anchor="middle">${y}</text>`; }
+  // lanes
+  lanes.forEach((name,i)=>{
+    const y=laneY(i);
+    g+=`<line class="tl-lane" x1="${m.l}" y1="${y}" x2="${m.l+iw}" y2="${y}"/>`;
+    g+=`<text class="tl-lane-label" x="${m.l-12}" y="${y+4}" text-anchor="end">${shortName(name)}</text>`;
+  });
+  // milestone dots
+  MS.forEach((d,idx)=>{
+    const i=lanes.indexOf(d.name), y=laneY(i), x=X(d.date);
+    const r=5+Math.sqrt(d.gpus)/7;
+    g+=`<circle class="tl-dot" cx="${x}" cy="${y}" r="${r}" fill="var(--gen-${d.generation})" `
+      +`${d.conf==='med'?'stroke-dasharray="2 2" ':''}data-m="${idx}"/>`;
+    // label the bigger / notable systems to keep it readable
+    if(d.gpus>=248)
+      g+=`<text class="tl-sys" x="${x}" y="${y-r-5}" text-anchor="middle" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${d.system.split(' (')[0].split(' —')[0]}</text>`;
+  });
+  document.getElementById('timeline').innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Timeline of flagship university GPU deployments by generation">${g}</svg>`;
+  document.querySelectorAll('.tl-dot').forEach(el=>{
+    el.addEventListener('mousemove', e=>{ const d=MS[+el.dataset.m];
+      showTip(`<b>${shortName(d.name)} — ${d.system}</b>`
+        +`<div class="row"><span>Date</span><span>${d.date}</span></div>`
+        +`<div class="row"><span>GPUs added</span><span>${fmt(d.gpus)} × ${d.gpu_type}</span></div>`
+        +`<div class="row"><span>Generation</span><span>${d.generation}</span></div>`
+        +`<div class="row"><span>Funding</span><span>${d.funding}</span></div>`
+        +`<div style="margin-top:6px;color:var(--muted)">${d.note}${d.conf==='med'?' · approximate':''}</div>`, e.clientX, e.clientY); });
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+
+/* ---- table ---- */
+const COLS = [
+  {k:'name', t:'School', num:false},
+  {k:'_gpus', t:'Owned GPUs', num:true},
+  {k:'_h100e', t:'H100-equiv', num:true},
+  {k:'endowment_b', t:'Endow $B', num:true},
+  {k:'_reEndow', t:'H100e / $B', num:true},
+  {k:'rd_expenditure_b', t:'R&D $B', num:true},
+  {k:'alloc_nodehours', t:'Leadership nh', num:true},
+  {k:'nairr_projects', t:'NAIRR', num:true},
+  {k:'funding_model', t:'Funding', num:false},
+];
+let sortK='_h100e', sortDir=-1, sectorFilter='All', query='';
+
+function renderHead(){
+  document.getElementById('thead-row').innerHTML = COLS.map(c=>
+    `<th data-k="${c.k}" class="${c.k===sortK?'sorted':''}">${c.t}`
+    +`<span class="arr">${c.k===sortK?(sortDir<0?' ▼':' ▲'):''}</span></th>`).join('');
+  document.querySelectorAll('thead th').forEach(th=>th.onclick=()=>{
+    const k=th.dataset.k;
+    if(k===sortK) sortDir*=-1; else { sortK=k; sortDir = (k==='name')?1:-1; }
+    renderHead(); renderBody();
+  });
+}
+function yoyTag(d){
+  if(d.endowment_yoy_pct==null) return '';
+  const up=d.endowment_yoy_pct>=0;
+  return ` <span style="color:${up?'var(--up)':'var(--down)'};font-size:11px">`
+    +`${up?'▲':'▼'}${Math.abs(d.endowment_yoy_pct)}%</span>`;
+}
+function gpuBreakdown(d){
+  const pal=['#2a78d6','#1baf7a','#eda100','#4a3aa7','#e34948','#e87ba4','#eb6834','#008300','#898781'];
+  const entries=Object.entries(d.gpus).sort((a,b)=>b[1]-a[1]);
+  const bar=entries.map((e,i)=>`<i style="width:${e[1]/d.total_gpus*160}px;background:${pal[i%pal.length]}"></i>`).join('');
+  const chips=entries.map(e=>`<span class="modelchip">${e[0].replace('_',' ')}: ${fmt(e[1])}</span>`).join('');
+  const tier = d.has_facility
+    ? `<div style="margin:2px 0 8px"><b>Ownership tiers:</b> institutional ${fmt(d.institutional_gpus)} GPUs (${Math.round(d.institutional_h100e)} H100e) · `
+      + `NSF national facility ${fmt(d.facility_gpus)} GPUs (${Math.round(d.facility_h100e)} H100e). ${d.facility_systems}</div>`
+    : '';
+  const extra = `<div style="margin:2px 0 8px"><b>Also:</b> est. GPU value ${money(d.gpu_value_usd)} · `
+    + `${d.gpus_per_student} GPUs/student · ${d._reRd!=null?d._reRd+' H100e per $B R&D':'R&D ratio —'}`
+    + `${d.alloc_notable?' · leadership: '+d.alloc_notable:''}</div>`;
+  return `<div><span class="gpubar" style="width:160px">${bar}</span></div>`
+    +`<div style="margin:8px 0">${chips}</div>`
+    +extra
+    +tier
+    +`<div style="margin-bottom:4px"><b>Funding model:</b> ${d.funding_model}${d.funding_conf==='inferred'?' (inferred default)':''} — ${d.funding_note}</div>`
+    +`<div><b>Endowment note:</b> ${d.endowment_note||'—'}</div>`
+    +`<div style="margin-top:6px"><b>GPU notes:</b> ${d.notes}</div>`;
+}
+function renderBody(){
+  let rows = DATA.filter(d=> (sectorFilter==='All'||d.sector===sectorFilter)
+    && d.name.toLowerCase().includes(query));
+  rows.sort((a,b)=>{ const av=a[sortK], bv=b[sortK];
+    if(typeof av==='string') return av.localeCompare(bv)*sortDir;
+    return ((av??-1)-(bv??-1))*sortDir; });
+  const tb=document.getElementById('tbody'); tb.innerHTML='';
+  rows.forEach(d=>{
+    const c = d.sector==='Public'?'var(--public)':'var(--private)';
+    const flag = d.endowment_fy===2024 ? ` <span class="flag" title="${d.endowment_note}">FY24</span>`:'';
+    const tr=document.createElement('tr');
+    tr.innerHTML =
+      `<td><div class="name-cell"><span class="sector-dot" style="background:${c}"></span>`
+      +`<span class="nm">${d.name.replace(' (MIT)','')}</span>${flag}`
+      +`${d.has_facility?'<span class="nsf-badge" title="Hosts an NSF national facility; most of its compute is federally funded and nationally allocated, not institutional">NSF facility</span>':''}`
+      +`<span class="expand" data-x>▸</span></div></td>`
+      +`<td>${fmt(d._gpus)}</td>`
+      +`<td>${fmt(Math.round(d._h100e))}</td>`
+      +`<td>${d.endowment_b!=null?'$'+d.endowment_b:'—'}${yoyTag(d)}</td>`
+      +`<td>${d._reEndow??'—'}</td>`
+      +`<td>${d.rd_expenditure_b!=null?'$'+d.rd_expenditure_b+(d.rd_approx?'*':''):'—'}</td>`
+      +`<td>${d.alloc_nodehours?fmt(d.alloc_nodehours):'—'}</td>`
+      +`<td>${d.nairr_projects||'—'}</td>`
+      +`<td style="text-align:left;white-space:nowrap"><span class="sector-dot" style="background:${FUND_COLORS[d.funding_model]||'#898781'}"></span> ${d.funding_model}${d.funding_conf==='inferred'?'<span class="flag"> ·inf</span>':''}</td>`;
+    const det=document.createElement('tr'); det.className='detail'; det.style.display='none';
+    det.innerHTML=`<td colspan="${COLS.length}">${gpuBreakdown(d)}</td>`;
+    tr.querySelector('[data-x]').onclick=()=>{ const sh=det.style.display==='none';
+      det.style.display=sh?'table-row':'none'; tr.querySelector('[data-x]').textContent=sh?'▾':'▸'; };
+    tb.appendChild(tr); tb.appendChild(det);
+  });
+}
+
+document.querySelectorAll('#xmode-seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#xmode-seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); xMode=b.dataset.x; drawScatter();
+});
+document.querySelectorAll('#basis-seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#basis-seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); basis=b.dataset.b; prep(); drawScatter(); renderBody();
+});
+document.querySelectorAll('#color-seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#color-seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); colorBy=b.dataset.c; drawScatter();
+});
+document.querySelectorAll('#sector-seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#sector-seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); sectorFilter=b.dataset.s; renderBody();
+});
+document.getElementById('search').oninput = e=>{ query=e.target.value.toLowerCase(); renderBody(); };
+
+/* ---- Tier 3: national labs ---- */
+function renderLabs(){
+  const labs = PAYLOAD.national_labs;
+  document.getElementById('labbody').innerHTML = labs.map(n=>{
+    const g = n.gpus!=null ? fmt(n.gpus)+(n.gpus_approx?'*':'') : '—';
+    return `<tr${n.highlight?' style="background:var(--chip)"':''}>`
+      +`<td style="text-align:left"><span class="nm">${n.lab}</span>${n.highlight?' <span class="nsf-badge">Berkeley</span>':''}</td>`
+      +`<td style="text-align:left">${n.manager}</td>`
+      +`<td style="text-align:left">${n.system}</td>`
+      +`<td>${g}</td>`
+      +`<td style="text-align:left">${n.accelerator}</td>`
+      +`<td>${n.top500}</td></tr>`
+      +`<tr class="detail" style="display:table-row"><td colspan="6" style="padding-top:0">${n.note}</td></tr>`;
+  }).join('');
+  const bigGpus = labs.filter(n=>n.gpus).reduce((a,n)=>a+n.gpus,0);
+  const owned = DATA.reduce((a,d)=>a+d.total_gpus,0);
+  document.getElementById('lab-note').innerHTML =
+    `Scale check: these federal leadership systems hold ~${fmt(bigGpus)} accelerators combined — roughly `
+    +`${(bigGpus/owned).toFixed(1)}× the <b>${fmt(owned)}</b> GPUs <em>owned</em> by all 50 universities above. `
+    +`* approximate. Different accelerator types; not directly comparable to the H100-equivalent metric.`;
+}
+
+drawScatter(); renderBars(); drawTimeline(); renderHead(); renderBody(); renderLabs();
+addEventListener('resize', ()=>{ /* svg is viewBox-scaled; nothing needed */ });
+</script>
+</body>
+</html>

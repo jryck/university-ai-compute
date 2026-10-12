@@ -1,0 +1,488 @@
+#!/usr/bin/env python3
+"""Build the merged university-compute dataset.
+
+Joins the GPU inventory (gpusperstudent.org master_data.csv) with the most
+recent available university endowment figures (FY2025 where reported, else
+FY2024) and computes derived economics metrics. Outputs data.json which is
+embedded into index.html.
+"""
+import csv
+import json
+import os
+
+GPU_MODELS = ['H100_SXM', 'H100_PCIe', 'H200', 'A100_80GB', 'A100_40GB',
+              'B200', 'B100', 'Rubin', 'A40', 'RTX_A6000', 'L40S',
+              'V100', 'P100', 'GH200', 'A10']
+
+# Endowment figures keyed by the EXACT university name in the GPU CSV.
+# value = endowment in $B, fy = fiscal year of the figure, note = caveat.
+# FY2025 = year ending ~June 30 2025 (latest reported as of Oct 2026).
+ENDOWMENTS = {
+    'University of Illinois Urbana-Champaign':      (3.80, 2025, 'U of Illinois System & Foundations'),
+    'University of Texas - Austin':                 (6.49, 2025, 'UT Austin institutional (UT System total $27.2B)'),
+    'New York University':                          (7.28, 2025, ''),
+    'University of Florida':                         (2.69, 2025, 'UF Foundation'),
+    'Texas A&M University':                          (22.23, 2025, 'Texas A&M System & foundations (system-level)'),
+    'Princeton University':                          (36.42, 2025, ''),
+    'Stanford University':                           (40.79, 2025, ''),
+    'Harvard University':                            (56.90, 2025, ''),
+    'Massachusetts Institute of Technology (MIT)':   (27.37, 2025, ''),
+    'University of Washington':                      (6.00, 2025, 'Consolidated Endowment Fund'),
+    'Georgia Institute of Technology':               (3.51, 2025, 'incl. related foundations'),
+    'Yale University':                               (44.15, 2025, ''),
+    'Carnegie Mellon University':                    (4.29, 2025, ''),
+    'Johns Hopkins University':                      (13.73, 2025, ''),
+    'Oregon State University':                       (0.90, 2024, 'FY2024; FY2025 not yet reported'),
+    'Rensselaer Polytechnic Institute':              (1.03, 2025, ''),
+    'Clemson University':                            (1.24, 2025, ''),
+    'Washington University in St. Louis':            (13.30, 2025, ''),
+    'University of Vermont':                         (0.90, 2024, 'FY2024; FY2025 not yet reported'),
+    'California Institute of Technology':            (4.32, 2025, ''),
+    'Rice University':                               (8.50, 2025, ''),
+    'Boston University':                             (4.02, 2025, ''),
+    'University of Virginia':                        (11.23, 2025, 'incl. UVIMCO/foundation'),
+    'Arizona State University':                      (1.76, 2025, 'ASU Foundation'),
+    'Michigan State University':                     (4.61, 2025, ''),
+    'Northeastern University':                       (2.10, 2025, ''),
+    'University of Wyoming':                          (0.70, 2024, 'FY2024; approximate'),
+    'University of Wisconsin - Madison':             (4.92, 2025, 'UW Foundation'),
+    'University of Central Florida':                 (0.26, 2024, 'UCF Foundation, FY2024'),
+    'Southern Methodist University':                 (2.34, 2025, ''),
+    'University of Chicago':                         (10.62, 2025, ''),
+    'Mississippi State University':                  (0.89, 2024, 'FY2024; approximate'),
+    'University of California, Los Angeles':         (4.77, 2025, 'UCLA Foundation (UC System total $20.2B)'),
+    'University of Pittsburgh':                      (6.15, 2025, ''),
+    'University of Kentucky':                        (2.17, 2025, ''),
+    'University of Utah':                            (2.07, 2025, ''),
+    'Case Western Reserve University':               (2.52, 2025, ''),
+    'New Jersey Institute of Technology':            (0.20, 2024, 'FY2024; approximate'),
+    'University of Louisville':                       (1.01, 2024, 'FY2024'),
+    'University of Oklahoma':                         (2.00, 2024, 'OU Norman, FY2024; approximate'),
+    'University of South Carolina':                  (1.04, 2024, 'FY2024'),
+    'University of Michigan - Ann Arbor':            (21.20, 2025, ''),
+    'University of Alabama - Birmingham':             (2.59, 2025, 'Univ. of Alabama SYSTEM total; UAB-only is far smaller'),
+    'Columbia University':                           (15.92, 2025, ''),
+    'Tufts University':                              (2.71, 2025, ''),
+    'University of Nebraska - Lincoln':              (2.72, 2025, 'U of Nebraska system/foundation'),
+    'Duke University':                               (12.32, 2025, ''),
+    'Boston College':                                (4.24, 2025, ''),
+    'University of Notre Dame':                      (20.09, 2025, ''),
+    'University of Southern California':             (9.03, 2025, ''),
+}
+
+
+PRIVATE = {
+    'New York University', 'Princeton University', 'Stanford University',
+    'Harvard University', 'Massachusetts Institute of Technology (MIT)',
+    'Yale University', 'Carnegie Mellon University', 'Johns Hopkins University',
+    'Rensselaer Polytechnic Institute', 'Washington University in St. Louis',
+    'California Institute of Technology', 'Rice University', 'Boston University',
+    'Northeastern University', 'Southern Methodist University',
+    'University of Chicago', 'Case Western Reserve University',
+    'Columbia University', 'Tufts University', 'Duke University',
+    'Boston College', 'University of Notre Dame',
+    'University of Southern California',
+}
+
+
+# Prior-year (FY2024) endowments, to compute year-over-year change. Keyed by the
+# exact GPU-CSV name. Only schools where a reliable FY2024 figure exists.
+ENDOWMENTS_FY24 = {
+    'University of Illinois Urbana-Champaign': 2.99,
+    'University of Texas - Austin': 6.08,
+    'New York University': 6.65,
+    'University of Florida': 2.50,
+    'Texas A&M University': 20.38,
+    'Princeton University': 34.05,
+    'Stanford University': 37.63,
+    'Harvard University': 51.98,
+    'Massachusetts Institute of Technology (MIT)': 24.57,
+    'University of Washington': 4.90,
+    'Georgia Institute of Technology': 3.17,
+    'Yale University': 41.44,
+    'Carnegie Mellon University': 4.00,
+    'Johns Hopkins University': 13.06,
+    'Oregon State University': 0.90,
+    'Rensselaer Polytechnic Institute': 0.80,
+    'Clemson University': 1.12,
+    'Washington University in St. Louis': 11.98,
+    'California Institute of Technology': 4.14,
+    'Rice University': 8.06,
+    'Boston University': 3.54,
+    'University of Virginia': 10.22,
+    'Arizona State University': 1.59,
+    'Michigan State University': 4.42,
+    'Northeastern University': 1.83,
+    'University of Wisconsin - Madison': 4.30,
+    'Southern Methodist University': 2.12,
+    'University of Chicago': 10.10,
+    'University of California, Los Angeles': 4.30,
+    'University of Pittsburgh': 5.80,
+    'University of Kentucky': 1.98,
+    'University of Utah': 1.86,
+    'Case Western Reserve University': 2.40,
+    'University of Michigan - Ann Arbor': 19.17,
+    'Columbia University': 14.78,
+    'Tufts University': 2.53,
+    'University of Nebraska - Lincoln': 2.53,
+    'Duke University': 11.89,
+    'Boston College': 3.78,
+    'University of Notre Dame': 17.90,
+    'University of Southern California': 8.15,
+}
+
+# FY2024 total R&D expenditure ($M), from the NSF HERD survey. Actuals where
+# directly reported; others derived from the HERD FY2024 base. Keyed by GPU-CSV
+# name. RD_APPROX flags figures that are estimates (school not individually pulled).
+RD_FY24 = {
+    'University of Illinois Urbana-Champaign': 907,
+    'University of Texas - Austin': 1144,
+    'New York University': 1501,
+    'University of Florida': 1273,
+    'Texas A&M University': 1394,
+    'Princeton University': 559,
+    'Stanford University': 1642,
+    'Harvard University': 1495,
+    'Massachusetts Institute of Technology (MIT)': 1066,
+    'University of Washington': 1691,
+    'Georgia Institute of Technology': 1529,
+    'Yale University': 1520,
+    'Carnegie Mellon University': 505,
+    'Johns Hopkins University': 4129,
+    'Oregon State University': 372,
+    'Rensselaer Polytechnic Institute': 100,
+    'Clemson University': 290,
+    'Washington University in St. Louis': 1243,
+    'University of Vermont': 246,
+    'California Institute of Technology': 445,
+    'Rice University': 278,
+    'Boston University': 784,
+    'University of Virginia': 814,
+    'Arizona State University': 1003,
+    'Michigan State University': 932,
+    'Northeastern University': 347,
+    'University of Wyoming': 167,
+    'University of Wisconsin - Madison': 1933,
+    'University of Central Florida': 285,
+    'Southern Methodist University': 63,
+    'University of Chicago': 681,
+    'Mississippi State University': 342,
+    'University of California, Los Angeles': 1896,
+    'University of Pittsburgh': 1505,
+    'University of Kentucky': 528,
+    'University of Utah': 789,
+    'Case Western Reserve University': 643,
+    'New Jersey Institute of Technology': 172,
+    'University of Louisville': 225,
+    'University of Oklahoma': 474,
+    'University of South Carolina': 277,
+    'University of Michigan - Ann Arbor': 2111,
+    'University of Alabama - Birmingham': 866,
+    'Columbia University': 1450,
+    'Tufts University': 278,
+    'University of Nebraska - Lincoln': 657,
+    'Duke University': 1581,
+    'Boston College': 96,
+    'University of Notre Dame': 346,
+    'University of Southern California': 1264,
+}
+RD_APPROX = {'Rensselaer Polytechnic Institute', 'Clemson University'}
+
+# Flagship GPU deployments over time — the documented AI buildout wave. These are
+# the marquee systems schools have publicly announced (counts/dates from press
+# releases, HPC-center docs, and TOP500). conf: high | med. Not exhaustive — it
+# tracks headline clusters, not every incremental node. Generations drive color.
+MILESTONES = [
+    # school, date(YYYY-MM), system, gpus, gpu_type, generation, funding, conf, note
+    ('Massachusetts Institute of Technology (MIT)', '2019-08', 'TX-GAIA / SuperCloud', 896, 'V100', 'Volta', 'Federal (Lincoln Lab)', 'high', 'Fastest university system at launch'),
+    ('University of Florida', '2021-01', 'HiPerGator AI', 1120, 'A100', 'Ampere', 'NVIDIA + UF ($70M partnership)', 'high', '140 DGX A100 nodes; landmark vendor donation'),
+    ('University of Texas - Austin', '2022-01', 'Lonestar6 (GPU)', 84, 'A100', 'Ampere', 'State / UT', 'med', 'A100 partition added to Lonestar6'),
+    ('University of Illinois Urbana-Champaign', '2022-04', 'Delta', 800, 'A100 / A40', 'Ampere', 'NSF', 'high', 'NSF-funded national resource (ACCESS)'),
+    ('Harvard University', '2022-09', 'Kempner Institute (initial)', 384, 'A100', 'Ampere', 'Donation (Chan Zuckerberg-linked gift)', 'med', 'Initial Kempner AI cluster'),
+    ('Princeton University', '2024-03', 'Della — PLI partition', 336, 'H100', 'Hopper', 'Internal', 'high', 'Dedicated to Princeton Language & Intelligence'),
+    ('University of Texas - Austin', '2024-09', 'Vista', 600, 'GH200 / H200', 'Hopper', 'NSF', 'high', 'Grace Hopper; bridge to Horizon'),
+    ('University of Illinois Urbana-Champaign', '2024-10', 'DeltaAI', 608, 'GH200 (H100)', 'Hopper', 'NSF', 'high', '114 quad Grace Hopper nodes'),
+    ('Stanford University', '2024-12', 'Marlowe', 248, 'H100', 'Hopper', 'Internal / Stanford Data Science', 'high', '31 DGX H100 nodes; first GPU supercomputer'),
+    ('Harvard University', '2025-06', 'Kempner (expansion)', 808, 'H200 / H100', 'Hopper', 'Internal / donation', 'high', '424 H200 + 384 H100 added'),
+    ('University of Florida', '2025-06', 'HiPerGator (Blackwell upgrade)', 504, 'B200', 'Blackwell', 'UF ($24M)', 'high', '63 DGX B200 systems'),
+    ('Massachusetts Institute of Technology (MIT)', '2026-02', 'ORCD Engaging (Blackwell)', 200, 'B200', 'Blackwell', 'State grant ($31M match)', 'high', '200+ B200 GPUs'),
+    ('University of Texas - Austin', '2026-06', 'Horizon', 4032, 'B200 (GB200)', 'Blackwell', 'NSF (Leadership-Class Facility)', 'med', 'Planned 2026; 2,016 GB200 NVL4 nodes'),
+]
+
+
+# Ownership-tier overrides. The source dataset (a) double-counts Grace Hopper
+# systems (listed under BOTH H100 and GH200) and (b) blends NSF national-facility
+# compute into the host university's total. For the handful of affected top-50
+# schools we set corrected totals and split off the NSF-facility (Tier 2) portion.
+# 'total_*' override fixes the double-count; 'facility_*' is the NSF-facility slice
+# (nationally allocated, not institutional). Everything else is 100% institutional.
+TIER_OVERRIDES = {
+    'University of Illinois Urbana-Champaign': {
+        'total_gpus': 1604, 'total_h100e': 879,         # removed 608 double-counted DeltaAI GH200
+        'facility_gpus': 1530, 'facility_h100e': 854,
+        'facility_systems': 'NCSA: Delta, DeltaAI, HAL — NSF-funded, nationally allocated (ACCESS)',
+    },
+    'University of Texas - Austin': {
+        'total_gpus': 860, 'total_h100e': 765,           # removed 600 double-counted Vista GH200 + decommissioned
+        'facility_gpus': 600, 'facility_h100e': 631,
+        'facility_systems': 'TACC: Vista — NSF national facility (excludes decommissioned Longhorn/Maverick2)',
+    },
+    'Texas A&M University': {
+        'facility_gpus': 31, 'facility_h100e': 28,       # keep source total; ACES is small
+        'facility_systems': 'ACES — NSF-funded, ACCESS-allocated (DGX SuperPOD is institutional)',
+    },
+}
+
+
+# Primary funding model for each school's compute. Documented where a dominant
+# external source is identifiable; otherwise defaults to Institutional (inferred) —
+# the accurate default, as universities buy clusters with their own funds absent
+# evidence of a major donation, NSF facility, or state program. (model, conf, note)
+FUNDING = {
+    'University of Illinois Urbana-Champaign': ('NSF facility', 'documented', 'NCSA Delta/DeltaAI are NSF-funded national resources'),
+    'University of Texas - Austin': ('NSF facility', 'documented', 'TACC systems (Vista, Frontera) are NSF-funded'),
+    'University of Florida': ('Vendor donation', 'documented', 'HiPerGator AI launched via a ~$70M NVIDIA partnership/gift'),
+    'Texas A&M University': ('Mixed', 'documented', 'Institutional DGX SuperPOD + NSF-funded ACES'),
+    'Massachusetts Institute of Technology (MIT)': ('Mixed', 'documented', 'Federal (Lincoln Lab) + institutional + $31M MA state grant'),
+    'New York University': ('Mixed', 'documented', 'Institutional (Greene) + NY State Empire AI consortium ($25M + state)'),
+    'Columbia University': ('Mixed', 'documented', 'Institutional + NY State Empire AI consortium'),
+    'Rensselaer Polytechnic Institute': ('Mixed', 'documented', 'IBM-partnership AiMOS + NY State Empire AI consortium'),
+    'Georgia Institute of Technology': ('Mixed', 'documented', 'Institutional PACE + NVIDIA AI Makerspace partnership'),
+}
+FUNDING_DEFAULT = ('Institutional', 'inferred', 'Institutional/endowment funds (default; no dominant external source identified)')
+FUNDING_MODELS = ['Institutional', 'NSF facility', 'Vendor donation', 'Mixed']
+
+# National leadership-computing allocations — the "accessible compute" spine.
+# Source: full ALCF (Argonne) 2025 award list — Aurora/Polaris INCITE + ALCC +
+# Early Science + Director's Discretionary. Node-hours per top-50 school (ESP/DD
+# projects list as a project with 0 published hours). This is DOCUMENTED, not a
+# census: OLCF/Frontier, NERSC/Perlmutter, and NSF ACCESS allocations are
+# additional and NOT captured here. Node-hours are a different unit than owned
+# GPUs — never mix them. (node_hours, n_projects, notable_project)
+ALLOC_ALCF_2025 = {
+    'Columbia University': (1850000, 1, 'OpenFold protein-interaction ML (INCITE)'),
+    'Stanford University': (1800000, 2, 'Serpentine engine-inlet flow simulation (ALCC)'),
+    'Georgia Institute of Technology': (1000000, 1, 'Bubble-laden turbulent flows (ALCC)'),
+    'University of Southern California': (925000, 2, 'AI-guided quantum-materials simulation (INCITE)'),
+    'University of Illinois Urbana-Champaign': (760000, 1, 'QMC-HAMM multiscale materials (INCITE)'),
+    'University of Chicago': (400000, 2, 'Neutrino science; inner-ear mechanotransduction (INCITE)'),
+    'Princeton University': (250000, 1, 'Core-collapse supernova simulations (INCITE); PPPL adds more'),
+    'Duke University': (200000, 1, 'Digital twins for blood-cell analysis (INCITE)'),
+    'University of Michigan - Ann Arbor': (200000, 1, 'Foundation models for crystals (INCITE)'),
+    'Harvard University': (50000, 1, 'Materials for energy storage (INCITE)'),
+    'Massachusetts Institute of Technology (MIT)': (0, 1, 'ML for lattice QCD (Aurora Early Science)'),
+    'Carnegie Mellon University': (0, 1, 'Many-body perturbation theory + ML (Aurora Early Science)'),
+    'Rensselaer Polytechnic Institute': (0, 1, '2D magnetic-materials informatics (Director\'s Discretionary)'),
+}
+
+# TIER 3 — federal national labs in the university orbit. These are DOE facilities
+# a university *manages or operates* (not institutionally owns), running largely
+# non-NVIDIA accelerators. Shown as CONTEXT ONLY — never summed into the top-50
+# metrics, which count institutional/NSF compute. Attribution is the management
+# contract. Counts are native GPU/accelerator units (not H100-equivalents).
+NATIONAL_LABS = [
+    # lab, managing university / consortium, flagship system, gpus, approx?, accelerator, top500, note, highlight
+    ('Lawrence Berkeley (NERSC)', 'University of California', 'Perlmutter', 6144, False, 'NVIDIA A100', '#19',
+     'DOE open-science facility; UC is the prime contractor for LBNL', True),
+    ('Oak Ridge (OLCF)', 'University of Tennessee (UT-Battelle)', 'Frontier', 37888, False, 'AMD MI250X', '#2',
+     'First US exascale system; DOE Office of Science', False),
+    ('Argonne (ALCF)', 'University of Chicago (UChicago Argonne)', 'Aurora', 63744, False, 'Intel Data Center Max', '#3',
+     'Exascale; UChicago also runs Polaris (2,240 A100) and Fermilab', False),
+    ('Lawrence Livermore (LLNL)', 'Univ. of California (LLNS partner)', 'El Capitan', 44000, True, 'AMD MI300A', '#1',
+     'NNSA; Bechtel-led consortium in which UC is a partner', False),
+    ('Los Alamos (LANL)', 'UC + Texas A&M (Triad)', 'Venado', 2560, True, 'NVIDIA GH200', '—',
+     'NNSA weapons lab; managed by a UC/Texas A&M/Battelle consortium', False),
+    ('SLAC', 'Stanford University', 'S3DF / shared', None, False, 'NVIDIA (mixed)', '—',
+     'DOE lab operated by Stanford; modest, growing GPU footprint', False),
+    ('Princeton Plasma Physics (PPPL)', 'Princeton University', '—', None, False, '—', '—',
+     'DOE fusion lab operated by Princeton; limited GPU compute', False),
+    ('Brookhaven (BNL)', 'Stony Brook University (BSA)', '—', None, False, 'NVIDIA (mixed)', '—',
+     'DOE lab co-managed by Stony Brook; GPU for sPHENIX / data science', False),
+    ('Ames National Laboratory', 'Iowa State University', '—', None, False, '—', '—',
+     'DOE materials lab operated by Iowa State; limited GPU compute', False),
+]
+
+
+# GPU generation buckets + rough H100-equivalent weights, for the owned-compute
+# composition bar. Four buckets align with the buildout-timeline legend.
+GEN_OF = {
+    'P100': 'Volta', 'V100': 'Volta',
+    'A100_80GB': 'Ampere', 'A100_40GB': 'Ampere', 'A40': 'Ampere', 'A10': 'Ampere',
+    'RTX_A6000': 'Ampere', 'L40S': 'Ampere',
+    'H100_SXM': 'Hopper', 'H100_PCIe': 'Hopper', 'H200': 'Hopper', 'GH200': 'Hopper',
+    'B200': 'Blackwell', 'B100': 'Blackwell', 'Rubin': 'Blackwell',
+}
+GEN_W = {'P100': 0.05, 'V100': 0.12, 'A100_80GB': 0.6, 'A100_40GB': 0.5, 'A40': 0.2,
+         'A10': 0.15, 'RTX_A6000': 0.25, 'L40S': 0.4, 'H100_SXM': 1.0, 'H100_PCIe': 0.9,
+         'H200': 1.1, 'GH200': 1.0, 'B200': 2.2, 'B100': 1.8, 'Rubin': 3.0}
+GENS_ORDER = ['Volta', 'Ampere', 'Hopper', 'Blackwell']
+
+
+def gen_split(gpus, total_h100e):
+    """Apportion total H100-equivalent across generations (effective compute)."""
+    raw = {g: 0.0 for g in GENS_ORDER}
+    for model, n in gpus.items():
+        raw[GEN_OF[model]] += n * GEN_W.get(model, 0.3)
+    s = sum(raw.values())
+    if s <= 0:
+        return {g: 0 for g in GENS_ORDER}
+    scale = total_h100e / s
+    return {g: round(raw[g] * scale, 1) for g in GENS_ORDER}
+
+
+def gen_count(gpus):
+    """Raw GPU counts by generation (shows fleet age/modernity directly)."""
+    c = {g: 0 for g in GENS_ORDER}
+    for model, n in gpus.items():
+        c[GEN_OF[model]] += n
+    return c
+
+
+def num(r, k):
+    try:
+        return float(r[k] or 0)
+    except ValueError:
+        return 0
+
+
+def main():
+    alloc_data = json.load(open('alloc.json')) if os.path.exists('alloc.json') else {}
+    rows = list(csv.DictReader(open('raw_gpus.csv')))
+    rows.sort(key=lambda r: num(r, 'h100_equivalent'), reverse=True)
+    top = rows[:50]
+
+    out = []
+    for r in top:
+        name = r['university']
+        gpus = {m: int(num(r, m)) for m in GPU_MODELS if num(r, m) > 0}
+        total_gpus = sum(gpus.values())
+        h100e = num(r, 'h100_equivalent')
+        gpu_value = num(r, 'total_gpu_value')
+
+        # apply ownership-tier overrides (double-count fix + NSF-facility split)
+        ov = TIER_OVERRIDES.get(name, {})
+        total_gpus = ov.get('total_gpus', total_gpus)
+        h100e = ov.get('total_h100e', h100e)
+        facility_gpus = ov.get('facility_gpus', 0)
+        facility_h100e = ov.get('facility_h100e', 0)
+        inst_gpus = total_gpus - facility_gpus
+        inst_h100e = round(h100e - facility_h100e, 1)
+        endow, fy, enote = ENDOWMENTS.get(name, (None, None, 'endowment not found'))
+        endow_prior = ENDOWMENTS_FY24.get(name)
+        # YoY change only meaningful when current figure is FY2025 (same basis)
+        yoy = None
+        if endow and endow_prior and fy == 2025:
+            yoy = round(100 * (endow - endow_prior) / endow_prior, 1)
+
+        rec = {
+            'name': name,
+            'url': r['url'],
+            'sector': 'Private' if name in PRIVATE else 'Public',
+            'funding_model': FUNDING.get(name, FUNDING_DEFAULT)[0],
+            'funding_conf': FUNDING.get(name, FUNDING_DEFAULT)[1],
+            'funding_note': FUNDING.get(name, FUNDING_DEFAULT)[2],
+            'alloc_nodehours': alloc_data.get(name, {}).get('total_nh', 0),
+            'alloc_incite_nh': alloc_data.get(name, {}).get('incite_nh', 0),
+            'alloc_alcc_nh': alloc_data.get(name, {}).get('alcc_nh', 0),
+            'alloc_notable': alloc_data.get(name, {}).get('notable', ''),
+            'nairr_projects': alloc_data.get(name, {}).get('nairr_projects', 0),
+            'has_alloc': alloc_data.get(name, {}).get('total_nh', 0) > 0,
+            'has_access': name in alloc_data,
+            'gpus': gpus,
+            'total_gpus': total_gpus,
+            'h100_equivalent': round(h100e, 1),
+            'institutional_gpus': inst_gpus,
+            'institutional_h100e': inst_h100e,
+            'facility_gpus': facility_gpus,
+            'facility_h100e': facility_h100e,
+            'facility_systems': ov.get('facility_systems', ''),
+            'has_facility': facility_h100e > 0,
+            'gen_h100e': gen_split(gpus, h100e),
+            'gen_count': gen_count(gpus),
+            'gpu_value_usd': int(gpu_value),
+            'endowment_b': endow,
+            'endowment_fy': fy,
+            'endowment_b_prior': endow_prior,
+            'endowment_yoy_pct': yoy,
+            'endowment_note': enote,
+            'rd_expenditure_b': round(RD_FY24[name] / 1000, 3) if name in RD_FY24 else None,
+            'rd_approx': name in RD_APPROX,
+            # derived economics
+            'h100e_per_b_endowment': round(h100e / endow, 1) if endow else None,
+            'h100e_per_b_rd': round(h100e / (RD_FY24[name] / 1000), 1) if name in RD_FY24 else None,
+            'gpu_value_pct_of_endowment': round(100 * gpu_value / (endow * 1e9), 3) if endow else None,
+            'students': int(num(r, 'weighted_students')),
+            'gpus_per_student': round(num(r, 'gpus_per_student'), 3),
+            'notes': r['Notes'],
+            'num_sources': int(num(r, 'sources')),
+        }
+        out.append(rec)
+
+    meta = {
+        'title': 'US University Compute vs. Endowment',
+        'gpu_data_asof': 'Late 2025 / early 2026 (gpusperstudent.org inventory + TOP500 Nov 2025)',
+        'endowment_data_asof': 'FY2025 (year ending ~June 30 2025) where reported; FY2024 for a few smaller schools',
+        'built': '2026-10-10',
+        'n_schools': len(out),
+        'gpu_source': 'gpusperstudent.org (master_data.csv), cross-referenced with TOP500 and university HPC docs',
+        'endowment_source': '2025 NACUBO-Commonfund Study; statranker/altss FY2025 compilations; university treasury reports',
+        'rd_source': 'NSF HERD survey, FY2024 (total R&D expenditures; year ending ~June 30 2024)',
+        'rd_data_asof': 'FY2024 (NSF HERD, released Nov 2025)',
+        'alloc_source': 'DOE INCITE 2025 + ALCC 2025 — both complete across all facilities (Frontier/Aurora/Polaris/Perlmutter), parsed from the official ASCR/INCITE fact-sheet PDFs; NAIRR pilot project counts (nairrpilot.org awards CSV, 1,212 awards)',
+        'alloc_caveat': 'Leadership node-hours = INCITE 2025 + ALCC 2025, both complete across all leadership facilities. NSF ACCESS and routine NERSC/ERCAP allocations are not quantified (no clean per-institution public totals). NAIRR is a project count (AI-specific national access), a distinct signal. Node-hours/project-counts are not comparable to owned-GPU counts.',
+        'caveats': [
+            'GPU counts for research clusters are inherently approximate; private/departmental clusters are often undercounted and vendor-donated systems vary in disclosure.',
+            'H100-equivalent normalizes different GPU generations to relative compute vs an H100; it is an estimate, not a benchmark.',
+            'Public-university endowments are often reported at SYSTEM level (e.g., Texas A&M, U of Alabama), inflating the per-campus figure. These are flagged in the endowment note.',
+            'GPU dollar values are rough list-price estimates from the source dataset, not purchase prices (which are often discounted or donated).',
+            'The buildout timeline tracks marquee announced systems only, not every incremental node; it shows the generational wave, not a complete per-school history. Owned compute is published; rented/cloud compute is NOT publicly disclosed and is excluded.',
+            'Ownership tiers: "institutional" = bought with university/donor funds for the university\'s own use; "NSF national facility" = federally funded, nationally allocated compute the university operates (TACC at UT Austin, NCSA at Illinois, ACES at Texas A&M). The "Institutional only" view excludes the facility tier. National labs the university merely manages or neighbors (e.g., NERSC/LBNL for Berkeley) are a separate category and are NOT counted at all.',
+            'Source double-counting of Grace Hopper systems (listed under both H100 and GH200) was corrected for Illinois and UT Austin, lowering their totals vs the raw source.',
+            'National access uses two signals: leadership node-hours = DOE INCITE 2025 + ALCC 2025, both complete across all leadership facilities (Frontier/Aurora/Polaris/Perlmutter); and NAIRR pilot project counts (AI-specific access). NSF ACCESS and routine NERSC/ERCAP are not quantified. Node-hours and project counts are distinct units, not comparable to owned-GPU counts.',
+        ],
+    }
+
+    gens = ['Volta', 'Ampere', 'Hopper', 'Blackwell']
+    milestones = [{
+        'name': m[0], 'date': m[1], 'system': m[2], 'gpus': m[3],
+        'gpu_type': m[4], 'generation': m[5], 'funding': m[6],
+        'conf': m[7], 'note': m[8],
+    } for m in sorted(MILESTONES, key=lambda x: x[1])]
+
+    national_labs = [{
+        'lab': n[0], 'manager': n[1], 'system': n[2], 'gpus': n[3], 'gpus_approx': n[4],
+        'accelerator': n[5], 'top500': n[6], 'note': n[7], 'highlight': n[8],
+    } for n in NATIONAL_LABS]
+
+    payload = {'meta': meta, 'schools': out, 'milestones': milestones,
+               'generations': gens, 'national_labs': national_labs,
+               'funding_models': FUNDING_MODELS, 'gens_order': GENS_ORDER}
+    json.dump(payload, open('data.json', 'w'), indent=2)
+
+    # archive a dated snapshot so the per-school series accumulates over rebuilds.
+    # Each snapshot is the compute state at build time; re-running later adds points.
+    os.makedirs('snapshots', exist_ok=True)
+    snap_date = meta['built'][:7]  # YYYY-MM
+    snap = {'date': meta['built'], 'schools': [
+        {'name': r['name'], 'total_gpus': r['total_gpus'],
+         'h100_equivalent': r['h100_equivalent'], 'gpu_value_usd': r['gpu_value_usd'],
+         'endowment_b': r['endowment_b']} for r in out]}
+    json.dump(snap, open(f'snapshots/{snap_date}.json', 'w'), indent=2)
+
+    # inject into the standalone HTML template -> self-contained index.html
+    tpl = open('template.html').read()
+    html = tpl.replace('__DATA_JSON__', json.dumps(payload))
+    open('index.html', 'w').write(html)
+    print(f'Wrote data.json + index.html + snapshots/{snap_date}.json with {len(out)} schools')
+    print(f'Milestones: {len(milestones)}')
+    missing = [r['name'] for r in out if r['endowment_b'] is None]
+    if missing:
+        print('MISSING ENDOWMENTS:', missing)
+    # quick sanity print
+    print(f'\n{"school":42} {"H100e":>7} {"endow$B":>8} {"H100e/$B":>9}')
+    for r in out[:15]:
+        print(f'{r["name"][:42]:42} {r["h100_equivalent"]:>7.0f} {str(r["endowment_b"]):>8} {str(r["h100e_per_b_endowment"]):>9}')
+
+
+if __name__ == '__main__':
+    main()

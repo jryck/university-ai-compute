@@ -1,0 +1,378 @@
+{
+  "University of Texas - Austin": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 6,
+    "notable": ""
+  },
+  "University of Washington": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 25,
+    "notable": ""
+  },
+  "University of Alabama - Birmingham": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 4,
+    "notable": ""
+  },
+  "University of Louisville": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 3,
+    "notable": ""
+  },
+  "University of Notre Dame": {
+    "incite_nh": 1000000,
+    "alcc_nh": 0,
+    "total_nh": 1000000,
+    "projects": 1,
+    "nairr_projects": 4,
+    "notable": "High-fidelity combustion/CFD on Frontier (INCITE)"
+  },
+  "University of Virginia": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 7,
+    "notable": ""
+  },
+  "Rensselaer Polytechnic Institute": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 4,
+    "notable": ""
+  },
+  "Georgia Institute of Technology": {
+    "incite_nh": 300000,
+    "alcc_nh": 2000000,
+    "total_nh": 2300000,
+    "projects": 2,
+    "nairr_projects": 14,
+    "notable": "Bubble-laden turbulent flows (ALCC, 2M node-hrs)"
+  },
+  "University of Utah": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 7,
+    "notable": ""
+  },
+  "Rice University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 7,
+    "notable": ""
+  },
+  "Massachusetts Institute of Technology (MIT)": {
+    "incite_nh": 900000,
+    "alcc_nh": 1397750,
+    "total_nh": 2297750,
+    "projects": 3,
+    "nairr_projects": 9,
+    "notable": "ML for lattice QCD (INCITE+ALCC)"
+  },
+  "Johns Hopkins University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 2,
+    "notable": ""
+  },
+  "University of Oklahoma": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 6,
+    "notable": ""
+  },
+  "University of Southern California": {
+    "incite_nh": 1375000,
+    "alcc_nh": 0,
+    "total_nh": 1375000,
+    "projects": 2,
+    "nairr_projects": 20,
+    "notable": "AI-guided quantum-materials simulation (INCITE)"
+  },
+  "Princeton University": {
+    "incite_nh": 3830000,
+    "alcc_nh": 0,
+    "total_nh": 3830000,
+    "projects": 2,
+    "nairr_projects": 6,
+    "notable": "Core-collapse supernova + fusion simulations (INCITE, 3.8M node-hrs)"
+  },
+  "Stanford University": {
+    "incite_nh": 1950000,
+    "alcc_nh": 3300000,
+    "total_nh": 5250000,
+    "projects": 3,
+    "nairr_projects": 25,
+    "notable": "Engine-inlet flow + photocatalyst discovery (INCITE+ALCC)"
+  },
+  "University of Wyoming": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 2,
+    "notable": ""
+  },
+  "Southern Methodist University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 3,
+    "notable": ""
+  },
+  "Arizona State University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 16,
+    "notable": ""
+  },
+  "Columbia University": {
+    "incite_nh": 800000,
+    "alcc_nh": 0,
+    "total_nh": 800000,
+    "projects": 2,
+    "nairr_projects": 4,
+    "notable": "OpenFold protein-interaction ML (INCITE)"
+  },
+  "University of Illinois Urbana-Champaign": {
+    "incite_nh": 1660000,
+    "alcc_nh": 0,
+    "total_nh": 1660000,
+    "projects": 2,
+    "nairr_projects": 49,
+    "notable": "QMC-HAMM multiscale materials (INCITE)"
+  },
+  "University of Wisconsin - Madison": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 8,
+    "notable": ""
+  },
+  "University of Pittsburgh": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 3,
+    "notable": ""
+  },
+  "Carnegie Mellon University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 24,
+    "notable": ""
+  },
+  "University of Kentucky": {
+    "incite_nh": 0,
+    "alcc_nh": 477000,
+    "total_nh": 477000,
+    "projects": 1,
+    "nairr_projects": 4,
+    "notable": "ALCC leadership allocation (477K node-hrs)"
+  },
+  "University of Chicago": {
+    "incite_nh": 200000,
+    "alcc_nh": 200000,
+    "total_nh": 400000,
+    "projects": 2,
+    "nairr_projects": 2,
+    "notable": "Inner-ear mechanotransduction; neutrino science (INCITE+ALCC)"
+  },
+  "University of Central Florida": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 4,
+    "notable": ""
+  },
+  "Michigan State University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 6,
+    "notable": ""
+  },
+  "Oregon State University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 3,
+    "notable": ""
+  },
+  "Northeastern University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 15,
+    "notable": ""
+  },
+  "University of Nebraska - Lincoln": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 1,
+    "notable": ""
+  },
+  "University of Florida": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 1,
+    "notable": ""
+  },
+  "University of Michigan - Ann Arbor": {
+    "incite_nh": 1200000,
+    "alcc_nh": 290000,
+    "total_nh": 1490000,
+    "projects": 3,
+    "nairr_projects": 16,
+    "notable": "Foundation models for crystals (INCITE)"
+  },
+  "Washington University in St. Louis": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 3,
+    "notable": ""
+  },
+  "Texas A&M University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 12,
+    "notable": ""
+  },
+  "University of Vermont": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 3,
+    "notable": ""
+  },
+  "University of South Carolina": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 7,
+    "notable": ""
+  },
+  "Boston University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 9,
+    "notable": ""
+  },
+  "Harvard University": {
+    "incite_nh": 200000,
+    "alcc_nh": 0,
+    "total_nh": 200000,
+    "projects": 1,
+    "nairr_projects": 9,
+    "notable": "Materials for energy storage (INCITE)"
+  },
+  "Yale University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 8,
+    "notable": ""
+  },
+  "New York University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 8,
+    "notable": ""
+  },
+  "University of California, Los Angeles": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 26,
+    "notable": ""
+  },
+  "Tufts University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 1,
+    "notable": ""
+  },
+  "California Institute of Technology": {
+    "incite_nh": 0,
+    "alcc_nh": 820000,
+    "total_nh": 820000,
+    "projects": 1,
+    "nairr_projects": 6,
+    "notable": "ALCC leadership allocation (820K node-hrs)"
+  },
+  "Case Western Reserve University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 3,
+    "notable": ""
+  },
+  "Clemson University": {
+    "incite_nh": 0,
+    "alcc_nh": 0,
+    "total_nh": 0,
+    "projects": 0,
+    "nairr_projects": 8,
+    "notable": ""
+  },
+  "Duke University": {
+    "incite_nh": 650000,
+    "alcc_nh": 0,
+    "total_nh": 650000,
+    "projects": 1,
+    "nairr_projects": 6,
+    "notable": "Digital twins for blood-cell analysis (INCITE)"
+  }
+}
