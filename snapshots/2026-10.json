@@ -87,9 +87,9 @@
     },
     {
       "name": "Carnegie Mellon University",
-      "total_gpus": 0,
-      "h100_equivalent": 0,
-      "gpu_value_usd": 0,
+      "total_gpus": 71,
+      "h100_equivalent": 15.0,
+      "gpu_value_usd": 525000,
       "endowment_b": 4.29
     },
     {

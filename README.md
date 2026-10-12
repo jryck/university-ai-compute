@@ -5,31 +5,46 @@
 An interactive dashboard on AI compute across US research universities — who owns it,
 who can access it, and how it maps to institutional wealth and research spending.
 
-## Data quality & methodology (overhaul in progress)
+## Data quality & methodology
 
-This project is transitioning from a quick build to an **independently source-verified,
-auditable dataset**. Key documents:
+An **independently source-verified, auditable** dataset (10-university pilot done; 38
+schools still legacy). Key documents:
 
-- **[`PILOT_AUDIT.md`](PILOT_AUDIT.md)** — primary-source verification of 10 universities
-  vs. the legacy figures. Finding: the legacy source (GPUs Per Student) **consistently
-  overstates** owned GPUs (double-counts, cloud-as-owned, MIG-as-physical, planned/
-  decommissioned-as-live, estimate inflation).
-- **[`clusters.csv`](clusters.csv)** — the new **cluster-level**, independently-sourced
-  inventory: one record per hardware deployment with source URL, date, status (operational/
-  planned/retired), owner, funding, access model, and confidence.
-- **[`validate.py`](validate.py)** — automated checks run after every build (per-model
-  reconciliation, institutional/facility reconciliation, planned/cloud exclusion, funding-
-  default integrity, generation-class correctness, regression cases). `python3 validate.py`.
+- **[`PILOT_AUDIT.md`](PILOT_AUDIT.md)** — primary-source audit of 10 universities with a
+  reconciliation table. Calibrated finding: the legacy source has **substantial, non-uniform
+  errors** (duplicate accelerators, cloud-as-owned, planned/decommissioned-as-live,
+  MIG-as-physical, wrong generation records) — but **not** a uniform overstatement (Harvard
+  was *under*-counted), and for several schools public docs can't establish a total.
+- **[`RESEARCH_FINDINGS.md`](RESEARCH_FINDINGS.md)** — what the corrected evidence supports:
+  established vs. suggestive vs. retracted vs. unanswered.
+- **[`clusters.csv`](clusters.csv)** — the **cluster-level** inventory: one row per deployment
+  with `count_basis` (primary / legacy / aggregate), `overlap`, status, owner, funding,
+  access model, source URL + date, confidence.
+- **[`validate.py`](validate.py)** — substantive checks that **independently re-aggregate
+  `clusters.csv` and assert `data.json` matches** (so perturbing either file fails a check),
+  plus pilot regressions. `python3 validate.py`.
 
-**Known limitations (stated plainly):**
-- **Sample:** the 50 schools are currently those with the most documented GPU inventory in
-  the legacy source — **not** an NSF-R&D-defined "top 50." Fix in progress.
+### Count concepts (a verified cluster-count is NOT a university total)
+
+Per school the dataset tracks these **distinct** quantities — never collapsed into one total:
+
+| Field | Meaning |
+|---|---|
+| `verified_model_count` | per-model GPUs from primary sources |
+| `aggregate_count` | independently-sourced totals w/o model breakdown (w/ overlap flag) |
+| `legacy_estimate` | GPUs-Per-Student-derived, kept separate as *unverified* |
+| `documented_lower_bound` | verified + **non-overlapping** aggregates (the headline "≥" figure) |
+| `cloud_gpus` / `planned_gpus` | reserved cloud / under-construction — **excluded** from operational |
+| `facility_gpus` (national-allocation) vs `federal_funded_gpus` | **separate** attributes |
+| `inventory_completeness` / `ownership_verification` | coverage and ownership flags, independent of count verification |
+
+**Known limitations (plainly):**
+- **Sample:** the 50 are those with the most documented GPU inventory in the legacy source —
+  **not** an NSF-R&D-defined "top 50." Fix pending.
 - **Metric:** "H100 price-equivalent" = estimated GPU value ÷ $35,000 — a **price proxy, not
-  performance**, and not actual spending. Physical GPU count is the primary unit.
-- **Provenance:** most rows are still legacy candidate data; audited schools (Illinois, UT
-  Austin, Harvard, CMU, Oregon State + pilot) are corrected against primary sources. **Missing
-  inventory ≠ zero GPUs.** Funding defaults to **Unknown**, never silently "institutional."
-- **Access:** national-allocation coverage (INCITE/ALCC + NAIRR) is incomplete; absence ≠ no access.
+  performance**, and not actual spending. Physical GPU count is primary.
+- **Provenance:** 38 of 50 rows are still unverified legacy. Audited figures are **lower bounds**.
+  Missing inventory ≠ zero. Funding defaults to **Unknown**, never silently institutional.
 
 Build: `python3 alloc_build.py && python3 build_data.py && python3 validate.py`.
 

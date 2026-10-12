@@ -174,30 +174,30 @@
 
   <section>
     <h2>Key findings</h2>
-    <p class="tl-note" style="margin:-4px 0 14px">Descriptive statements the dataset directly shows. Figures are based on
-      <em>documented</em> owned GPUs (largely legacy GPUs-Per-Student data, now being source-verified); treat broader
-      explanations as hypotheses, not established cause.</p>
+    <p class="tl-note" style="margin:-4px 0 14px">What the <em>corrected, verified</em> evidence supports. Only 10 schools are
+      independently audited; the other 38 remain unverified legacy data. See <a href="https://github.com/jryck/university-ai-compute/blob/main/RESEARCH_FINDINGS.md" target="_blank" rel="noopener">RESEARCH_FINDINGS.md</a>
+      and <a href="https://github.com/jryck/university-ai-compute/blob/main/PILOT_AUDIT.md" target="_blank" rel="noopener">PILOT_AUDIT.md</a>.</p>
     <div class="lead-finding">
-      <div class="lf-big" id="lf-invert">—</div>
-      <div class="lf-txt"><b>Documented owned compute does not scale with endowment.</b> Across schools with documented
-        inventories, the spread in owned GPUs per $B of endowment is very wide, and several of the wealthiest sit near the
-        bottom. <em>Caveat:</em> this reflects <em>documented owned hardware</em> only — it may also reflect incomplete
-        inventories and heavier reliance on cloud or national facilities, not lower investment alone.</div>
+      <div class="lf-big" id="lf-invert" style="font-size:34px">0 of 10</div>
+      <div class="lf-txt"><b>Not one audited university's legacy GPU figure held up as-is.</b> The independent audit found
+        <em>substantial, non-uniform</em> errors: duplicate accelerators (Illinois, UT Austin), cloud counted as owned (CMU),
+        planned hardware counted as operational (Oregon State), MIG partitions as physical GPUs (Princeton), and wrong
+        generation records (Harvard, NYU). These errors move rankings. <em>But</em> they aren't all overstatements — Harvard's
+        legacy row actually <em>under</em>-counted its current cluster.</div>
     </div>
     <div class="findings">
-      <div class="finding"><b>Access ≠ ownership.</b> USC, Michigan and Notre Dame each hold ~1–1.5M documented national
-        supercomputing node-hours (DOE INCITE/ALCC) while owning few GPUs; GPU-rich NYU and Texas A&amp;M hold little
-        measured allocation. <em>Allocation coverage is incomplete</em> (INCITE/ALCC + NAIRR only; not NSF ACCESS or cloud),
-        so absence is not proof of no access.</div>
-      <div class="finding"><b>Where funding is documented, donations and federal facilities built the biggest fleets.</b>
-        Florida's traces to an NVIDIA gift; Illinois's and UT Austin's are NSF national facilities. For most schools the
-        funding source is <em>not yet verified</em> and is marked Unknown — this dataset does not claim they self-funded.</div>
-      <div class="finding"><b>Documented owned GPU does not track total R&amp;D.</b> Johns Hopkins — #1 in US R&amp;D — shows
-        little documented owned GPU here, while some smaller-R&amp;D schools rank high. The data shows the divergence; it does
-        <em>not</em> establish the cause (research mix, cloud/national reliance, or incomplete inventory are all possible).</div>
-      <div class="finding"><b>Fleet vintage varies widely.</b> Florida skipped the Hopper generation (Ampere → Blackwell);
-        NYU and others carry large legacy fleets (V100/RTX8000) that loom large by GPU count but contribute little effective
-        compute. Composition, not just count, matters.</div>
+      <div class="finding"><b>Ownership ≠ access ≠ funding — and it's material.</b> Of ~7,400 verified pilot GPUs, ~28% are
+        nationally-allocated <em>NSF facilities</em> (Illinois NCSA, UT Austin TACC), not institutional hardware; CMU's largest
+        compute is <em>reserved cloud</em>. A single "owned GPUs" number conflates categories that behave very differently.</div>
+      <div class="finding"><b>For several universities, public documentation can't establish a total.</b> Stanford (Sherlock),
+        MIT (Engaging per-model), Harvard (Cannon), JHU (DSAI) publish aggregate or no counts. Their figures are <em>floors</em>
+        (Stanford ≥248), not reliable totals — a smaller discrepancy there means incomplete coverage, not a confirmed overcount.</div>
+      <div class="finding"><b>Funding is more often federal or unknown than demonstrably institutional.</b> Of 11 pilot schools,
+        6 have unverified (Unknown) funding; where documented it is frequently federal (NSF facilities) or donated (UF/NVIDIA).
+        The dataset does <em>not</em> claim most schools self-fund.</div>
+      <div class="finding"><b>Retracted since round one.</b> "Wealthiest own the least compute per dollar" is <em>not
+        established</em> — an artifact of legacy overstatement + incomplete coverage of wealthy privates. "Legacy consistently
+        overstates" is <em>retracted</em> (Harvard undercounted). Broad wealth/research/compute claims await a verified sample.</div>
     </div>
     <p class="tl-note" id="lf-context"></p>
   </section>
@@ -265,8 +265,8 @@
     <p class="tl-note" style="margin:-4px 0 12px">Each school is badged by data provenance:
       <span class="vbadge vb-verified">verified</span> (per-model counts from primary sources),
       <span class="vbadge vb-partial">partial</span> (some clusters verified, inventory incomplete),
-      <span class="vbadge vb-legacy">legacy</span> (unverified GPUs-Per-Student candidate data — likely overstated).
-      Only 10 pilot schools are audited so far.</p>
+      <span class="vbadge vb-legacy">legacy</span> (unverified GPUs-Per-Student candidate data — may be over- or under-stated).
+      "Documented GPUs" is a <b>lower bound</b> (≥) for audited schools — additional capacity may exist. Only 10 pilot schools are audited so far.</p>
     <div class="controls">
       <div class="seg" id="verif-seg">
         <button data-v="All" class="on">All</button>
@@ -346,15 +346,12 @@ document.getElementById('tiles').innerHTML = tiles.map(t=>
 
 /* ---- key findings: lead number + context line ---- */
 (function(){
-  const ratios = DATA.filter(d=>d.h100e_per_b_endowment).map(d=>d.h100e_per_b_endowment);
-  const spread = Math.round(Math.max(...ratios)/Math.min(...ratios));
-  document.getElementById('lf-invert').textContent = spread+'×';
+  const audited = DATA.filter(d=>d.verification==='verified'||d.verification==='partial').length;
   document.getElementById('lf-context').innerHTML =
-    `For context: all 50 universities own ~${fmt(Math.round(totH100e))} H100 price-equivalents <em>combined</em>. `
-    +`That industry and the national labs dwarf academia is well known — federal leadership systems alone hold `
-    +`roughly 5.5× all 50 schools put together, and a single frontier cluster more still. The question this tool answers `
-    +`isn't the size of that gap, but how the 50 divide the compute they <em>do</em> have — and how unevenly it maps to `
-    +`wealth, research, and ownership.`;
+    `Scope: ${audited} universities independently audited against primary sources; the rest remain unverified legacy data. `
+    +`All verified figures are <em>documented lower bounds</em> — additional capacity may exist. For context, federal national `
+    +`labs and a single industry frontier cluster each dwarf all US academic owned compute combined; this tool is about `
+    +`measuring what universities themselves hold, carefully, not that gap.`;
 })();
 
 /* ---- scatter (log-log, hand-built SVG) ---- */
@@ -399,7 +396,7 @@ function drawScatter(){
   renderLegend();
   const cfg=XMODES[xMode], XK=cfg.key;
   document.getElementById('scatter-hint').textContent =
-    `${basis==='inst'?'Institutional compute only (NSF national facilities excluded) · ':''}log axes · dashed line = median · hover for detail`;
+    `${basis==='inst'?'Institutional only · ':''}log axes · filled = verified/partial, hollow = unverified legacy · provisional (mixes audited + legacy) · hover for detail`;
   const pts = DATA.filter(d=>d[XK] && d._h100e>0);
   const W=1080, H=560, m={t:18,r:24,b:52,l:60};
   const iw=W-m.l-m.r, ih=H-m.t-m.b;
@@ -441,7 +438,8 @@ function drawScatter(){
   pts.forEach(d=>{
     const c = dotColor(d);
     const r = 5 + Math.sqrt(d._gpus)/9;
-    g+=`<circle class="pt" cx="${X(d[XK])}" cy="${Y(d._h100e)}" r="${r}" fill="${c}" data-i="${DATA.indexOf(d)}"/>`;
+    const ver = (d.verification==='verified'||d.verification==='partial');
+    g+=`<circle class="pt" cx="${X(d[XK])}" cy="${Y(d._h100e)}" r="${r}" fill="${ver?c:'none'}" stroke="${ver?'var(--surface)':c}" stroke-width="${ver?2:1.5}" opacity="${ver?1:0.7}" data-i="${DATA.indexOf(d)}"/>`;
     if(labels[d.name]){ const [dir,dy]=labels[d.name];
       const tx = dir>0 ? X(d[XK])+r+4 : X(d[XK])-r-4;
       g+=`<text class="pt-label" x="${tx}" y="${Y(d._h100e)+dy}" text-anchor="${dir>0?'start':'end'}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${shortName(d.name)}</text>`;
@@ -453,8 +451,8 @@ function drawScatter(){
   document.querySelectorAll('.pt').forEach(el=>{
     el.addEventListener('mousemove', e=>{
       const d=DATA[+el.dataset.i];
-      showTip(`<b>${d.name}</b><br><div class="row"><span>Sector</span><span>${d.sector}</span></div>`
-       +`<div class="row"><span>${basis==='inst'?'Institutional GPUs':'Total GPUs'}</span><span>${fmt(d._gpus)}</span></div>`
+      showTip(`<b>${d.name}</b><br><div class="row"><span>Provenance</span><span>${d.verification} (${d.inventory_completeness})</span></div>`
+       +`<div class="row"><span>Documented GPUs</span><span>${d.display_is_lower_bound?'≥':''}${fmt(d.display_gpus)}</span></div>`
        +`<div class="row"><span>H100 price-eq</span><span>${fmt(Math.round(d._h100e))}${basis==='all'?'':' (inst.)'}</span></div>`
        +(d.has_facility?`<div class="row"><span>of which NSF facility</span><span>${fmt(Math.round(d.facility_h100e))}</span></div>`:'')
        +`<div class="row"><span>Endowment</span><span>$${d.endowment_b}B (FY${d.endowment_fy})</span></div>`
@@ -552,7 +550,7 @@ function drawTimeline(){
 /* ---- table ---- */
 const COLS = [
   {k:'name', t:'School', num:false},
-  {k:'_gpus', t:'Owned GPUs', num:true},
+  {k:'display_gpus', t:'Documented GPUs', num:true},
   {k:'_h100e', t:'H100 price-eq', num:true},
   {k:'endowment_b', t:'Endow $B', num:true},
   {k:'_reEndow', t:'H100e / $B', num:true},
@@ -602,11 +600,16 @@ function gpuBreakdown(d){
     +extra
     +tier
     +`<div style="margin-bottom:4px"><b>Funding model:</b> ${d.funding_model}${d.funding_conf==='inferred'?' (inferred default)':''} — ${d.funding_note}</div>`
-    +`<div style="margin-bottom:4px"><b>Data provenance:</b> ${d.verification}`
-      + `${d.cloud_gpus?` · ${fmt(d.cloud_gpus)} GPUs reserved cloud (not owned)`:''}`
-      + `${d.planned_gpus?` · ${fmt(d.planned_gpus)} GPUs planned (not operational)`:''}`
-      + `${(d.aggregate_clusters&&d.aggregate_clusters.length)?' · unresolved aggregate clusters: '+d.aggregate_clusters.map(a=>a.cluster).join(', '):''}</div>`
-    + ((d.sources&&d.sources.length)?`<div style="margin-bottom:4px"><b>Sources:</b> ${d.sources.map(u=>`<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\//,'').split('/')[0]}</a>`).join(' · ')}</div>`:'')
+    +`<div style="margin-bottom:4px"><b>Inventory accounting</b> (${d.verification}, ${d.inventory_completeness} coverage, ownership ${d.ownership_verification}):`
+      + `<br>• verified per-model: <b>${fmt(d.verified_model_count)}</b>`
+      + `${d.aggregate_count?` · aggregate (no model breakdown): <b>${fmt(d.aggregate_count)}</b> ${d.aggregate_clusters.map(a=>a.cluster+(a.overlap==='distinct'?' [distinct, in lower bound]':' [overlap unresolved, excluded]')).join('; ')}`:''}`
+      + `${d.legacy_estimate?` · legacy estimate (unverified): <b>${fmt(d.legacy_estimate)}</b>`:''}`
+      + `${d.cloud_gpus?` · reserved cloud (not owned): <b>${fmt(d.cloud_gpus)}</b>`:''}`
+      + `${d.planned_gpus?` · planned (not operational): <b>${fmt(d.planned_gpus)}</b>`:''}`
+      + `<br>→ documented lower bound: <b>${d.display_is_lower_bound?'≥':''}${fmt(d.documented_lower_bound||d.display_gpus)}</b>`
+      + `${d.facility_gpus?` · of which nationally-allocated facility: ${fmt(d.facility_gpus)}`:''}`
+      + `${d.federal_funded_gpus&&d.federal_funded_gpus!==d.facility_gpus?` · federally-funded (incl. univ-access): ${fmt(d.federal_funded_gpus)}`:''}</div>`
+    + ((d.sources&&d.sources.length)?`<div style="margin-bottom:4px"><b>Sources${d.source_dates&&d.source_dates.length?' (as of '+d.source_dates[d.source_dates.length-1]+')':''}:</b> ${d.sources.map(u=>`<a href="${u}" target="_blank" rel="noopener">${u.replace(/^https?:\/\//,'').split('/')[0]}</a>`).join(' · ')}</div>`:'')
     +`<div><b>Endowment note:</b> ${d.endowment_note||'—'}</div>`
     +`<div style="margin-top:6px"><b>Legacy GPU notes:</b> ${d.notes}</div>`;
 }
@@ -628,7 +631,7 @@ function renderBody(){
       +`${vbadge(d)}`
       +`${d.has_facility?'<span class="nsf-badge" title="Hosts an NSF national facility; most of its compute is federally funded and nationally allocated, not institutional">NSF facility</span>':''}`
       +`<span class="expand" data-x>▸</span></div></td>`
-      +`<td>${fmt(d._gpus)}</td>`
+      +`<td title="${d.display_is_lower_bound?'documented lower bound — additional capacity may exist':'documented'}">${d.display_is_lower_bound?'≥':''}${fmt(d.display_gpus)}${(d.legacy_estimate&&(d.verification==='verified'||d.verification==='partial'))?` <span class="flag">+${fmt(d.legacy_estimate)} leg</span>`:''}</td>`
       +`<td>${fmt(Math.round(d._h100e))}</td>`
       +`<td>${d.endowment_b!=null?'$'+d.endowment_b:'—'}${yoyTag(d)}</td>`
       +`<td>${d._reEndow??'—'}</td>`

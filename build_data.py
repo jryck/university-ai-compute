@@ -234,44 +234,55 @@ FEDERAL_OWNERS = ('NSF', 'US (NSF)', 'federal')
 
 
 def parse_clusters(path='clusters.csv'):
-    """Aggregate the verified cluster-level inventory per university. Returns, per
-    school: operational owned-GPU model dict (reconcilable), the national-facility
-    slice, reserved-cloud, planned, any aggregate/unresolved clusters, sources, and
-    a coverage flag ('verified' = all resolved & confident; 'partial' = gaps)."""
+    """Aggregate the cluster-level inventory per university into DISTINCT count
+    concepts (a verified cluster-count is NOT a verified university inventory):
+
+      owned_primary        per-model, primary-sourced, operational, university hardware
+      owned_legacy         per-model, but GPUs-Per-Student-derived (unverified estimate)
+      aggregate            independently-sourced totals w/o model breakdown (w/ overlap flag)
+      cloud / planned      reserved-cloud and planned/under-construction (NOT operational)
+      facility_national    operational owned where access = national-allocation
+      federal_funded       operational owned where funding is federal (a SEPARATE attribute)
+      ownership_confirmed  true iff a primary owned record documents a specific owner
+    """
     import os
     if not os.path.exists(path):
         return {}
     agg = {}
     for r in csv.DictReader(open(path)):
         uni = r['university']
-        d = agg.setdefault(uni, {'owned': {}, 'facility': {}, 'cloud': {}, 'planned': {},
-                                 'aggregate': [], 'sources': set(), 'partial': False,
-                                 'source_dates': set()})
+        d = agg.setdefault(uni, {'owned_primary': {}, 'owned_legacy': {}, 'facility_national': {},
+                                 'federal_funded': {}, 'cloud': {}, 'planned': {}, 'aggregate': [],
+                                 'sources': set(), 'source_dates': set(), 'ownership_confirmed': False})
         d['sources'].add(r['source_url'])
         d['source_dates'].add(r.get('source_date', ''))
         model, cnt, status = r['gpu_model'], r['gpu_count'], r['status']
-        access, owner, conf = r['access_model'], r['owner'], r['confidence']
-        # unresolved: aggregate/mixed clusters or missing counts -> partial coverage
-        if model == 'mixed' or not cnt.strip():
-            d['aggregate'].append({'cluster': r['cluster_name'], 'count': cnt or '?', 'note': r['notes']})
-            d['partial'] = True
+        access, owner = r['access_model'], r['owner']
+        basis = r.get('count_basis', 'primary')
+        overlap = r.get('overlap', '')
+        # aggregate / unquantified clusters: kept separate, never summed into per-model
+        if basis == 'aggregate' or model == 'mixed' or not cnt.strip():
+            d['aggregate'].append({'cluster': r['cluster_name'], 'count': (int(cnt) if cnt.strip().isdigit() else None),
+                                   'overlap': overlap, 'note': r['notes'], 'source': r['source_url']})
             continue
         cnt = int(cnt)
         if status == 'planned':
             d['planned'][model] = d['planned'].get(model, 0) + cnt
             continue
         if status in ('retired', 'uncertain'):
-            d['partial'] = True
-            continue  # excluded from operational owned
+            continue  # excluded from operational
         if access == 'reserved-cloud':
             d['cloud'][model] = d['cloud'].get(model, 0) + cnt
             continue
-        # operational, owned/operated by the university (institutional or facility)
-        d['owned'][model] = d['owned'].get(model, 0) + cnt
-        if access in FACILITY_ACCESS or any(f in owner for f in FEDERAL_OWNERS):
-            d['facility'][model] = d['facility'].get(model, 0) + cnt
-        if conf == 'low':
-            d['partial'] = True
+        # operational, university-operated hardware
+        bucket = 'owned_primary' if basis == 'primary' else 'owned_legacy'
+        d[bucket][model] = d[bucket].get(model, 0) + cnt
+        if access in FACILITY_ACCESS:                       # nationally allocated
+            d['facility_national'][model] = d['facility_national'].get(model, 0) + cnt
+        if any(f in r['funding_source'] for f in ('federal', 'NSF')):  # funding attribute (separate)
+            d['federal_funded'][model] = d['federal_funded'].get(model, 0) + cnt
+        if basis == 'primary' and owner and owner.lower() != 'unknown':
+            d['ownership_confirmed'] = True
     return agg
 
 
@@ -403,42 +414,70 @@ def main():
         name = r['university']
         legacy_gpus = {m: int(num(r, m)) for m in GPU_MODELS if num(r, m) > 0}
 
-        # SPINE: verified cluster records first; TIER_OVERRIDES next; legacy last.
+        # SPINE: cluster records first (distinct count concepts); TIER_OVERRIDES; legacy.
         cl = clusters.get(name)
         ov = TIER_OVERRIDES.get(name, {})
-        aggregate_clusters, sources = [], []
+        aggregate_clusters, sources, source_dates = [], [], []
+        owned_primary, owned_legacy = {}, {}
+        facility_models, federal_models, cloud_models, planned_models = {}, {}, {}, {}
+        ownership_verification = 'unresolved'
         if cl:
-            gpus = dict(cl['owned'])
-            facility_models = cl['facility']
+            owned_primary = dict(cl['owned_primary'])
+            owned_legacy = dict(cl['owned_legacy'])
+            facility_models = cl['facility_national']
+            federal_models = cl['federal_funded']
             cloud_models = cl['cloud']
             planned_models = cl['planned']
-            verification = 'partial' if cl['partial'] else 'verified'
             aggregate_clusters = cl['aggregate']
             sources = sorted(u for u in cl['sources'] if u)
+            source_dates = sorted(x for x in cl['source_dates'] if x)
+            ownership_verification = 'confirmed' if cl['ownership_confirmed'] else 'unresolved'
         elif ov:
-            gpus = dict(ov.get('owned', legacy_gpus))
+            owned_legacy = dict(ov.get('owned', legacy_gpus))
             facility_models = ov.get('facility_models', {})
             cloud_models = ov.get('cloud_models', {})
             planned_models = ov.get('planned_models', {})
-            verification = 'legacy-adjusted'
             sources = [ov.get('source', '')]
         else:
-            gpus = legacy_gpus
-            facility_models, cloud_models, planned_models = {}, {}, {}
-            verification = 'legacy'
+            owned_legacy = dict(legacy_gpus)
 
         def h100e_of(g):  # transparent price-equivalent: sum(count * price-weight)
             return round(sum(g.get(m, 0) * GEN_W.get(m, 0.3) for m in g), 1)
 
-        total_gpus = sum(gpus.values())
-        h100e = h100e_of(gpus)
-        gpu_value = round(h100e * 35000)                 # ties value to the price-equiv basis
+        per_model = {}                                     # verified + legacy per-model (reconciles w/ gen breakdown)
+        for src in (owned_primary, owned_legacy):
+            for m, n in src.items():
+                per_model[m] = per_model.get(m, 0) + n
+
+        # distinct count concepts (a verified cluster-count is NOT a university total)
+        verified_model_count = sum(owned_primary.values())
+        legacy_estimate = sum(owned_legacy.values())
+        aggregate_count = sum(a['count'] for a in aggregate_clusters if a['count'])
+        distinct_agg = sum(a['count'] for a in aggregate_clusters if a['count'] and a['overlap'] == 'distinct')
+        documented_lower_bound = verified_model_count + distinct_agg   # non-overlap aggregates only
+
+        total_gpus = sum(per_model.values())
+        gpus = per_model
+        h100e = h100e_of(per_model)
+        gpu_value = round(h100e * 35000)
         facility_gpus = sum(facility_models.values())
         facility_h100e = h100e_of(facility_models)
+        federal_funded_gpus = sum(federal_models.values())
         inst_gpus = total_gpus - facility_gpus
         inst_h100e = round(h100e - facility_h100e, 1)
         cloud_gpus = sum(cloud_models.values())
         planned_gpus = sum(planned_models.values())
+
+        if cl:
+            verification = 'verified' if (verified_model_count and not owned_legacy and not aggregate_clusters) else 'partial'
+            completeness = 'partial'                        # no pilot school is asserted complete
+        elif ov:
+            verification, completeness = 'legacy-adjusted', 'unknown'
+        else:
+            verification, completeness = 'legacy', 'unknown'
+        # headline display: lower bound for audited schools, legacy estimate for the rest
+        display_gpus = documented_lower_bound if verification in ('verified', 'partial') else total_gpus
+        display_is_lower_bound = verification in ('verified', 'partial') and completeness != 'complete'
         endow, fy, enote = ENDOWMENTS.get(name, (None, None, 'endowment not found'))
         endow_prior = ENDOWMENTS_FY24.get(name)
         # YoY change only meaningful when current figure is FY2025 (same basis)
@@ -462,6 +501,16 @@ def main():
             'has_access': name in alloc_data,
             'gpus': gpus,
             'total_gpus': total_gpus,
+            'verified_model_count': verified_model_count,
+            'legacy_estimate': legacy_estimate,
+            'aggregate_count': aggregate_count,
+            'documented_lower_bound': documented_lower_bound,
+            'display_gpus': display_gpus,
+            'display_is_lower_bound': display_is_lower_bound,
+            'inventory_completeness': completeness,
+            'ownership_verification': ownership_verification,
+            'federal_funded_gpus': federal_funded_gpus,
+            'source_dates': source_dates,
             'h100_equivalent': round(h100e, 1),
             'institutional_gpus': inst_gpus,
             'institutional_h100e': inst_h100e,
