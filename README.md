@@ -1,8 +1,11 @@
-# US University Compute vs. Endowment
+# The State of US University AI Compute
 
-An interactive dashboard tracking GPU compute owned/operated by the top 50 US
-research universities, set against their endowments — to explore university AI
-compute usage and economics.
+**▶ Live dashboard: https://jryck.github.io/university-ai-compute/**
+
+An interactive dashboard on AI compute across the top 50 US research universities —
+who owns it, who can access it, and who's been left behind. Owned GPU fleets and
+their vintage, the federal supercomputers in their orbit, competitive national
+allocations, and how it all lines up against endowments and research spending.
 
 ## What it shows
 
