@@ -1,99 +1,95 @@
-# At most leading US research universities, the AI compute isn't the university's
+# The AI GPUs at top US universities are mostly faculty-priority, not centrally allocatable
 
-**Finding.** Among the 20 US universities with the largest research-and-development
-budgets (NSF HERD, FY2024), only **5 — Harvard, NYU, Penn, Stanford, and Georgia Tech —
-operate a large, dedicated, centrally-funded GPU cluster that the institution itself
-owns and controls.** In the majority of the rest, the GPUs that exist are owned by
-*individual labs* (the "condo" model, ≥8 of 20) or by *federal or state agencies* (NSF/
-state shared facilities, 3 of 20). At the institutional level, the university frequently
-*operates* compute it does not *own* or *control*.
+**Finding.** At leading US research universities, the hardware is almost always
+university-owned — but a general researcher's *guaranteed* access runs through a
+**central/public allocation pool that is a minority of the headline GPU count**. Where
+universities disclose the split, the centrally-allocatable share is small: at **NYU, 232
+of 944 Torch GPUs** are the general "IT-public" pool (the other 712 are stakeholder-
+priority); at **UCSF, 88 of 235** Wynton GPUs are communal (147 are PI-contributed); at
+**Columbia, the general/free tier has *zero* GPUs** — GPU access requires a group to buy
+in. The dominant governance model is *faculty- or stakeholder-priority allocation*, not
+central institutional control.
+
+Two things this is **not**. It is **not** "universities don't own their GPUs" — legal
+ownership is almost always the university's, even for PI-funded "condo" hardware. And it is
+**not** that fragmentation strands idle capacity: idle priority-GPUs are **near-universally
+shared** through preemptible or time-limited queues (Cornell's three-tier preemptible
+partitions; UCLA's 24-hour "shared" jobs on others' idle nodes; Yale's `scavenge_gpu`;
+Wisconsin's HTCondor backfill; UCSF's 2-hour cap for non-contributors). Opportunistic
+access to the full fleet is broad.
+
+The binding constraint is instead **guaranteed, non-preemptible scale for a single
+coordinated job** — and that is capped by (a) the size of the central pool and (b) explicit
+per-job scheduling limits. Princeton's PLI partition illustrates the latter: it has 336
+dedicated H100s, yet its published QOS caps a single job at roughly 16–35 GPUs.
 
 ## Why it matters
 
-Public discussion of academic AI compute treats "the university" as the unit that has
-(or lacks) GPUs — e.g., "University X has N H100s." Our primary-source audit of the
-top-20-by-R&D universities shows this unit is usually wrong. The dominant arrangements
-place control somewhere other than the central institution:
-
-- **Condo clusters.** The central HPC cluster is a shared host for hardware purchased by
-  individual PIs, labs, or departments. Cornell's shared cluster spans **755 GPUs across
-  70 distinct resource owners**; Columbia's Insomnia was a **joint purchase by 21 research
-  groups**; Washington's Hyak and UCLA's Hoffman2 are explicit condo models. The
-  institution schedules the hardware but does not own most of it, and typically does not
-  publish a per-model inventory because there isn't a single institutional one.
-- **National / state facilities.** The largest GPU systems "at" some universities are
-  federally or state funded and allocated beyond the host. UC San Diego's SDSC (Expanse +
-  Voyager) and Pittsburgh's PSC (Bridges-2) are **NSF facilities allocated nationally via
-  ACCESS**; Ohio State's OSC is a **state facility serving all of Ohio**. These are not
-  institutional AI capacity in any ownership sense.
-- **Dedicated institutional clusters — the exception.** Only Harvard (Kempner, ≥1,144
-  GPUs), NYU (Greene + Torch, ≥1,108), Penn (Betty DGX B200 SuperPOD), Stanford (Marlowe,
-  248 H100), and Georgia Tech (AI Makerspace, ≥344) run a large GPU supercomputer the
-  institution funded and controls centrally. **Every one is recent (2023–2026)**, and
-  where funding is documented it traces to philanthropy or one-time institutional/state
-  capital (e.g., Harvard's Kempner gift; Florida's NVIDIA-gift HiPerGator, outside this
-  sample) — **not** recurring research budgets.
+The standard way to describe academic AI compute — "University X has N GPUs" — answers the
+wrong question. N conflates three different things a researcher experiences very
+differently: GPUs they can get a large guaranteed block of (central pool), GPUs they can
+use opportunistically but can be preempted from (idle priority capacity), and GPUs that are
+effectively someone else's (another group's priority, or a nationally-allocated federal
+facility). For the question that matters to large coordinated experiments — *how many GPUs
+can I count on, uninterrupted, at once?* — the relevant number is usually far below N and is
+set by scheduling policy, not hardware.
 
 ## Evidence
 
-The primary chart classifies each of the 20 universities by its principal
-compute-control model, with documented GPU counts (verified lower bounds) where primary
-sources publish them and an explicit *unresolved* marker where they do not. Sources are
-each university's own research-computing documentation, NSF/DOE facility pages, and
-official announcements (`research_subset.csv`, column `primary_source`).
+The chart shows, for the 20 highest-R&D US universities (NSF HERD FY2024, an independent
+sample not selected on GPU holdings), documented GPUs split by **allocation regime**:
+central/generally-allocatable, faculty/stakeholder-priority, nationally/state-allocated
+facility, and unresolved. Counts are documented **lower bounds** from each university's own
+research-computing documentation (`research_subset.csv`); where the central-vs-priority
+split is not disclosed, capacity is shown as unresolved rather than guessed.
 
-| Control model | Universities (of 20) |
-|---|---|
-| Dedicated institutional cluster | 5 — Harvard, NYU, Penn, Stanford, Georgia Tech |
-| Institutional shared (modest central) | 4 — Johns Hopkins, Wisconsin, Maryland, Yale |
-| Condo (PI/department-owned) | 7 — Michigan, UCLA, UW, Cornell, UNC, Duke, Columbia |
-| National / state facility host | 3 — UC San Diego, Ohio State, Pittsburgh |
-| Minimal / cloud-reliant | 1 — UCSF |
-
-The point is not the exact counts (which are incomplete; see Limitations) but the
-**category distribution**: dedicated institutional control is a minority arrangement.
+Three structural facts are well supported:
+- **Central-allocatable is a minority where disclosed.** NYU 232/944; UCSF 88/235; Columbia
+  0 general-tier GPUs. Dedicated central clusters that *are* broadly allocatable exist
+  (Stanford's Marlowe, 248 GPUs / 500+ accounts; Penn's Betty; Maryland's Zaratan; Wisconsin's
+  CHTC) but are modest in size.
+- **Idle-sharing is the norm, not the exception** — documented preemptible/scavenge/time-
+  limited queues at Cornell, UCLA, UW, Yale, UCSF, Wisconsin, Duke.
+- **"Dedicated" ≠ "central."** Even flagship institute clusters are priority-gated: Harvard's
+  Kempner (1,144 GPUs) prioritizes institute members, opening to 6,000+ other Harvard
+  researchers only when idle; NYU's Torch is ~75% stakeholder-priority.
 
 ## What drives it
 
-The condo model is an equilibrium: central IT provides power, cooling, networking, and
-staff, while faculty buy GPUs from their own grants. It is administratively convenient and
-spreads capital cost across PIs, but it produces a fleet that is fragmented (owned by
-dozens of parties), hard to marshal for a single large job, and invisible as an
-institutional total. A dedicated institutional cluster requires a large, lumpy capital
-outlay that recurring research budgets don't fund — which is why the five that exist were
-enabled by donors, vendor partnerships, or one-time state/institutional commitments, and
-why they appeared only once frontier AI made the case urgent.
+The condo / stakeholder-priority model is how universities finance GPUs at all: central IT
+supplies power, space, networking, and staff; faculty buy accelerators from grants and get
+scheduling priority in return. It maximizes total hardware and utilization (via backfill)
+but minimizes the centrally-marshalable pool. Large central clusters require lumpy capital
+that recurring research budgets don't provide, which is why the broadly-allocatable ones are
+recent and typically donor-, vendor-, or one-time-institution-funded.
 
-## Implications
+## Implications — and non-implications
 
-- **"Who has the most university AI compute" is largely a category error.** Rankings that
-  sum GPUs "at" a university conflate PI-owned, federally-owned, and institution-owned
-  hardware that behave completely differently.
-- **It explains the pull of national programs.** If most universities cannot marshal
-  institutional compute, shared federal infrastructure (NSF ACCESS, NAIRR, DOE INCITE) is
-  not a supplement but the primary path to scale for most academic researchers.
-- **It reframes "underinvestment."** Low institution-controlled compute is not obviously
-  under-investment; for many universities the condo model *is* the investment strategy.
+- **Compute-leaderboards by total GPUs are misleading** for coordinated-research capacity.
+- **It clarifies why shared federal infrastructure is load-bearing**: for a researcher
+  needing a large guaranteed allocation, NSF ACCESS / DOE / NAIRR is often the realistic
+  path, because the home institution's central pool is small.
+- **Non-implication:** this is *not* evidence of under-investment, and *not* evidence that
+  these universities cannot do large-scale work — idle-sharing and national facilities both
+  provide routes. We make no claim about realized training-run sizes.
 
 ## Limitations
 
-- **Sample.** 20 universities, defined independently by R&D rank (not by GPU holdings) to
-  avoid selection bias — but 20, not a census; not generalizable to all US universities.
-- **Completeness.** Condo and aggregate clusters do not publish per-model counts; GPU
-  figures are **documented lower bounds**, and several are unresolved. Counts should not be
-  compared as if complete, which is precisely why the finding is about **control model**,
-  a variable we *can* establish, not about precise GPU totals.
-- **Classification.** Some universities span models (Stanford: dedicated Marlowe + condo
-  Sherlock); each is assigned its principal arrangement, with specifics in
-  `research_subset.csv`. Ownership and funding are recorded separately from operation and
-  access and are "unknown" where not documented.
-- **Timing.** This is a late-2025/2026 snapshot; dedicated clusters are being built quickly
-  (Penn's Betty, MIT's incoming B200s), so the count of "dedicated" is a rising floor.
+- **Sample:** 20 universities by R&D (unbiased vs. GPU holdings), not a census.
+- **Disclosure:** the central-vs-priority split is published by only ~6 of 20; others are
+  structurally priority-based but unquantified, and condo totals are lower bounds. We
+  therefore report the split as a documented minority *where disclosed*, not as a sample-wide
+  percentage.
+- **Effective-access (max coordinated job):** documented for few institutions (e.g.,
+  Princeton's QOS caps); recorded as unknown elsewhere. The claim that fragmentation limits
+  guaranteed scale is **supported but not yet systematically quantified** — it is the
+  strongest next target.
 
-## Is this publishable?
+## Novelty
 
-The control-model classification of the top-20-by-R&D universities, from primary sources,
-is — to our knowledge — **not available elsewhere** and overturns the common "GPUs per
-university" framing. It is a defensible, specific, novel result suitable for a short Data
-Insight, provided it is presented as a **structural classification with documented lower
-bounds**, not as precise aggregate GPU shares.
+Academic-HPC literature has long described the condo model, and Epoch's compute work focuses
+on frontier/industry systems and training runs. What appears absent elsewhere is a
+primary-source classification of the top-R&D universities by **allocation regime**, with the
+central-allocatable-vs-priority distinction made explicit and quantified where disclosed.
+That distinction — and the "idle-shared but not guaranteed-at-scale" characterization — is a
+modest but genuine contribution to how academic AI-compute capacity is measured.

@@ -203,14 +203,18 @@
   </section>
 
   <section>
-    <h2>Research: who controls the compute?</h2>
-    <p class="sub" style="margin-bottom:6px"><b>At most leading US research universities, the AI compute isn't the university's.</b>
-      Among the 20 US universities with the largest R&amp;D budgets (NSF HERD FY2024), only <b>5</b> run a large <em>dedicated,
-      institution-controlled</em> GPU cluster. In the rest, the GPUs are owned by individual labs (the "condo" model) or by
-      federal/state agencies (NSF/state shared facilities) — the university operates compute it doesn't own.</p>
-    <p class="tl-note" style="margin:0 0 14px">Independent, unbiased sample (ranked by R&amp;D, not by GPU holdings). Bars are
-      <b>documented lower bounds</b> from each university's own research-computing docs; hatched = aggregate/not-per-model;
-      "not published" = condo/aggregate clusters that disclose no count. Full write-up:
+    <h2>Research: who can actually get the compute?</h2>
+    <p class="sub" style="margin-bottom:6px"><b>At leading US universities, GPUs are mostly university-owned but
+      faculty-priority-allocated — the central pool a general researcher can get a guaranteed block from is a minority of the
+      headline count.</b> Where the split is disclosed: NYU 232 of 944 Torch GPUs are the general "IT-public" pool; UCSF 88 of
+      235 are communal; Columbia's general tier has <em>zero</em> GPUs. Idle priority-GPUs are near-universally shared via
+      preemptible queues (marked ↻), so fragmentation strands little — but guaranteed coordinated-job scale is capped by the
+      central pool and per-job limits.</p>
+    <p class="tl-note" style="margin:0 0 14px">Independent, unbiased sample (20 highest-R&amp;D universities, NSF HERD FY2024 —
+      not selected on GPU holdings). Bars = documented GPUs (<b>lower bounds</b>) by <b>allocation regime</b>; <b>"ctrl"</b> =
+      documented central-allocatable pool; <b>↻</b> = idle capacity shared via preemptible/time-limited queues; hatched =
+      priority split not disclosed. Legal ownership is almost always the university's — this chart is about <em>scheduling
+      control</em>, not ownership. Write-up:
       <a href="https://github.com/jryck/university-ai-compute/blob/main/DATA_INSIGHT_DRAFT.md" target="_blank" rel="noopener">DATA_INSIGHT_DRAFT.md</a>.</p>
     <div class="card">
       <div class="legend" id="ctrl-legend" style="margin-bottom:12px"></div>
@@ -707,32 +711,41 @@ function renderLabs(){
     +`* approximate. Different accelerator types; not directly comparable to the H100-equivalent metric.`;
 }
 
-/* ---- Research chart: control-model classification (top 20 by R&D) ---- */
-const CTRL_COLORS = {'Dedicated institutional':'#2a78d6','Institutional shared':'#1baf7a',
-  'Condo':'#eda100','National / state facility':'#4a3aa7','Minimal / cloud':'#898781'};
-function ctrlCat(m){
-  if(/Dedicated/.test(m)) return 'Dedicated institutional';
-  if(/National|State facility/.test(m)) return 'National / state facility';
-  if(/Minimal/.test(m)) return 'Minimal / cloud';
-  if(/[Ii]nstitutional/.test(m)) return 'Institutional shared';
-  return 'Condo';
+/* ---- Research chart: allocation regime (top 20 by R&D) ---- */
+const REGIME = {central:'#2a78d6', priority:'#eda100', facility:'#4a3aa7', unresolved:'#c3c2b7'};
+function regimeSegs(r){
+  const total=r.documented_gpus, sc=r.scheduling_control||'';
+  if(/national-allocation|state-allocation/.test(sc) && total>0)
+    return [{t:'National/state facility',v:total,c:REGIME.facility}];
+  if(!total) return [{t:'Unresolved (count not published)',v:0,c:REGIME.unresolved}];
+  const caRaw=r.central_allocatable_gpus;
+  const ca=(caRaw===''||caRaw==='unknown'||caRaw==null)?null:+caRaw;
+  if(ca===null) return [{t:'Faculty/stakeholder-priority (split not disclosed)',v:total,c:REGIME.priority,hatch:true}];
+  const s=[];
+  if(ca>0) s.push({t:'Central-allocatable',v:ca,c:REGIME.central});
+  if(total-ca>0) s.push({t:'Faculty/stakeholder-priority',v:total-ca,c:REGIME.priority});
+  return s.length?s:[{t:'Faculty/stakeholder-priority',v:total,c:REGIME.priority}];
 }
 function renderResearch(){
   const rs = PAYLOAD.research_subset||[];
   if(!rs.length) return;
-  document.getElementById('ctrl-legend').innerHTML = Object.entries(CTRL_COLORS).map(([k,c])=>
-    `<span><i class="dot" style="background:${c}"></i>${k}</span>`).join('');
+  const leg=[['Central-allocatable (general pool)',REGIME.central],['Faculty / stakeholder-priority',REGIME.priority],
+    ['National / state facility',REGIME.facility],['Unresolved / not disclosed',REGIME.unresolved]];
+  document.getElementById('ctrl-legend').innerHTML = leg.map(([k,c])=>`<span><i class="dot" style="background:${c}"></i>${k}</span>`).join('');
   const max = Math.max(...rs.map(r=>r.documented_gpus), 1);
-  document.getElementById('research-bars').innerHTML = rs.sort((a,b)=>a.rd_rank-b.rd_rank).map(r=>{
-    const cat=ctrlCat(r.control_model), col=CTRL_COLORS[cat];
-    const hatch = r.count_type!=='verified_lower_bound';
-    const seg = r.documented_gpus>0
-      ? `<div class="bar-seg" style="width:${r.documented_gpus/max*100}%;background:${col};${hatch?'opacity:.55;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 2px,transparent 2px 5px)':''}" data-t="${r.institution} · ${cat} · ${r.key_systems}"></div>`
-      : `<div class="bar-seg" style="width:3px;background:${col};opacity:.4" data-t="${r.institution} · ${cat} · count not published"></div>`;
-    const label = r.documented_gpus>0 ? `≥${fmt(r.documented_gpus)}` : `<span style="color:var(--muted)">not published</span>`;
-    return `<div class="bar-row" style="grid-template-columns:200px 1fr 92px">`
-      +`<div class="blabel" title="${r.control_model}">#${r.rd_rank} ${shortName(r.institution)}</div>`
-      +`<div class="bar-track">${seg}</div>`
+  document.getElementById('research-bars').innerHTML = rs.slice().sort((a,b)=>a.rd_rank-b.rd_rank).map(r=>{
+    const segs=regimeSegs(r);
+    const bars = r.documented_gpus>0 ? segs.map(s=>
+      `<div class="bar-seg" style="width:${s.v/max*100}%;background:${s.c};${s.hatch?'background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.45) 0 2px,transparent 2px 5px)':''}" `
+      +`data-t="${shortName(r.institution)} · ${s.t}: ${fmt(s.v)} · ${r.key_systems}"></div>`).join('')
+      : `<div class="bar-seg" style="width:4px;background:${REGIME.unresolved}" data-t="${shortName(r.institution)} · count not published · ${r.key_systems}"></div>`;
+    const idle = r.idle_sharing && !/unknown|n\/a/.test(r.idle_sharing) ? ' ↻' : '';
+    const label = r.documented_gpus>0
+      ? `≥${fmt(r.documented_gpus)}${(r.central_allocatable_gpus!==''&&r.central_allocatable_gpus!=='unknown'&&!/national|state/.test(r.scheduling_control))?` <span class="flag">${fmt(+r.central_allocatable_gpus)} ctrl</span>`:''}`
+      : `<span style="color:var(--muted)">not published</span>`;
+    return `<div class="bar-row" style="grid-template-columns:210px 1fr 120px">`
+      +`<div class="blabel" title="${r.scheduling_control} · idle sharing: ${r.idle_sharing}">#${r.rd_rank} ${shortName(r.institution)}${idle}</div>`
+      +`<div class="bar-track">${bars}</div>`
       +`<div class="bar-val">${label}</div></div>`;
   }).join('');
   document.querySelectorAll('#research-bars .bar-seg').forEach(el=>{

@@ -17,9 +17,9 @@
     },
     {
       "name": "New York University",
-      "total_gpus": 1108,
-      "h100_equivalent": 596.6,
-      "gpu_value_usd": 20881000,
+      "total_gpus": 1276,
+      "h100_equivalent": 899.0,
+      "gpu_value_usd": 31465000,
       "endowment_b": 7.28
     },
     {

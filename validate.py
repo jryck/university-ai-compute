@@ -111,7 +111,7 @@ def main():
         ('Oregon State University', 'planned_gpus', 150),
         ('Oregon State University', 'verified_model_count', 0),
         ('University of Texas - Austin', 'documented_lower_bound', 860),
-        ('New York University', 'documented_lower_bound', 1108),
+        ('New York University', 'documented_lower_bound', 1276),
     ]
     for name, field, exp in reg:
         d = data.get(name)
@@ -125,6 +125,18 @@ def main():
         check(r['source_url'].startswith('http'), f"[src] {r['cluster_id']}: missing source_url")
         check(r['status'] in ('operational', 'planned', 'retired', 'uncertain'), f"[status] {r['cluster_id']}: bad status")
         check(r.get('count_basis', 'primary') in ('primary', 'legacy', 'aggregate'), f"[basis] {r['cluster_id']}: bad count_basis")
+
+    # research_subset.csv internal consistency (central-allocatable <= documented; sources present)
+    import os
+    if os.path.exists('research_subset.csv'):
+        for r in csv.DictReader(open('research_subset.csv')):
+            tot = int(r['documented_gpus'] or 0)
+            ca = r['central_allocatable_gpus']
+            if ca not in ('', 'unknown') and ca.lstrip('-').isdigit():
+                check(int(ca) <= tot, f"[research] {r['institution']}: central-allocatable {ca} > documented {tot}")
+            check(r['primary_source'].strip() != '', f"[research] {r['institution']}: missing primary_source")
+            check(r['count_type'] in ('verified', 'verified_lower_bound', 'aggregate', 'unresolved'),
+                  f"[research] {r['institution']}: bad count_type {r['count_type']}")
 
     if FAILS:
         print(f"VALIDATION FAILED — {len(FAILS)} issue(s):")
