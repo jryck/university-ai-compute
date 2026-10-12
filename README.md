@@ -2,10 +2,36 @@
 
 **▶ Live dashboard: https://jryck.github.io/university-ai-compute/**
 
-An interactive dashboard on AI compute across the top 50 US research universities —
-who owns it, who can access it, and who's been left behind. Owned GPU fleets and
-their vintage, the federal supercomputers in their orbit, competitive national
-allocations, and how it all lines up against endowments and research spending.
+An interactive dashboard on AI compute across US research universities — who owns it,
+who can access it, and how it maps to institutional wealth and research spending.
+
+## Data quality & methodology (overhaul in progress)
+
+This project is transitioning from a quick build to an **independently source-verified,
+auditable dataset**. Key documents:
+
+- **[`PILOT_AUDIT.md`](PILOT_AUDIT.md)** — primary-source verification of 10 universities
+  vs. the legacy figures. Finding: the legacy source (GPUs Per Student) **consistently
+  overstates** owned GPUs (double-counts, cloud-as-owned, MIG-as-physical, planned/
+  decommissioned-as-live, estimate inflation).
+- **[`clusters.csv`](clusters.csv)** — the new **cluster-level**, independently-sourced
+  inventory: one record per hardware deployment with source URL, date, status (operational/
+  planned/retired), owner, funding, access model, and confidence.
+- **[`validate.py`](validate.py)** — automated checks run after every build (per-model
+  reconciliation, institutional/facility reconciliation, planned/cloud exclusion, funding-
+  default integrity, generation-class correctness, regression cases). `python3 validate.py`.
+
+**Known limitations (stated plainly):**
+- **Sample:** the 50 schools are currently those with the most documented GPU inventory in
+  the legacy source — **not** an NSF-R&D-defined "top 50." Fix in progress.
+- **Metric:** "H100 price-equivalent" = estimated GPU value ÷ $35,000 — a **price proxy, not
+  performance**, and not actual spending. Physical GPU count is the primary unit.
+- **Provenance:** most rows are still legacy candidate data; audited schools (Illinois, UT
+  Austin, Harvard, CMU, Oregon State + pilot) are corrected against primary sources. **Missing
+  inventory ≠ zero GPUs.** Funding defaults to **Unknown**, never silently "institutional."
+- **Access:** national-allocation coverage (INCITE/ALCC + NAIRR) is incomplete; absence ≠ no access.
+
+Build: `python3 alloc_build.py && python3 build_data.py && python3 validate.py`.
 
 ## What it shows
 

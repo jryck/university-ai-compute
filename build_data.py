@@ -210,26 +210,46 @@ MILESTONES = [
 ]
 
 
-# Ownership-tier overrides. The source dataset (a) double-counts Grace Hopper
-# systems (listed under BOTH H100 and GH200) and (b) blends NSF national-facility
-# compute into the host university's total. For the handful of affected top-50
-# schools we set corrected totals and split off the NSF-facility (Tier 2) portion.
-# 'total_*' override fixes the double-count; 'facility_*' is the NSF-facility slice
-# (nationally allocated, not institutional). Everything else is 100% institutional.
+# Hardware-level corrections, applied at the per-model record level (not by
+# overriding summary totals) so every aggregate — physical count, generation
+# breakdown, institutional/facility split — reconciles automatically. Each entry
+# may provide: 'owned' (corrected operational owned-GPU model dict, replaces the
+# legacy row), 'facility_models' (the NSF national-facility slice), 'cloud_models'
+# (reserved cloud, NOT owned hardware), 'planned_models' (announced/under-construction,
+# excluded from operational totals). Sources documented per entry.
 TIER_OVERRIDES = {
     'University of Illinois Urbana-Champaign': {
-        'total_gpus': 1604, 'total_h100e': 879,         # removed 608 double-counted DeltaAI GH200
-        'facility_gpus': 1530, 'facility_h100e': 854,
+        # Removes 608 GH200 double-counted as H100_SXM (DeltaAI Grace Hopper counted once as GH200).
+        'owned': {'H100_SXM': 4, 'GH200': 608, 'A100_40GB': 440, 'A40': 400, 'H200': 64,
+                  'V100': 64, 'A10': 46, 'A100_80GB': 24},
+        'facility_models': {'GH200': 608, 'A100_40GB': 440, 'A40': 400, 'H200': 64, 'V100': 64},
         'facility_systems': 'NCSA: Delta, DeltaAI, HAL — NSF-funded, nationally allocated (ACCESS)',
+        'source': 'NCSA Delta/DeltaAI user docs; gpusperstudent notes. Double-count of DeltaAI GH200 corrected.',
     },
     'University of Texas - Austin': {
-        'total_gpus': 860, 'total_h100e': 765,           # removed 600 double-counted Vista GH200 + decommissioned
-        'facility_gpus': 600, 'facility_h100e': 631,
-        'facility_systems': 'TACC: Vista — NSF national facility (excludes decommissioned Longhorn/Maverick2)',
+        # Vista (600 Grace Hopper) counted once as GH200, not also as H200. Decommissioned
+        # Longhorn/Maverick2 (424 V100, 6 P100) removed from operational.
+        'owned': {'GH200': 600, 'A100_40GB': 252, 'H100_PCIe': 8},
+        'facility_models': {'GH200': 600},
+        'facility_systems': 'TACC: Vista — NSF national facility. Lonestar6 (A100/H100) is UT-funded.',
+        'source': 'TACC Vista/Lonestar6 docs. GH200 double-count + decommissioned Longhorn/Maverick2 removed.',
+    },
+    'Carnegie Mellon University': {
+        # 296 H100 are Google Cloud reserved-instance VMs — NOT owned hardware.
+        'owned': {'A40': 29, 'RTX_A6000': 4, 'L40S': 18, 'P100': 20},
+        'cloud_models': {'H100_SXM': 296},
+        'source': 'cmu.edu/rcd/faq.html — 296 H100 are GCP reserved-instance VMs, reclassified from owned.',
+    },
+    'Oregon State University': {
+        # 150 Rubin belong to the Huang Complex supercomputer, under construction (opens 2027).
+        'owned': {'A100_80GB': 8, 'A40': 48, 'RTX_A6000': 32, 'V100': 24, 'P100': 12},
+        'planned_models': {'Rubin': 150},
+        'source': 'huangcomplex.oregonstate.edu/FAQ — Huang Complex completes end-2026, opens 2027; Rubin not operational.',
     },
     'Texas A&M University': {
-        'facility_gpus': 31, 'facility_h100e': 28,       # keep source total; ACES is small
+        'facility_models': {'H100_PCIe': 30, 'GH200': 1},
         'facility_systems': 'ACES — NSF-funded, ACCESS-allocated (DGX SuperPOD is institutional)',
+        'source': 'gpusperstudent notes; ACES is NSF/ACCESS.',
     },
 }
 
@@ -249,8 +269,8 @@ FUNDING = {
     'Rensselaer Polytechnic Institute': ('Mixed', 'documented', 'IBM-partnership AiMOS + NY State Empire AI consortium'),
     'Georgia Institute of Technology': ('Mixed', 'documented', 'Institutional PACE + NVIDIA AI Makerspace partnership'),
 }
-FUNDING_DEFAULT = ('Institutional', 'inferred', 'Institutional/endowment funds (default; no dominant external source identified)')
-FUNDING_MODELS = ['Institutional', 'NSF facility', 'Vendor donation', 'Mixed']
+FUNDING_DEFAULT = ('Unknown', 'unverified', 'Funding source not verified against primary documentation')
+FUNDING_MODELS = ['Institutional', 'NSF facility', 'Vendor donation', 'Mixed', 'Unknown']
 
 # National leadership-computing allocations — the "accessible compute" spine.
 # Source: full ALCF (Argonne) 2025 award list — Aurora/Polaris INCITE + ALCC +
@@ -303,19 +323,22 @@ NATIONAL_LABS = [
 ]
 
 
-# GPU generation buckets + rough H100-equivalent weights, for the owned-compute
-# composition bar. Four buckets align with the buildout-timeline legend.
+# GPU microarchitecture generation, by NVIDIA's actual lineage. Used to show fleet
+# composition/vintage. (P100=Pascal, V100=Volta, A100/A40/A10/A6000=Ampere,
+# L40S=Ada Lovelace, H100/H200/GH200=Hopper, B200/B100=Blackwell, Rubin=Rubin.)
 GEN_OF = {
-    'P100': 'Volta', 'V100': 'Volta',
+    'P100': 'Pascal', 'V100': 'Volta',
     'A100_80GB': 'Ampere', 'A100_40GB': 'Ampere', 'A40': 'Ampere', 'A10': 'Ampere',
-    'RTX_A6000': 'Ampere', 'L40S': 'Ampere',
+    'RTX_A6000': 'Ampere', 'L40S': 'Ada',
     'H100_SXM': 'Hopper', 'H100_PCIe': 'Hopper', 'H200': 'Hopper', 'GH200': 'Hopper',
-    'B200': 'Blackwell', 'B100': 'Blackwell', 'Rubin': 'Blackwell',
+    'B200': 'Blackwell', 'B100': 'Blackwell', 'Rubin': 'Rubin',
 }
+# Price-based weights (NOT performance): approximate share of the source's value-
+# derived "H100 price-equivalent", used only to apportion that metric across gens.
 GEN_W = {'P100': 0.05, 'V100': 0.12, 'A100_80GB': 0.6, 'A100_40GB': 0.5, 'A40': 0.2,
          'A10': 0.15, 'RTX_A6000': 0.25, 'L40S': 0.4, 'H100_SXM': 1.0, 'H100_PCIe': 0.9,
          'H200': 1.1, 'GH200': 1.0, 'B200': 2.2, 'B100': 1.8, 'Rubin': 3.0}
-GENS_ORDER = ['Volta', 'Ampere', 'Hopper', 'Blackwell']
+GENS_ORDER = ['Pascal', 'Volta', 'Ampere', 'Ada', 'Hopper', 'Blackwell', 'Rubin']
 
 
 def gen_split(gpus, total_h100e):
@@ -354,19 +377,28 @@ def main():
     out = []
     for r in top:
         name = r['university']
-        gpus = {m: int(num(r, m)) for m in GPU_MODELS if num(r, m) > 0}
-        total_gpus = sum(gpus.values())
-        h100e = num(r, 'h100_equivalent')
-        gpu_value = num(r, 'total_gpu_value')
+        legacy_gpus = {m: int(num(r, m)) for m in GPU_MODELS if num(r, m) > 0}
 
-        # apply ownership-tier overrides (double-count fix + NSF-facility split)
+        # apply hardware-level corrections where audited; else use the legacy row.
         ov = TIER_OVERRIDES.get(name, {})
-        total_gpus = ov.get('total_gpus', total_gpus)
-        h100e = ov.get('total_h100e', h100e)
-        facility_gpus = ov.get('facility_gpus', 0)
-        facility_h100e = ov.get('facility_h100e', 0)
+        gpus = ov.get('owned', legacy_gpus)              # operational owned-GPU model dict
+        facility_models = ov.get('facility_models', {})
+        cloud_models = ov.get('cloud_models', {})
+        planned_models = ov.get('planned_models', {})
+
+        def h100e_of(g):  # transparent price-equivalent: sum(count * price-weight)
+            return round(sum(g.get(m, 0) * GEN_W.get(m, 0.3) for m in g), 1)
+
+        total_gpus = sum(gpus.values())
+        h100e = h100e_of(gpus)
+        gpu_value = round(h100e * 35000)                 # ties value to the price-equiv basis
+        facility_gpus = sum(facility_models.values())
+        facility_h100e = h100e_of(facility_models)
         inst_gpus = total_gpus - facility_gpus
         inst_h100e = round(h100e - facility_h100e, 1)
+        cloud_gpus = sum(cloud_models.values())
+        planned_gpus = sum(planned_models.values())
+        verification = 'audited' if ov else 'legacy'     # audited = corrected vs primary source
         endow, fy, enote = ENDOWMENTS.get(name, (None, None, 'endowment not found'))
         endow_prior = ENDOWMENTS_FY24.get(name)
         # YoY change only meaningful when current figure is FY2025 (same basis)
@@ -397,6 +429,12 @@ def main():
             'facility_h100e': facility_h100e,
             'facility_systems': ov.get('facility_systems', ''),
             'has_facility': facility_h100e > 0,
+            'cloud_gpus': cloud_gpus,
+            'cloud_models': cloud_models,
+            'planned_gpus': planned_gpus,
+            'planned_models': planned_models,
+            'verification': verification,
+            'correction_source': ov.get('source', ''),
             'gen_h100e': gen_split(gpus, h100e),
             'gen_count': gen_count(gpus),
             'gpu_value_usd': int(gpu_value),
@@ -419,26 +457,29 @@ def main():
         out.append(rec)
 
     meta = {
-        'title': 'US University Compute vs. Endowment',
-        'gpu_data_asof': 'Late 2025 / early 2026 (gpusperstudent.org inventory + TOP500 Nov 2025)',
+        'title': 'The State of US University AI Compute',
+        'sampling_method': 'Top 50 by documented GPU inventory in the GPUs Per Student dataset (NOT an NSF-R&D-defined "top 50 research universities"). Migration to an R&D-defined universe + source-verified inventory is in progress.',
+        'gpu_data_asof': 'Legacy inventory: late 2025 / early 2026 (gpusperstudent.org + TOP500 Nov 2025). Audited records (Illinois, UT Austin, Harvard, CMU, Oregon State + pilot) verified against primary sources, Oct 2026.',
+        'metric_note': 'H100 price-equivalent = estimated GPU market value / $35,000 (a PRICE proxy, NOT performance). Physical GPU count is the primary unit. No performance normalization is claimed.',
         'endowment_data_asof': 'FY2025 (year ending ~June 30 2025) where reported; FY2024 for a few smaller schools',
-        'built': '2026-10-10',
+        'built': '2026-10-11',
         'n_schools': len(out),
-        'gpu_source': 'gpusperstudent.org (master_data.csv), cross-referenced with TOP500 and university HPC docs',
+        'gpu_source': 'LEGACY candidate source: gpusperstudent.org (master_data.csv). Being replaced by independently source-verified cluster records (clusters.csv); see PILOT_AUDIT.md.',
         'endowment_source': '2025 NACUBO-Commonfund Study; statranker/altss FY2025 compilations; university treasury reports',
         'rd_source': 'NSF HERD survey, FY2024 (total R&D expenditures; year ending ~June 30 2024)',
         'rd_data_asof': 'FY2024 (NSF HERD, released Nov 2025)',
         'alloc_source': 'DOE INCITE 2025 + ALCC 2025 — both complete across all facilities (Frontier/Aurora/Polaris/Perlmutter), parsed from the official ASCR/INCITE fact-sheet PDFs; NAIRR pilot project counts (nairrpilot.org awards CSV, 1,212 awards)',
         'alloc_caveat': 'Leadership node-hours = INCITE 2025 + ALCC 2025, both complete across all leadership facilities. NSF ACCESS and routine NERSC/ERCAP allocations are not quantified (no clean per-institution public totals). NAIRR is a project count (AI-specific national access), a distinct signal. Node-hours/project-counts are not comparable to owned-GPU counts.',
         'caveats': [
-            'GPU counts for research clusters are inherently approximate; private/departmental clusters are often undercounted and vendor-donated systems vary in disclosure.',
-            'H100-equivalent normalizes different GPU generations to relative compute vs an H100; it is an estimate, not a benchmark.',
-            'Public-university endowments are often reported at SYSTEM level (e.g., Texas A&M, U of Alabama), inflating the per-campus figure. These are flagged in the endowment note.',
-            'GPU dollar values are rough list-price estimates from the source dataset, not purchase prices (which are often discounted or donated).',
-            'The buildout timeline tracks marquee announced systems only, not every incremental node; it shows the generational wave, not a complete per-school history. Owned compute is published; rented/cloud compute is NOT publicly disclosed and is excluded.',
-            'Ownership tiers: "institutional" = bought with university/donor funds for the university\'s own use; "NSF national facility" = federally funded, nationally allocated compute the university operates (TACC at UT Austin, NCSA at Illinois, ACES at Texas A&M). The "Institutional only" view excludes the facility tier. National labs the university merely manages or neighbors (e.g., NERSC/LBNL for Berkeley) are a separate category and are NOT counted at all.',
-            'Source double-counting of Grace Hopper systems (listed under both H100 and GH200) was corrected for Illinois and UT Austin, lowering their totals vs the raw source.',
-            'National access uses two signals: leadership node-hours = DOE INCITE 2025 + ALCC 2025, both complete across all leadership facilities (Frontier/Aurora/Polaris/Perlmutter); and NAIRR pilot project counts (AI-specific access). NSF ACCESS and routine NERSC/ERCAP are not quantified. Node-hours and project counts are distinct units, not comparable to owned-GPU counts.',
+            'SAMPLE: these 50 are the schools with the most documented GPU inventory in the legacy source — NOT an NSF-R&D-defined "top 50 research universities." Selection-bias fix in progress.',
+            'DATA PROVENANCE: most rows are still legacy (GPUs Per Student) candidate data, not independently verified. Audited schools (Illinois, UT Austin, Harvard, CMU, Oregon State + pilot) are corrected against primary sources; see clusters.csv and PILOT_AUDIT.md. Missing inventory ≠ zero GPUs.',
+            'H100 PRICE-EQUIVALENT = estimated GPU value / $35,000. It is a PRICE proxy, NOT a performance measure, and NOT actual institutional spending. Physical GPU count is the primary unit.',
+            'PLANNED and RESERVED-CLOUD capacity are excluded from operational owned totals and tracked separately (e.g., Oregon State 150 Rubin = under construction to 2027; CMU 296 H100 = Google Cloud reserved, not owned).',
+            'FUNDING source defaults to "Unknown / not verified" unless documented against a primary source. Unknown is NOT counted as institutional.',
+            'Ownership tiers: institutional vs NSF national facility (TACC/Illinois NCSA/TAMU ACES) are distinct. National labs a university merely operates/neighbors (NERSC, Frontier, Aurora...) are a separate context layer, never summed in.',
+            'Grace Hopper double-counting (listed under both H100 and GH200) corrected at the per-model level for Illinois and UT Austin; all aggregates reconcile to non-overlapping hardware counts.',
+            'National access = DOE INCITE 2025 + ALCC 2025 (complete, all leadership facilities) + NAIRR project counts. NSF ACCESS and routine NERSC/ERCAP not quantified; absence ≠ no access. Node-hours/project-counts are distinct units from GPU counts.',
+            'Public-university endowments are often reported at SYSTEM level (Texas A&M, U of Alabama), inflating per-campus figures; flagged in the endowment note.',
         ],
     }
 

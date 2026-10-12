@@ -15,7 +15,8 @@
     --accent-wash: rgba(42,120,214,0.07);
     --chip: #f0efec;
     /* GPU generations — ordinal blue ramp, light→dark = older→newer */
-    --gen-Volta: #86b6ef; --gen-Ampere: #3987e5; --gen-Hopper: #1c5cab; --gen-Blackwell: #0d366b;
+    --gen-Pascal: #b7d3f6; --gen-Volta: #86b6ef; --gen-Ampere: #5598e7; --gen-Ada: #2a78d6;
+    --gen-Hopper: #1c5cab; --gen-Blackwell: #104281; --gen-Rubin: #0a2a54;
     --up: #006300; --down: #d03b3b;
   }
   @media (prefers-color-scheme: dark) {
@@ -27,7 +28,8 @@
       --accent-wash: rgba(57,135,229,0.13);
       --chip: #262624;
       /* dark: reverse the ramp so newest reads brightest on the dark surface */
-      --gen-Volta: #184f95; --gen-Ampere: #3987e5; --gen-Hopper: #6da7ec; --gen-Blackwell: #b7d3f6;
+      --gen-Pascal: #133f78; --gen-Volta: #184f95; --gen-Ampere: #2a78d6; --gen-Ada: #3987e5;
+      --gen-Hopper: #6da7ec; --gen-Blackwell: #9ec5f4; --gen-Rubin: #cde2fb;
       --up: #0ca30c; --down: #e66767;
     }
   }
@@ -157,33 +159,39 @@
 <div class="wrap">
   <header>
     <h1>The State of US University AI Compute</h1>
-    <p class="sub">Who owns AI compute, who can access it, and who's been left behind — across the 50 top US research
-      universities. Owned GPU fleets and their vintage, the federal supercomputers in their orbit, competitive national
-      allocations, and how it all lines up against endowments and research spending.</p>
+    <p class="sub">Who owns AI compute, who can access it, and how it maps to institutional wealth and research spending.
+      <b>Sample caveat:</b> these 50 schools are currently those with the most documented GPU inventory in the GPUs Per Student
+      dataset — <em>not</em> an NSF-R&amp;D-defined "top 50 research universities." Migration to an R&amp;D-defined universe and
+      an independently source-verified inventory is underway (see Methodology &amp; the cluster-level audit).</p>
     <p class="asof" id="asof"></p>
   </header>
 
   <section>
     <h2>Key findings</h2>
+    <p class="tl-note" style="margin:-4px 0 14px">Descriptive statements the dataset directly shows. Figures are based on
+      <em>documented</em> owned GPUs (largely legacy GPUs-Per-Student data, now being source-verified); treat broader
+      explanations as hypotheses, not established cause.</p>
     <div class="lead-finding">
       <div class="lf-big" id="lf-invert">—</div>
-      <div class="lf-txt"><b>The wealthiest universities own the <em>least</em> compute per dollar.</b> Harvard and Yale
-        hold just 8–13 H100-equivalents per $B of endowment; Florida and Oregon State, 250–440. At the top end, wealth and
-        owned compute are essentially <em>inversely</em> related — the richest schools could buy far more, and don't.</div>
+      <div class="lf-txt"><b>Documented owned compute does not scale with endowment.</b> Across schools with documented
+        inventories, the spread in owned GPUs per $B of endowment is very wide, and several of the wealthiest sit near the
+        bottom. <em>Caveat:</em> this reflects <em>documented owned hardware</em> only — it may also reflect incomplete
+        inventories and heavier reliance on cloud or national facilities, not lower investment alone.</div>
     </div>
     <div class="findings">
-      <div class="finding"><b>Access ≠ ownership — two different strategies.</b> USC, Michigan and Notre Dame each win
-        ~1–1.5M national supercomputing node-hours while owning only ~30–40 H100-equivalents. GPU-rich NYU and Texas A&amp;M
-        win almost none — they run on owned hardware. Stanford, Princeton and Illinois do both.</div>
-      <div class="finding"><b>Donations and federal labs built the biggest fleets — not endowments.</b> Florida's came
-        from an NVIDIA gift; Illinois's and UT Austin's are NSF national facilities. Only 9 of 50 schools' compute is
-        primarily non-institutional — but they include the very top of the owned-compute ranking.</div>
-      <div class="finding"><b>Research scale ≠ compute.</b> Johns Hopkins — #1 in the US for R&amp;D spending — owns
-        almost no GPU. Biomedical research isn't compute-bound; owned GPU is a signal of <em>AI-specific</em> ambition,
-        not research size.</div>
-      <div class="finding"><b>Fleet vintage varies widely.</b> Florida skipped the Hopper generation entirely
-        (Ampere → Blackwell); NYU and RPI still carry large legacy V100 fleets that look big by GPU count but contribute
-        little effective compute. The composition, not just the count, tells the story.</div>
+      <div class="finding"><b>Access ≠ ownership.</b> USC, Michigan and Notre Dame each hold ~1–1.5M documented national
+        supercomputing node-hours (DOE INCITE/ALCC) while owning few GPUs; GPU-rich NYU and Texas A&amp;M hold little
+        measured allocation. <em>Allocation coverage is incomplete</em> (INCITE/ALCC + NAIRR only; not NSF ACCESS or cloud),
+        so absence is not proof of no access.</div>
+      <div class="finding"><b>Where funding is documented, donations and federal facilities built the biggest fleets.</b>
+        Florida's traces to an NVIDIA gift; Illinois's and UT Austin's are NSF national facilities. For most schools the
+        funding source is <em>not yet verified</em> and is marked Unknown — this dataset does not claim they self-funded.</div>
+      <div class="finding"><b>Documented owned GPU does not track total R&amp;D.</b> Johns Hopkins — #1 in US R&amp;D — shows
+        little documented owned GPU here, while some smaller-R&amp;D schools rank high. The data shows the divergence; it does
+        <em>not</em> establish the cause (research mix, cloud/national reliance, or incomplete inventory are all possible).</div>
+      <div class="finding"><b>Fleet vintage varies widely.</b> Florida skipped the Hopper generation (Ampere → Blackwell);
+        NYU and others carry large legacy fleets (V100/RTX8000) that loom large by GPU count but contribute little effective
+        compute. Composition, not just count, matters.</div>
     </div>
     <p class="tl-note" id="lf-context"></p>
   </section>
@@ -224,7 +232,7 @@
       <div class="chart-head">
         <div class="legend" id="bar-legend"></div>
         <div class="seg" id="barmode-seg">
-          <button data-m="h100e" class="on">Effective compute (H100e)</button>
+          <button data-m="h100e" class="on">H100 price-equivalent</button>
           <button data-m="count">GPU count</button>
         </div>
       </div>
@@ -314,7 +322,7 @@ const totVal = DATA.reduce((a,x)=>a+x.gpu_value_usd,0);
 const tiles = [
   [fmt(DATA.length), 'research universities'],
   [fmt(totGPU), 'GPUs catalogued'],
-  [fmt(Math.round(totH100e)), 'H100-equivalents of compute'],
+  [fmt(Math.round(totH100e)), 'H100 price-equivalents (est. value ÷ $35k)'],
   [money(totVal), 'est. aggregate GPU value'],
 ];
 document.getElementById('tiles').innerHTML = tiles.map(t=>
@@ -326,7 +334,7 @@ document.getElementById('tiles').innerHTML = tiles.map(t=>
   const spread = Math.round(Math.max(...ratios)/Math.min(...ratios));
   document.getElementById('lf-invert').textContent = spread+'×';
   document.getElementById('lf-context').innerHTML =
-    `For context: all 50 universities own ~${fmt(Math.round(totH100e))} H100-equivalents <em>combined</em>. `
+    `For context: all 50 universities own ~${fmt(Math.round(totH100e))} H100 price-equivalents <em>combined</em>. `
     +`That industry and the national labs dwarf academia is well known — federal leadership systems alone hold `
     +`roughly 5.5× all 50 schools put together, and a single frontier cluster more still. The question this tool answers `
     +`isn't the size of that gap, but how the 50 divide the compute they <em>do</em> have — and how unevenly it maps to `
@@ -407,7 +415,7 @@ function drawScatter(){
   g+=`<text class="refline-txt" x="${m.l+iw}" y="${Y(medianRatio*rx1)-6}" text-anchor="end">median ≈ ${Math.round(medianRatio)} H100e per ${cfg.unit}</text>`;
   // axis labels
   g+=`<text class="axis-label" x="${m.l+iw/2}" y="${H-6}" text-anchor="middle">${cfg.axis}</text>`;
-  g+=`<text class="axis-label" transform="translate(16,${m.t+ih/2}) rotate(-90)" text-anchor="middle">H100-equivalent compute (log)</text>`;
+  g+=`<text class="axis-label" transform="translate(16,${m.t+ih/2}) rotate(-90)" text-anchor="middle">H100 price-equivalent (log · value ÷ $35k, not performance)</text>`;
   // points — label a small "story" set, staggering above/below to avoid collisions
   const labels = {
     'University of Florida':[1,-8], 'University of Illinois Urbana-Champaign':[1,-8],
@@ -431,7 +439,7 @@ function drawScatter(){
       const d=DATA[+el.dataset.i];
       showTip(`<b>${d.name}</b><br><div class="row"><span>Sector</span><span>${d.sector}</span></div>`
        +`<div class="row"><span>${basis==='inst'?'Institutional GPUs':'Total GPUs'}</span><span>${fmt(d._gpus)}</span></div>`
-       +`<div class="row"><span>H100-equiv</span><span>${fmt(Math.round(d._h100e))}${basis==='all'?'':' (inst.)'}</span></div>`
+       +`<div class="row"><span>H100 price-eq</span><span>${fmt(Math.round(d._h100e))}${basis==='all'?'':' (inst.)'}</span></div>`
        +(d.has_facility?`<div class="row"><span>of which NSF facility</span><span>${fmt(Math.round(d.facility_h100e))}</span></div>`:'')
        +`<div class="row"><span>Endowment</span><span>$${d.endowment_b}B (FY${d.endowment_fy})</span></div>`
        +`<div class="row"><span>R&D (FY24)</span><span>${d.rd_expenditure_b!=null?'$'+d.rd_expenditure_b+'B'+(d.rd_approx?'*':''):'—'}</span></div>`
@@ -454,8 +462,8 @@ function renderBars(){
     .filter(r=>r.tot>0).sort((a,b)=>b.tot-a.tot);
   const max = rows[0].tot;
   document.getElementById('bar-hint').textContent = barMode==='h100e'
-    ? 'Bar length = H100-equivalent compute; older GPUs are discounted, so legacy fleets look small'
-    : 'Bar length = raw GPU count; reveals legacy hardware (e.g. old V100 fleets) the H100e view hides';
+    ? 'Bar length = H100 price-equivalent (value-based, value ÷ $35k — NOT performance); older GPUs are discounted, so legacy fleets look small'
+    : 'Bar length = raw physical GPU count; reveals legacy hardware (e.g. old V100 fleets) the price-weighted view hides';
   document.getElementById('bars').innerHTML = rows.map(r=>{
     const segs = GO.filter(g=>r.segs[g]>0).map(g=>
       `<div class="bar-seg" style="width:${r.segs[g]/max*100}%;background:var(--gen-${g})" `
@@ -529,7 +537,7 @@ function drawTimeline(){
 const COLS = [
   {k:'name', t:'School', num:false},
   {k:'_gpus', t:'Owned GPUs', num:true},
-  {k:'_h100e', t:'H100-equiv', num:true},
+  {k:'_h100e', t:'H100 price-eq', num:true},
   {k:'endowment_b', t:'Endow $B', num:true},
   {k:'_reEndow', t:'H100e / $B', num:true},
   {k:'rd_expenditure_b', t:'R&D $B', num:true},
