@@ -103,7 +103,20 @@
   .bar-track { height: 16px; border-radius: 4px; background: var(--chip); display: flex; overflow: hidden; }
   .bar-seg { height: 100%; cursor: pointer; }
   .bar-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-primary); }
-  @media (max-width: 640px) { .bar-row { grid-template-columns: 120px 1fr 52px; font-size: 11px; } }
+  .bars.rank .bar-row { grid-template-columns: 180px 1fr 92px; }
+  .bars.regime .bar-row { grid-template-columns: 206px 1fr 118px; }
+  @media (max-width: 640px) {
+    .bar-row { grid-template-columns: 116px 1fr 52px; font-size: 11px; }
+    .bars.rank .bar-row { grid-template-columns: 100px 1fr 58px; }
+    .bars.regime .bar-row { grid-template-columns: 104px 1fr 58px; }
+    .bar-row .bar-val .flag { display: none; }
+    .legend { font-size: 11px; gap: 5px 12px; }
+    .wrap { padding: 20px 14px 60px; }
+    .card { padding: 14px 12px; }
+    /* dense SVG charts stay legible by scrolling horizontally inside their card */
+    .chart-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .chart-scroll svg { min-width: 580px; }
+  }
 
   .tooltip { position: fixed; pointer-events: none; z-index: 20; opacity: 0;
     background: var(--surface); border: 1px solid var(--border);
@@ -203,7 +216,7 @@
       </div>
       <div class="chart-head"><div class="legend" id="fin-legend"></div>
         <div class="hint" id="fin-hint"></div></div>
-      <div id="finance"></div>
+      <div id="finance" class="chart-scroll"></div>
     </div>
   </section>
 
@@ -215,7 +228,7 @@
       <div class="legend" id="herd-rank-legend"></div>
       <div class="hint" style="margin-bottom:10px">Documented GPUs (lower bound) — 50 top-R&amp;D universities, ranked by
         documented capacity.</div>
-      <div class="bars" id="herd-ranking"></div>
+      <div class="bars rank" id="herd-ranking"></div>
     </div>
     <p class="sub" style="margin:24px 0 6px">Documented GPU capacity by generation — all 41 documented HERD-50 universities,
       reconciled to the same totals used everywhere else. Generation is assigned <em>only</em> where model-level cluster
@@ -247,7 +260,7 @@
       <a href="https://github.com/jryck/university-ai-compute/blob/main/DATA_INSIGHT_DRAFT.md" target="_blank" rel="noopener">DATA_INSIGHT_DRAFT.md</a>.</p>
     <div class="card">
       <div class="legend" id="ctrl-legend" style="margin-bottom:12px"></div>
-      <div class="bars" id="research-bars"></div>
+      <div class="bars regime" id="research-bars"></div>
     </div>
   </section>
 
@@ -267,7 +280,7 @@
     <div class="card">
       <div class="chart-head"><div class="legend" id="gen-legend"></div>
         <div class="hint">Marquee announced systems · dot size = GPUs added · hover for detail</div></div>
-      <div id="timeline"></div>
+      <div id="timeline" class="chart-scroll"></div>
     </div>
     <p class="sub" style="margin:24px 0 6px">National labs in the university orbit — context only, <em>not</em> counted above:</p>
     <div class="tbl-wrap">
@@ -741,7 +754,7 @@ function renderResearch(){
     const label = r.documented_gpus>0
       ? `≥${fmt(r.documented_gpus)}${(r.central_allocatable_gpus!==''&&r.central_allocatable_gpus!=='unknown'&&!/national|state/.test(r.scheduling_control))?` <span class="flag">${fmt(+r.central_allocatable_gpus)} ctrl</span>`:''}`
       : `<span style="color:var(--muted)">not published</span>`;
-    return `<div class="bar-row" style="grid-template-columns:210px 1fr 120px">`
+    return `<div class="bar-row">`
       +`<div class="blabel" title="${r.scheduling_control} · idle sharing: ${r.idle_sharing}">#${r.rd_rank} ${shortName(r.institution)}${idle}</div>`
       +`<div class="bar-track">${bars}</div>`
       +`<div class="bar-val">${label}</div></div>`;
@@ -846,7 +859,7 @@ function renderHerdRanking(){
       ? `<div class="bar-seg" style="width:${Math.max(r.documented_gpus/max*100,0.6)}%;background:${c};${hatch}" data-t="${shortName(r.institution)} · ≥${fmt(r.documented_gpus)} documented GPUs${agg?' (aggregate / not per-model)':''} · ${r.control_model}"></div>`
       : `<div class="bar-seg" style="width:4px;background:var(--border)" data-t="${shortName(r.institution)} · count not published"></div>`;
     const val = r.documented_gpus>0 ? `≥${fmt(r.documented_gpus)}${agg?' <span class="flag">agg</span>':''}` : `<span style="color:var(--muted)">not published</span>`;
-    return `<div class="bar-row" style="grid-template-columns:180px 1fr 96px">`
+    return `<div class="bar-row">`
       +`<div class="blabel" title="${r.institution} · ${r.control_model}">#${r.rank} ${shortName(r.institution)}</div>`
       +`<div class="bar-track">${bar}</div>`
       +`<div class="bar-val">${val}</div></div>`;
