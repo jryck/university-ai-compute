@@ -196,6 +196,10 @@
           <button data-n="all" class="on">All documented</button>
           <button data-n="exfac">Exclude NSF/state facilities</button>
         </div>
+        <div class="seg" id="finref-seg">
+          <button data-r="hide" class="on">HERD-50 only</button>
+          <button data-r="show">+ reference schools</button>
+        </div>
       </div>
       <div class="chart-head"><div class="legend" id="fin-legend"></div>
         <div class="hint" id="fin-hint"></div></div>
@@ -290,6 +294,12 @@
       tracked separately. "H100 price-equivalent" (used only in the generation chart) is a value proxy (est. value ÷ $35k),
       <em>not</em> a performance measure. Financial comparisons are exploratory and do not establish causation or
       under-investment.</p>
+    <p class="sub" style="margin-bottom:12px"><b>Reference schools.</b> A few notable endowment-heavy universities fall
+      outside the HERD top-50 because their total R&amp;D is below the rank-50 cutoff (e.g. Princeton ≥612 documented GPUs,
+      $36B endowment; Rice ≥160, $8.5B). They can be toggled onto the scatter as clearly-marked reference points but are
+      <b>excluded from every correlation and aggregate statistic</b>, which use the HERD-50 sample only. Notre Dame and the
+      University of Chicago are similarly endowment-heavy outsiders but publish no GPU count, so they are listed as
+      unresolved rather than plotted (<a href="https://github.com/jryck/university-ai-compute/blob/main/reference_points.csv" target="_blank" rel="noopener">reference_points.csv</a>).</p>
     <p class="sub" style="margin-bottom:12px"><b>Data-quality audit.</b> A 10-university pilot was verified against primary
       sources, surfacing substantial, non-uniform errors in legacy third-party estimates (duplicate accelerators, cloud counted
       as owned, planned/decommissioned hardware counted as current, MIG partitions as physical GPUs). Corrections are reflected
@@ -717,8 +727,9 @@ function renderResearch(){
 }
 
 /* ---- HERD-50 financial scatter (documented GPUs vs R&D / endowment) ---- */
-let finMode='rd', finNat='all';
+let finMode='rd', finNat='all', finRef='hide';
 const SECTOR_COLORS = {Public:'#2a78d6', Private:'#1baf7a', Medical:'#eda100'};
+const REF_COLOR='#898781';
 const isFacility = r => /national|state facility/i.test(r.control_model||'');
 function renderFinance(){
   const h = (PAYLOAD.herd50||[]);
@@ -727,13 +738,20 @@ function renderFinance(){
   const unresolved = h.filter(r=>r.documented_gpus===0).length;
   let exfacN = 0;
   if(finNat==='exfac'){ const before=pts.length; pts = pts.filter(r=>!isFacility(r)); exfacN = before-pts.length; }
+  // optional reference points — outside HERD-50, excluded from all stats
+  const refAll = PAYLOAD.reference_points||[];
+  const refPts = finRef==='show' ? refAll.filter(r=>r.documented_gpus>0 && xf(r)) : [];
+  const refUnres = refAll.filter(r=>r.documented_gpus===0).map(r=>shortName(r.institution));
   document.getElementById('fin-legend').innerHTML = Object.entries(SECTOR_COLORS).map(([k,c])=>
-    `<span><i class="dot" style="background:${c}"></i>${k}</span>`).join('');
+    `<span><i class="dot" style="background:${c}"></i>${k}</span>`).join('')
+    + (finRef==='show' ? `<span><i class="dot" style="background:none;border:1.5px dashed ${REF_COLOR}"></i>Reference (outside HERD-50)</span>` : '');
   document.getElementById('fin-hint').textContent =
     `log–log · documented GPUs are lower bounds · ${unresolved} unresolved excluded`
-    + (finNat==='exfac' ? ` · ${exfacN} NSF/state facilities excluded` : '') + ` · hover for detail`;
+    + (finNat==='exfac' ? ` · ${exfacN} NSF/state facilities excluded` : '')
+    + (finRef==='show' ? ` · reference schools shown (not in correlations)${refUnres.length?` · ${refUnres.join(', ')}: no published count`:''}` : '') + ` · hover for detail`;
   const W=1080,H=520,m={t:18,r:24,b:52,l:60}, iw=W-m.l-m.r, ih=H-m.t-m.b, lx=v=>Math.log10(v);
-  const xs=pts.map(xf), ys=pts.map(r=>r.documented_gpus);
+  const dom=pts.concat(refPts);
+  const xs=dom.map(xf), ys=dom.map(r=>r.documented_gpus);
   const x0=Math.floor(lx(Math.min(...xs))),x1=Math.ceil(lx(Math.max(...xs)));
   const y0=Math.floor(lx(Math.min(...ys))),y1=Math.ceil(lx(Math.max(...ys)));
   const X=v=>m.l+(lx(v)-x0)/(x1-x0)*iw, Y=v=>m.t+ih-(lx(v)-y0)/(y1-y0)*ih;
@@ -747,7 +765,18 @@ function renderFinance(){
   pts.forEach(r=>{const c=SECTOR_COLORS[r.sector]||'#898781'; const rad=5+Math.sqrt(r.documented_gpus)/10;
     g+=`<circle class="pt" cx="${X(xf(r))}" cy="${Y(r.documented_gpus)}" r="${rad}" fill="${c}" data-i="${PAYLOAD.herd50.indexOf(r)}"/>`;
     if(labelSet.has(r.institution)) g+=`<text class="pt-label" x="${X(xf(r))+rad+4}" y="${Y(r.documented_gpus)+4}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${shortName(r.institution)}</text>`;});
+  // reference points — hollow dashed diamonds, always labeled, visually distinct from the HERD-50 sample
+  refPts.forEach(r=>{const cx=X(xf(r)),cy=Y(r.documented_gpus),s=7;
+    g+=`<rect class="refpt" x="${cx-s}" y="${cy-s}" width="${s*2}" height="${s*2}" transform="rotate(45 ${cx} ${cy})" fill="var(--surface)" stroke="${REF_COLOR}" stroke-width="1.5" stroke-dasharray="3 2" data-ri="${refAll.indexOf(r)}"/>`;
+    g+=`<text class="pt-label" x="${cx+s+5}" y="${cy+4}" paint-order="stroke" stroke="var(--surface)" stroke-width="3" fill="${REF_COLOR}">${shortName(r.institution)}</text>`;});
   document.getElementById('finance').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Documented GPUs vs financial resources">${g}</svg>`;
+  document.querySelectorAll('#finance .refpt').forEach(el=>{el.addEventListener('mousemove',e=>{const r=refAll[+el.dataset.ri];
+    showTip(`<b>${r.institution}</b> <span style="color:var(--muted)">· reference, outside NSF HERD top-50</span>`
+    +`<div class="row"><span>Documented GPUs</span><span>≥${fmt(r.documented_gpus)} (${r.count_type})</span></div>`
+    +`<div class="row"><span>R&D</span><span>$${(r.rd_fy2024_m/1000).toFixed(1)}B</span></div>`
+    +`<div class="row"><span>Endowment</span><span>${r.endowment_b?'$'+r.endowment_b+'B':'—'}</span></div>`
+    +`<div class="row"><span>Note</span><span>excluded from all correlations &amp; totals</span></div>`,e.clientX,e.clientY);});
+    el.addEventListener('mouseleave',hideTip);});
   document.querySelectorAll('#finance .pt').forEach(el=>{el.addEventListener('mousemove',e=>{const r=PAYLOAD.herd50[+el.dataset.i];
     showTip(`<b>${r.institution}</b> (#${r.rank} R&D)<div class="row"><span>Sector</span><span>${r.sector}</span></div>`
     +`<div class="row"><span>Documented GPUs</span><span>≥${fmt(r.documented_gpus)} (${r.count_type})</span></div>`
@@ -762,6 +791,9 @@ document.querySelectorAll('#fin-seg button').forEach(b=>b.onclick=()=>{
 document.querySelectorAll('#finfac-seg button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#finfac-seg button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); finNat=b.dataset.n; renderFinance();});
+document.querySelectorAll('#finref-seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#finref-seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); finRef=b.dataset.r; renderFinance();});
 
 /* ---- Distribution: HERD-50 documented-GPU ranking ---- */
 function renderHerdRanking(){

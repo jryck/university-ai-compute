@@ -1,0 +1,5 @@
+institution,sector,rd_fy2024_m,endowment_b,documented_gpus,count_type,control_model,key_systems,primary_source,completeness
+Princeton University,Private,559,36.42,612,lower_bound,Central + PLI priority,Della (336 H100 + 276 A100) + GH200 + H200 (PLI),researchcomputing.princeton.edu/systems/della,partial
+Rice University,Private,278,8.50,160,lower_bound,Central (RANGE + NOTS),RANGE (16 H100 + 64 H200) + NOTS (32 V100 + 48 L40S),researchcomputing.rice.edu/high-performance-computing-resources,partial
+University of Notre Dame,Private,346,20.09,0,unresolved,Central (CRC),CRC clusters (count not published),crc.nd.edu,unknown
+University of Chicago,Private,681,10.62,0,unresolved,Central (RCC Midway3),Midway3 (A100/V100/RTX6000; count not published),rcc.uchicago.edu/support-and-services/midway3,unknown

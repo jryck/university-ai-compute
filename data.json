@@ -5587,5 +5587,55 @@
     "n_documented": 41,
     "n_total": 50,
     "total_documented_gpus": 17808
-  }
+  },
+  "reference_points": [
+    {
+      "institution": "Princeton University",
+      "sector": "Private",
+      "rd_fy2024_m": 559.0,
+      "endowment_b": 36.42,
+      "documented_gpus": 612,
+      "count_type": "lower_bound",
+      "control_model": "Central + PLI priority",
+      "key_systems": "Della (336 H100 + 276 A100) + GH200 + H200 (PLI)",
+      "primary_source": "researchcomputing.princeton.edu/systems/della",
+      "completeness": "partial"
+    },
+    {
+      "institution": "Rice University",
+      "sector": "Private",
+      "rd_fy2024_m": 278.0,
+      "endowment_b": 8.5,
+      "documented_gpus": 160,
+      "count_type": "lower_bound",
+      "control_model": "Central (RANGE + NOTS)",
+      "key_systems": "RANGE (16 H100 + 64 H200) + NOTS (32 V100 + 48 L40S)",
+      "primary_source": "researchcomputing.rice.edu/high-performance-computing-resources",
+      "completeness": "partial"
+    },
+    {
+      "institution": "University of Notre Dame",
+      "sector": "Private",
+      "rd_fy2024_m": 346.0,
+      "endowment_b": 20.09,
+      "documented_gpus": 0,
+      "count_type": "unresolved",
+      "control_model": "Central (CRC)",
+      "key_systems": "CRC clusters (count not published)",
+      "primary_source": "crc.nd.edu",
+      "completeness": "unknown"
+    },
+    {
+      "institution": "University of Chicago",
+      "sector": "Private",
+      "rd_fy2024_m": 681.0,
+      "endowment_b": 10.62,
+      "documented_gpus": 0,
+      "count_type": "unresolved",
+      "control_model": "Central (RCC Midway3)",
+      "key_systems": "Midway3 (A100/V100/RTX6000; count not published)",
+      "primary_source": "rcc.uchicago.edu/support-and-services/midway3",
+      "completeness": "unknown"
+    }
+  ]
 }

@@ -629,10 +629,22 @@ def main():
             rr['documented_gpus'] = int(rr['documented_gpus'] or 0)
             research_subset.append(rr)
 
+    # Reference points: notable endowment-heavy schools OUTSIDE the NSF HERD top-50.
+    # Shown only as optional, clearly-labeled markers on the scatter; never included
+    # in any headline correlation or aggregate statistic (those use herd50 only).
+    reference_points = []
+    if os.path.exists('reference_points.csv'):
+        for rp in csv.DictReader(open('reference_points.csv')):
+            rp['rd_fy2024_m'] = float(rp['rd_fy2024_m'] or 0)
+            rp['endowment_b'] = float(rp['endowment_b']) if rp['endowment_b'] else None
+            rp['documented_gpus'] = int(rp['documented_gpus'] or 0)
+            reference_points.append(rp)
+
     payload = {'meta': meta, 'schools': out, 'milestones': milestones,
                'generations': gens, 'national_labs': national_labs,
                'funding_models': FUNDING_MODELS, 'gens_order': GENS_ORDER,
-               'research_subset': research_subset, 'herd50': herd50, 'headline': headline}
+               'research_subset': research_subset, 'herd50': herd50, 'headline': headline,
+               'reference_points': reference_points}
     json.dump(payload, open('data.json', 'w'), indent=2)
 
     # archive a dated snapshot so the per-school series accumulates over rebuilds.
