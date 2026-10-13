@@ -382,8 +382,7 @@ document.getElementById('headline-tiles').innerHTML = [
 document.getElementById('headline-takeaway').innerHTML =
   `University wealth and research spending are <b>surprisingly weak predictors</b> of documented AI-computing capacity — both correlations sit near zero. `
   +`And that capacity is <b>unevenly concentrated</b>: the ten largest documented fleets hold ${HL.top10_gpu_share}% of documented GPUs. `
-  +`This reflects differing research priorities, financing, and sources of access — it is <em>not</em> evidence of deliberate under-investment. `
-  +`<em>Exploratory relationships involving documented GPU capacity (Pearson correlations on lower bounds, n=${HL.corr_rd_n} of ${HL.n_total}; the ${HL.n_total-HL.n_documented} schools with no published count are excluded), not comprehensive inventories.</em>`;
+  +`This reflects differing research priorities, financing, and sources of access.`;
 const docN = H50.filter(h=>h.documented_gpus>0).length;
 document.getElementById('tiles').innerHTML = [
   ['50', 'top universities by R&D (NSF HERD FY2024)'],
