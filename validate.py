@@ -53,7 +53,8 @@ def reaggregate(path='clusters.csv'):
 
 def main():
     U = reaggregate()
-    data = {x['name']: x for x in json.load(open('data.json'))['schools']}
+    PAYLOAD = json.load(open('data.json'))
+    data = {x['name']: x for x in PAYLOAD['schools']}
 
     # (1,10) data.json reproduces the independent recompute for every clustered school
     for uni, u in U.items():
@@ -137,6 +138,49 @@ def main():
             check(r['primary_source'].strip() != '', f"[research] {r['institution']}: missing primary_source")
             check(r['count_type'] in ('verified', 'verified_lower_bound', 'aggregate', 'unresolved'),
                   f"[research] {r['institution']}: bad count_type {r['count_type']}")
+
+    # [recon] ONE authoritative universe — the same documented total everywhere.
+    herd = {h['institution']: h for h in PAYLOAD.get('herd50', [])}
+    gen = {e['name']: e for e in PAYLOAD.get('gen_chart', [])}
+    hl = PAYLOAD.get('headline', {})
+
+    # gen_chart reconciles exactly to the HERD-50 documented universe
+    documented_herd = [h for h in herd.values() if h['documented_gpus'] > 0]
+    check(len(gen) == len(documented_herd),
+          f"[recon] gen_chart has {len(gen)} entries, {len(documented_herd)} herd50 documented")
+    check(sum(e['documented'] for e in gen.values()) == hl.get('total_documented_gpus'),
+          "[recon] gen_chart documented sum != headline total_documented_gpus")
+    for name, e in gen.items():
+        h = herd.get(name)
+        check(h is not None, f"[recon] gen_chart {name} not in herd50")
+        check(e['documented'] == (h['documented_gpus'] if h else None),
+              f"[recon] {name}: gen_chart documented {e['documented']} != herd50 {h and h['documented_gpus']}")
+        check(e['classified_count'] + e['unknown_count'] == e['documented'],
+              f"[recon] {name}: classified+unknown {e['classified_count']}+{e['unknown_count']} != documented {e['documented']}")
+        check(e['classified_count'] <= e['documented'],
+              f"[recon] {name}: classified {e['classified_count']} > documented {e['documented']}")
+        # generations assigned only where model-level evidence exists
+        if not e['has_model_evidence']:
+            check(e['classified_count'] == 0,
+                  f"[recon] {name}: has generation counts without model-level evidence")
+
+    # research_subset (allocation-regime chart) uses the SAME documented totals as herd50
+    for r in PAYLOAD.get('research_subset', []):
+        h = herd.get(r['institution'])
+        if h:
+            check(int(r['documented_gpus'] or 0) == h['documented_gpus'],
+                  f"[recon] research_subset {r['institution']} documented {r['documented_gpus']} != herd50 {h['documented_gpus']}")
+
+    # named cross-chart test schools: identical documented total in every structure
+    for name, exp in [('Massachusetts Institute of Technology', 1448), ('New York University', 1276),
+                      ('Harvard University', 1144), ('University of Illinois Urbana-Champaign', 1650),
+                      ('Cornell University', 755)]:
+        check(herd.get(name, {}).get('documented_gpus') == exp, f"[recon] herd50 {name} != {exp}")
+        check(gen.get(name, {}).get('documented') == exp, f"[recon] gen_chart {name} != {exp}")
+
+    # reference points are NEVER folded into HERD-50 figures
+    for rp in PAYLOAD.get('reference_points', []):
+        check(rp['institution'] not in herd, f"[recon] reference point {rp['institution']} leaked into herd50")
 
     if FAILS:
         print(f"VALIDATION FAILED — {len(FAILS)} issue(s):")

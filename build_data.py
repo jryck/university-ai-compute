@@ -9,6 +9,7 @@ embedded into index.html.
 import csv
 import json
 import os
+import re
 
 GPU_MODELS = ['H100_SXM', 'H100_PCIe', 'H200', 'A100_80GB', 'A100_40GB',
               'B200', 'B100', 'Rubin', 'A40', 'RTX_A6000', 'L40S',
@@ -548,29 +549,29 @@ def main():
         out.append(rec)
 
     meta = {
-        'title': 'The State of US University AI Compute',
-        'sampling_method': 'Top 50 by documented GPU inventory in the GPUs Per Student dataset (NOT an NSF-R&D-defined "top 50 research universities"). Migration to an R&D-defined universe + source-verified inventory is in progress.',
-        'gpu_data_asof': 'Legacy inventory: late 2025 / early 2026 (gpusperstudent.org + TOP500 Nov 2025). Audited records (Illinois, UT Austin, Harvard, CMU, Oregon State + pilot) verified against primary sources, Oct 2026.',
-        'metric_note': 'H100 price-equivalent = estimated GPU market value / $35,000 (a PRICE proxy, NOT performance). Physical GPU count is the primary unit. No performance normalization is claimed.',
+        'title': 'University AI Compute',
+        'sampling_method': 'The 50 highest-R&D US universities (NSF HERD FY2024), defined independently of GPU holdings (herd50.csv). This is the single authoritative universe for all rankings, financial comparisons, summary figures, and the hardware-generation chart. The legacy GPUs-Per-Student-derived set (raw_gpus.csv) is retained only for historical comparison / data discovery and never combined with the authoritative counts.',
+        'gpu_data_asof': 'Documented capacity collected from primary sources (university research-computing docs, NSF/DOE facility pages, official announcements), verified through Oct 2026. All figures are documented lower bounds.',
+        'metric_note': 'Physical GPU count is the primary unit; the same documented total is used for a given university across every chart and table. "H100 price-equivalent" (generation chart, value view only) = estimated GPU market value / $35,000 — a PRICE proxy, NOT performance, and shown only for GPUs whose generation is documented.',
         'endowment_data_asof': 'FY2025 (year ending ~June 30 2025) where reported; FY2024 for a few smaller schools',
-        'built': '2026-10-11',
-        'n_schools': len(out),
-        'gpu_source': 'LEGACY candidate source: gpusperstudent.org (master_data.csv). Being replaced by independently source-verified cluster records (clusters.csv); see PILOT_AUDIT.md.',
+        'built': '2026-10-12',
+        'n_schools_legacy': len(out),
+        'gpu_source': 'AUTHORITATIVE: herd50.csv (documented lower bounds) + independently documented cluster records (clusters.csv) for model-level / generation evidence. LEGACY (discovery only, never in headline figures): gpusperstudent.org via raw_gpus.csv.',
         'endowment_source': '2025 NACUBO-Commonfund Study; statranker/altss FY2025 compilations; university treasury reports',
         'rd_source': 'NSF HERD survey, FY2024 (total R&D expenditures; year ending ~June 30 2024)',
         'rd_data_asof': 'FY2024 (NSF HERD, released Nov 2025)',
         'alloc_source': 'DOE INCITE 2025 + ALCC 2025 — both complete across all facilities (Frontier/Aurora/Polaris/Perlmutter), parsed from the official ASCR/INCITE fact-sheet PDFs; NAIRR pilot project counts (nairrpilot.org awards CSV, 1,212 awards)',
         'alloc_caveat': 'Leadership node-hours = INCITE 2025 + ALCC 2025, both complete across all leadership facilities. NSF ACCESS and routine NERSC/ERCAP allocations are not quantified (no clean per-institution public totals). NAIRR is a project count (AI-specific national access), a distinct signal. Node-hours/project-counts are not comparable to owned-GPU counts.',
         'caveats': [
-            'SAMPLE: these 50 are the schools with the most documented GPU inventory in the legacy source — NOT an NSF-R&D-defined "top 50 research universities." Selection-bias fix in progress.',
-            'DATA PROVENANCE: most rows are still legacy (GPUs Per Student) candidate data, not independently verified. Audited schools (Illinois, UT Austin, Harvard, CMU, Oregon State + pilot) are corrected against primary sources; see clusters.csv and PILOT_AUDIT.md. Missing inventory ≠ zero GPUs.',
-            'H100 PRICE-EQUIVALENT = estimated GPU value / $35,000. It is a PRICE proxy, NOT a performance measure, and NOT actual institutional spending. Physical GPU count is the primary unit.',
-            'PLANNED and RESERVED-CLOUD capacity are excluded from operational owned totals and tracked separately (e.g., Oregon State 150 Rubin = under construction to 2027; CMU 296 H100 = Google Cloud reserved, not owned).',
-            'FUNDING source defaults to "Unknown / not verified" unless documented against a primary source. Unknown is NOT counted as institutional.',
-            'Ownership tiers: institutional vs NSF national facility (TACC/Illinois NCSA/TAMU ACES) are distinct. National labs a university merely operates/neighbors (NERSC, Frontier, Aurora...) are a separate context layer, never summed in.',
-            'Grace Hopper double-counting (listed under both H100 and GH200) corrected at the per-model level for Illinois and UT Austin; all aggregates reconcile to non-overlapping hardware counts.',
-            'National access = DOE INCITE 2025 + ALCC 2025 (complete, all leadership facilities) + NAIRR project counts. NSF ACCESS and routine NERSC/ERCAP not quantified; absence ≠ no access. Node-hours/project-counts are distinct units from GPU counts.',
-            'Public-university endowments are often reported at SYSTEM level (Texas A&M, U of Alabama), inflating per-campus figures; flagged in the endowment note.',
+            'SAMPLE: the 50 highest-R&D US universities (NSF HERD FY2024), defined independently of GPU holdings. 41 of 50 have documented capacity; 9 are unresolved (no public count) and never set to zero.',
+            'ONE AUTHORITATIVE UNIVERSE: every ranking, scatter, summary tile, table, and the generation chart uses the herd50.csv documented lower bounds; a given university shows the SAME documented total everywhere. Legacy GPUs-Per-Student data is retained separately (data.json "schools") for discovery only and is never combined with these counts.',
+            'GENERATION CHART: GPU generations are assigned ONLY where model-level cluster evidence exists (clusters.csv; 8 of 41 documented schools). Aggregate-only capacity is shown as "Generation unknown," never omitted and never given an invented breakdown.',
+            'H100 PRICE-EQUIVALENT = estimated GPU value / $35,000. It is a PRICE proxy, NOT a performance measure, and NOT actual institutional spending. Shown only for generation-documented GPUs.',
+            'PLANNED and RESERVED-CLOUD capacity are excluded from documented totals and tracked separately.',
+            'OWNERSHIP ≠ ACCESS ≠ FUNDING: legal ownership, funding, operation, and scheduling control are tracked separately. Funding defaults to "unknown," never inferred as institutional.',
+            'NSF/state national facilities (TACC, Illinois NCSA, SDSC, OSC, PSC, Anvil) are distinct from institutional hardware; national labs a university merely operates/neighbors (NERSC, Frontier...) are a separate context layer, never summed in.',
+            'Correlations are exploratory Pearson on documented lower bounds; association, not causation, and not evidence of under-investment.',
+            'Public-university endowments are sometimes reported at SYSTEM level (Texas A&M), inflating per-campus figures; flagged in the endowment note.',
         ],
     }
 
@@ -594,6 +595,8 @@ def main():
             h['endowment_b'] = float(h['endowment_b']) if h['endowment_b'] else None
             h['documented_gpus'] = int(h['documented_gpus'] or 0)
             herd50.append(h)
+    meta['n_herd50'] = len(herd50)
+    meta['n_documented'] = len([h for h in herd50 if h['documented_gpus'] > 0])
 
     # headline metrics, recomputed from herd50 (reproducible, not hardcoded)
     def _corr(xs, ys):
@@ -629,6 +632,51 @@ def main():
             rr['documented_gpus'] = int(rr['documented_gpus'] or 0)
             research_subset.append(rr)
 
+    # Generation chart, reconciled to the authoritative HERD-50 documented capacity.
+    # classified = model-level generation evidence from independently documented cluster
+    # records ONLY (verified/partial pilot schools; never raw_gpus legacy estimates);
+    # the remainder up to the HERD-50 documented total is "Generation unknown"
+    # (aggregate-only capacity — never omitted, never given an invented breakdown).
+    def _norm(s):
+        s = s.lower().replace('(mit)', '').replace('(uiuc)', '')
+        s = s.replace('—', '-').replace('–', '-')
+        return re.sub(r'[^a-z0-9]+', ' ', s).strip()
+
+    _GEN_ALIAS = {
+        'university of texas austin': 'university of texas at austin',
+        'university of washington': 'university of washington seattle',
+    }
+    audited_gen = {}
+    for s in out:
+        if s['verification'] in ('verified', 'partial'):
+            k = _norm(s['name'])
+            audited_gen[_GEN_ALIAS.get(k, k)] = {'gen_count': s['gen_count'], 'gen_h100e': s['gen_h100e']}
+
+    gen_chart = []
+    for h in herd50:
+        if h['documented_gpus'] <= 0:
+            continue
+        k = _norm(h['institution'])
+        a = audited_gen.get(_GEN_ALIAS.get(k, k))
+        gc = {g: (a['gen_count'].get(g, 0) if a else 0) for g in GENS_ORDER}
+        gh = {g: (a['gen_h100e'].get(g, 0) if a else 0) for g in GENS_ORDER}
+        classified = sum(gc.values())
+        # model-level evidence must never exceed the authoritative documented total
+        assert classified <= h['documented_gpus'], f"{h['institution']}: classified {classified} > documented {h['documented_gpus']}"
+        gen_chart.append({
+            'name': h['institution'],
+            'sector': h['sector'],
+            'documented': h['documented_gpus'],
+            'count_type': h['count_type'],
+            'completeness': h['completeness'],
+            'gen_count': gc,
+            'gen_h100e': gh,
+            'classified_count': classified,
+            'classified_h100e': round(sum(gh.values()), 1),
+            'unknown_count': h['documented_gpus'] - classified,
+            'has_model_evidence': bool(a),
+        })
+
     # Reference points: notable endowment-heavy schools OUTSIDE the NSF HERD top-50.
     # Shown only as optional, clearly-labeled markers on the scatter; never included
     # in any headline correlation or aggregate statistic (those use herd50 only).
@@ -644,7 +692,8 @@ def main():
                'generations': gens, 'national_labs': national_labs,
                'funding_models': FUNDING_MODELS, 'gens_order': GENS_ORDER,
                'research_subset': research_subset, 'herd50': herd50, 'headline': headline,
-               'reference_points': reference_points}
+               'reference_points': reference_points, 'gen_chart': gen_chart,
+               'schools_note': 'LEGACY (GPUs-Per-Student-derived) data, retained for historical comparison / data discovery ONLY. Not used in any headline figure, ranking, or chart. Authoritative counts live in herd50 / gen_chart.'}
     json.dump(payload, open('data.json', 'w'), indent=2)
 
     # archive a dated snapshot so the per-school series accumulates over rebuilds.

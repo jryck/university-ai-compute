@@ -216,14 +216,15 @@
         documented capacity. Colored by sector; hatched = aggregate / not per-model; not-published shown as a marker.</div>
       <div class="bars" id="herd-ranking"></div>
     </div>
-    <p class="sub" style="margin:24px 0 6px">Fleet composition by GPU generation — <em>audited subset</em> (schools with
-      per-model primary-source inventories):</p>
+    <p class="sub" style="margin:24px 0 6px">Documented GPU capacity by generation — all 41 documented HERD-50 universities,
+      reconciled to the same totals used everywhere else. Generation is assigned <em>only</em> where model-level cluster
+      evidence exists (8 schools); the rest is documented but aggregate-only, shown as <em>Generation unknown</em>:</p>
     <div class="card">
       <div class="chart-head">
         <div class="legend" id="bar-legend"></div>
         <div class="seg" id="barmode-seg">
-          <button data-m="h100e" class="on">H100 price-equivalent</button>
-          <button data-m="count">GPU count</button>
+          <button data-m="count" class="on">GPU count</button>
+          <button data-m="h100e">H100 price-equivalent</button>
         </div>
       </div>
       <div class="hint" id="bar-hint" style="text-align:right;margin-bottom:10px"></div>
@@ -294,6 +295,19 @@
       tracked separately. "H100 price-equivalent" (used only in the generation chart) is a value proxy (est. value ÷ $35k),
       <em>not</em> a performance measure. Financial comparisons are exploratory and do not establish causation or
       under-investment.</p>
+    <p class="sub" style="margin-bottom:12px"><b>One authoritative pipeline.</b> Every ranking, financial comparison, summary
+      figure, table, and the generation chart draws on a single source: the HERD-50 documented lower bounds
+      (<a href="https://github.com/jryck/university-ai-compute/blob/main/herd50.csv" target="_blank" rel="noopener">herd50.csv</a>)
+      plus independently documented cluster records
+      (<a href="https://github.com/jryck/university-ai-compute/blob/main/clusters.csv" target="_blank" rel="noopener">clusters.csv</a>).
+      A given university therefore reports the <b>same documented total everywhere</b> (e.g. MIT ≥1,448, NYU ≥1,276,
+      Harvard ≥1,144, Illinois ≥1,650, Cornell ≥755). The legacy GPUs-Per-Student-derived estimates are kept only for
+      historical comparison and data discovery and are <b>never combined</b> with these counts.
+      In the generation chart, GPU generations are assigned <b>only where model-level cluster evidence exists</b>
+      (8 of the 41 documented schools); the remaining documented capacity is aggregate-only and shown as
+      <em>"Generation unknown,"</em> never omitted and never given an invented breakdown. Of the 41 documented schools,
+      4 are single-source verified, ~4 more have model-level inventories, and the rest are lower bounds or aggregate-only
+      (see each row's <em>count type</em> in the explorer).</p>
     <p class="sub" style="margin-bottom:12px"><b>Reference schools.</b> A few notable endowment-heavy universities fall
       outside the HERD top-50 because their total R&amp;D is below the rank-50 cutoff (e.g. Princeton ≥612 documented GPUs,
       $36B endowment; Rice ≥160, $8.5B). They are shown on the scatter by default as clearly-marked reference points (toggle "HERD-50 only" to hide
@@ -480,25 +494,36 @@ function drawScatter(){
   });
 }
 
-/* ---- owned compute by generation (stacked bars) ---- */
-let barMode='h100e';
-document.getElementById('bar-legend').innerHTML = (PAYLOAD.gens_order||[]).map(g=>
-  `<span><i class="genkey" style="background:var(--gen-${g})"></i>${g}</span>`).join('');
+/* ---- documented GPU capacity by generation (reconciled to HERD-50) ---- */
+let barMode='count';
+const UNKNOWN_HATCH='background-color:#b8b6ad;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.5) 0 2px,transparent 2px 5px)';
 function renderBars(){
-  const GO=PAYLOAD.gens_order, key = barMode==='h100e'?'gen_h100e':'gen_count';
-  const rows = DATA.map(d=>({d, segs:d[key], tot:GO.reduce((a,g)=>a+d[key][g],0)}))
-    .filter(r=>r.tot>0).sort((a,b)=>b.tot-a.tot);
-  const max = rows[0].tot;
+  const GO=PAYLOAD.gens_order, GC=PAYLOAD.gen_chart||[];
+  // legend: generations (+ "Generation unknown" in count view)
+  document.getElementById('bar-legend').innerHTML = GO.map(g=>
+    `<span><i class="genkey" style="background:var(--gen-${g})"></i>${g}</span>`).join('')
+    + (barMode==='count' ? `<span><i class="genkey" style="${UNKNOWN_HATCH}"></i>Generation unknown</span>` : '');
+  const rows = GC.map(e=>{
+    const segs = GO.filter(g=>e[barMode==='h100e'?'gen_h100e':'gen_count'][g]>0)
+      .map(g=>[g, e[barMode==='h100e'?'gen_h100e':'gen_count'][g]]);
+    const unknown = barMode==='count' ? e.unknown_count : 0;
+    const tot = barMode==='h100e' ? e.classified_h100e : e.documented;
+    return {e, segs, unknown, tot};
+  }).filter(r=>r.tot>0).sort((a,b)=>b.tot-a.tot);
+  const max = rows.length ? rows[0].tot : 1;
   document.getElementById('bar-hint').textContent = barMode==='h100e'
-    ? 'Bar length = H100 price-equivalent (value-based, value ÷ $35k — NOT performance); older GPUs are discounted, so legacy fleets look small'
-    : 'Bar length = raw physical GPU count; reveals legacy hardware (e.g. old V100 fleets) the price-weighted view hides';
+    ? 'Bar length = H100 price-equivalent (value ÷ $35k — NOT performance) of generation-documented GPUs only; GPUs with no documented generation are not valued here'
+    : 'Bar length = documented GPUs (lower bound), reconciled to the HERD-50 figures. Colored = generation from model-level cluster evidence; hatched grey = documented but aggregate-only (generation unknown)';
   document.getElementById('bars').innerHTML = rows.map(r=>{
-    const segs = GO.filter(g=>r.segs[g]>0).map(g=>
-      `<div class="bar-seg" style="width:${r.segs[g]/max*100}%;background:var(--gen-${g})" `
-      +`data-t="${shortName(r.d.name)} · ${g}: ${fmt(Math.round(r.segs[g]))}"></div>`).join('');
-    return `<div class="bar-row"><div class="blabel">${shortName(r.d.name)}</div>`
+    let segs = r.segs.map(([g,v])=>
+      `<div class="bar-seg" style="width:${v/max*100}%;background:var(--gen-${g})" `
+      +`data-t="${shortName(r.e.name)} · ${g}: ${fmt(Math.round(v))}"></div>`).join('');
+    if(r.unknown>0) segs += `<div class="bar-seg" style="width:${r.unknown/max*100}%;${UNKNOWN_HATCH}" `
+      +`data-t="${shortName(r.e.name)} · Generation unknown (aggregate-only): ${fmt(r.unknown)}${r.e.has_model_evidence?'':' · no model-level inventory published'}"></div>`;
+    const val = barMode==='count' ? `≥${fmt(r.tot)}` : fmt(Math.round(r.tot));
+    return `<div class="bar-row"><div class="blabel" title="${r.e.name} · ${r.e.count_type}">${shortName(r.e.name)}</div>`
       +`<div class="bar-track">${segs}</div>`
-      +`<div class="bar-val">${fmt(Math.round(r.tot))}</div></div>`;
+      +`<div class="bar-val">${val}</div></div>`;
   }).join('');
   document.querySelectorAll('#bars .bar-seg').forEach(el=>{
     el.addEventListener('mousemove', e=>showTip(el.dataset.t, e.clientX, e.clientY));
