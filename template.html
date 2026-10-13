@@ -223,6 +223,25 @@
   </section>
 
   <section>
+    <h2>Compute vs. financial resources (HERD top-50)</h2>
+    <p class="sub" style="margin-bottom:6px">Documented GPU capacity against research spending and endowment, across the 50
+      highest-R&amp;D US universities. <b>Research spending barely predicts documented compute</b> (correlation ≈ −0.05 with
+      R&amp;D, 0.19 with endowment) — and GPU capacity is ~2× more concentrated than R&amp;D (top-10 hold 62% of documented GPUs
+      vs 31% of R&amp;D). Exploratory: figures are documented <b>lower bounds</b>; 9 of 50 are unresolved and excluded here.</p>
+    <div class="card">
+      <div class="chart-controls">
+        <div class="seg" id="fin-seg">
+          <button data-f="rd" class="on">vs. R&amp;D spending</button>
+          <button data-f="endow">vs. Endowment</button>
+        </div>
+      </div>
+      <div class="chart-head"><div class="legend" id="fin-legend"></div>
+        <div class="hint" id="fin-hint"></div></div>
+      <div id="finance"></div>
+    </div>
+  </section>
+
+  <section>
     <h2>At a glance</h2>
     <div class="tiles" id="tiles"></div>
   </section>
@@ -754,7 +773,47 @@ function renderResearch(){
   });
 }
 
-drawScatter(); renderBars(); drawTimeline(); renderHead(); renderBody(); renderLabs(); renderResearch();
+/* ---- HERD-50 financial scatter (documented GPUs vs R&D / endowment) ---- */
+let finMode='rd';
+const SECTOR_COLORS = {Public:'#2a78d6', Private:'#1baf7a', Medical:'#eda100'};
+function renderFinance(){
+  const h = (PAYLOAD.herd50||[]);
+  const xf = finMode==='rd' ? (r=>r.rd_fy2024_m) : (r=>r.endowment_b);
+  const pts = h.filter(r=>r.documented_gpus>0 && xf(r));
+  const unresolved = h.filter(r=>r.documented_gpus===0).length;
+  document.getElementById('fin-legend').innerHTML = Object.entries(SECTOR_COLORS).map(([k,c])=>
+    `<span><i class="dot" style="background:${c}"></i>${k}</span>`).join('');
+  document.getElementById('fin-hint').textContent =
+    `log–log · documented GPUs are lower bounds · ${unresolved} unresolved schools excluded · hover for detail`;
+  const W=1080,H=520,m={t:18,r:24,b:52,l:60}, iw=W-m.l-m.r, ih=H-m.t-m.b, lx=v=>Math.log10(v);
+  const xs=pts.map(xf), ys=pts.map(r=>r.documented_gpus);
+  const x0=Math.floor(lx(Math.min(...xs))),x1=Math.ceil(lx(Math.max(...xs)));
+  const y0=Math.floor(lx(Math.min(...ys))),y1=Math.ceil(lx(Math.max(...ys)));
+  const X=v=>m.l+(lx(v)-x0)/(x1-x0)*iw, Y=v=>m.t+ih-(lx(v)-y0)/(y1-y0)*ih;
+  const ticks=e=>{const a=[];for(let p=e[0];p<=e[1];p++)for(const f of[1,2,5])a.push(f*10**p);return a;};
+  let g='';
+  ticks([x0,x1]).filter(v=>v>=10**x0&&v<=10**x1).forEach(v=>{g+=`<g class="tick"><line x1="${X(v)}" y1="${m.t}" x2="${X(v)}" y2="${m.t+ih}"/><text x="${X(v)}" y="${m.t+ih+18}" text-anchor="middle">${finMode==='rd'?'$'+(v>=1000?(v/1000)+'B':v+'M'):'$'+v+'B'}</text></g>`;});
+  ticks([y0,y1]).filter(v=>v>=10**y0&&v<=10**y1).forEach(v=>{g+=`<g class="tick"><line x1="${m.l}" y1="${Y(v)}" x2="${m.l+iw}" y2="${Y(v)}"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end">${v>=1000?(v/1000)+'k':v}</text></g>`;});
+  g+=`<text class="axis-label" x="${m.l+iw/2}" y="${H-6}" text-anchor="middle">${finMode==='rd'?'R&D expenditure (log, NSF HERD FY2024)':'Endowment (log, $B)'}</text>`;
+  g+=`<text class="axis-label" transform="translate(16,${m.t+ih/2}) rotate(-90)" text-anchor="middle">Documented GPUs (log, lower bound)</text>`;
+  const labelSet=new Set(['University of Illinois Urbana-Champaign','Harvard University','New York University','Massachusetts Institute of Technology','University of California San Diego','Johns Hopkins University','Emory University','Icahn School of Medicine at Mount Sinai']);
+  pts.forEach(r=>{const c=SECTOR_COLORS[r.sector]||'#898781'; const rad=5+Math.sqrt(r.documented_gpus)/10;
+    g+=`<circle class="pt" cx="${X(xf(r))}" cy="${Y(r.documented_gpus)}" r="${rad}" fill="${c}" data-i="${PAYLOAD.herd50.indexOf(r)}"/>`;
+    if(labelSet.has(r.institution)) g+=`<text class="pt-label" x="${X(xf(r))+rad+4}" y="${Y(r.documented_gpus)+4}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${shortName(r.institution)}</text>`;});
+  document.getElementById('finance').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Documented GPUs vs financial resources">${g}</svg>`;
+  document.querySelectorAll('#finance .pt').forEach(el=>{el.addEventListener('mousemove',e=>{const r=PAYLOAD.herd50[+el.dataset.i];
+    showTip(`<b>${r.institution}</b> (#${r.rank} R&D)<div class="row"><span>Sector</span><span>${r.sector}</span></div>`
+    +`<div class="row"><span>Documented GPUs</span><span>≥${fmt(r.documented_gpus)} (${r.count_type})</span></div>`
+    +`<div class="row"><span>R&D</span><span>$${(r.rd_fy2024_m/1000).toFixed(1)}B</span></div>`
+    +`<div class="row"><span>Endowment</span><span>${r.endowment_b?'$'+r.endowment_b+'B':'—'}</span></div>`
+    +`<div class="row"><span>Model</span><span>${r.control_model}</span></div>`,e.clientX,e.clientY);});
+    el.addEventListener('mouseleave',hideTip);});
+}
+document.querySelectorAll('#fin-seg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#fin-seg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); finMode=b.dataset.f; renderFinance();});
+
+drawScatter(); renderBars(); drawTimeline(); renderHead(); renderBody(); renderLabs(); renderResearch(); renderFinance();
 addEventListener('resize', ()=>{ /* svg is viewBox-scaled; nothing needed */ });
 </script>
 </body>

@@ -1,0 +1,51 @@
+rank,institution,sector,rd_fy2024_m,endowment_b,documented_gpus,count_type,control_model,key_systems,primary_source,completeness
+1,Johns Hopkins University,Private,4100,13.73,144,lower_bound,Hybrid (institutional+NSF-MRI),Rockfish (+DSAI unresolved),docs.arch.jhu.edu,partial
+2,University of Pennsylvania,Private,2200,24.81,376,lower_bound,Central + medical condo,Betty DGX B200 (248) + CBICA (128),parcc.upenn.edu,partial
+3,University of California San Francisco,Medical,2100,,235,verified,Condo (communal + contributed),Wynton (88 communal + 147 contributed),wynton.ucsf.edu,high
+4,University of Michigan Ann Arbor,Public,2100,21.20,0,unresolved,Condo (cost-recovery),Great Lakes + Armis2,documentation.its.umich.edu,unknown
+5,University of Wisconsin-Madison,Public,1900,4.92,72,lower_bound,Central (free shared),CHTC GPU Lab (40 A100 + 32 H100),chtc.cs.wisc.edu,partial
+6,University of California Los Angeles,Public,1900,4.77,0,unresolved,Condo,Hoffman2,hpc.oarc.ucla.edu,unknown
+7,University of California San Diego,Public,1900,1.79,344,lower_bound,National facility (NSF),SDSC Expanse (208 V100 + 136 H100) + Voyager,sdsc.edu,high
+8,University of Washington Seattle,Public,1700,6.00,954,aggregate,Condo,Hyak klone (954 cards),hyak.uw.edu,partial
+9,Stanford University,Private,1600,40.79,248,lower_bound,Central (Marlowe) + condo (Sherlock),Marlowe (248 H100) + Sherlock,marlowe.stanford.edu,partial
+10,Cornell University,Private,1600,11.75,755,aggregate,Condo (70 owners),G2/Unicorn (755 GPUs),it.coecis.cornell.edu,partial
+11,University of North Carolina Chapel Hill,Public,1600,6.22,0,unresolved,Condo,Longleaf / Dogwood,help.rc.unc.edu,unknown
+12,Ohio State University,Public,1600,8.62,904,lower_bound,State facility,OSC Ascend (776 A100) + Cardinal (128 H100),osc.edu,high
+13,Duke University,Private,1600,12.32,28,lower_bound,Condo,Duke Compute Cluster (28 A100 + condo),oit-rc.pages.oit.duke.edu,partial
+14,University of Maryland College Park,Public,1500,2.46,80,lower_bound,Central,Zaratan (80 A100),hpcc.umd.edu,partial
+15,Georgia Institute of Technology,Public,1500,3.51,304,verified,Central (AI Makerspace) + condo (PACE),AI Makerspace (160 H100 + 144 H200) + PACE,ece.gatech.edu,partial
+16,Yale University,Private,1500,44.15,100,lower_bound,Central shared + buy-in,Grace + McCleary + Misha,docs.ycrc.yale.edu,partial
+17,University of Pittsburgh,Public,1500,6.15,264,lower_bound,National facility (NSF),PSC Bridges-2 (264 V100),psc.edu,partial
+18,New York University,Private,1500,7.28,1276,lower_bound,Stakeholder-priority + public,Torch (944) + Greene (332),github.com/NYU-RTS/rts-docs,partial
+19,Harvard University,Private,1500,56.90,1144,lower_bound,Institute-priority (Kempner),Kempner (1144) + Cannon unresolved,kempnerinstitute.harvard.edu,partial
+20,Columbia University,Private,1400,15.92,230,lower_bound,Condo (ownership-fairshare),Insomnia (230 / 21 groups) + Ginsburg,cuit.columbia.edu,partial
+21,University of Minnesota Twin Cities,Public,1400,4.50,408,lower_bound,Central (MSI),MSI Agate (264 A100 + 32 H100 + 32 L40S + 80 A40),msi.umn.edu,high
+22,Texas A&M University,Public,1400,22.23,1000,aggregate,Central (DGX SuperPOD) + NSF (ACES),DGX SuperPOD (760 H200) + Grace/FASTER/ACES,hprc.tamu.edu,partial
+23,UT MD Anderson Cancer Center,Medical,1400,,0,unresolved,Medical (unresolved),Seadragon,mdanderson.org,unknown
+24,Vanderbilt University,Private,1300,10.86,320,aggregate,Condo + DSI,ACCRE (~320 incl 4 DGX A100),vanderbilt.edu/accre,partial
+25,Pennsylvania State University,Public,1300,5.06,0,unresolved,Condo (cost-recovery),Roar Collab,icds.psu.edu,unknown
+26,University of Florida,Public,1300,2.69,1104,verified,Central (vendor-donation lineage),HiPerGator 4.0 (504 B200 + 600 L4),news.ufl.edu,partial
+27,University of Southern California,Private,1300,9.03,180,aggregate,Central + condo,CARC Discovery (~180),carc.usc.edu,partial
+28,Northwestern University,Private,1300,15.17,200,lower_bound,Central (general) + condo,Quest (104 A100 + 96 H100 general),rcdsdocs.it.northwestern.edu,partial
+29,Emory University,Private,1200,12.00,8,lower_bound,Cloud-reliant (AWS),Dept (8 H100) + AI.Humanity on AWS,aws.amazon.com,unknown
+30,Washington University in St. Louis,Private,1200,13.30,300,aggregate,Cost-recovery + condo (RIS),RIS Compute2 (64 H100) + Compute1 (242),ris.wustl.edu,partial
+31,University of Texas at Austin,Public,1100,6.49,860,lower_bound,National facility (TACC),Vista (600 GH200) + Lonestar6,docs.tacc.utexas.edu,high
+32,University of California Berkeley,Public,1100,3.39,0,unresolved,Condo (Savio); NERSC adjacent,Savio (condo); NERSC=DOE separate,research-it.berkeley.edu,unknown
+33,Massachusetts Institute of Technology,Private,1100,27.37,1448,lower_bound,Central-shared + Lincoln,Engaging (>=1000) + SuperCloud (448),orcd.mit.edu,partial
+34,Icahn School of Medicine at Mount Sinai,Medical,1000,,356,lower_bound,Central (Minerva),Minerva (236 H100 + 40 A100 + 48 V100 + L40S),labs.icahn.mssm.edu,high
+35,University of Arizona,Public,1000,1.80,150,aggregate,Central + buy-in,Puma + Ocelote (V100/P100 + A100 MIG),hpcdocs.hpc.arizona.edu,partial
+36,University of California Davis,Public,1000,2.50,200,aggregate,Condo,Hive + Franklin,hpc.ucdavis.edu,partial
+37,Arizona State University,Public,1000,1.76,300,lower_bound,Central (Sol),Sol (~280 A100 + 8 H100 + A30),docs.rc.asu.edu,high
+38,Michigan State University,Public,931,4.61,100,lower_bound,Central + buy-in (ICER),HPCC (68 A100 + V100/L40S/H200),docs.icer.msu.edu,partial
+39,Purdue University,Public,931,4.44,308,lower_bound,National (Anvil) + central (Gautschi),Anvil (148 NSF) + Gautschi (160 H100),rcac.purdue.edu,high
+40,University of Illinois Urbana-Champaign,Public,908,3.80,1650,lower_bound,National facility (NCSA),Delta/DeltaAI (1512 NSF) + campus,docs.ncsa.illinois.edu,high
+41,Indiana University Bloomington,Public,897,4.05,304,lower_bound,Central (Big Red) + NSF (Jetstream2),Big Red 200 (256 A100 + 48 H100),kb.iu.edu,high
+42,Baylor College of Medicine,Medical,881,,0,unresolved,Medical (unresolved),Dan L Duncan CCC cluster,bcm.edu,unknown
+43,UT Southwestern Medical Center,Medical,869,,100,aggregate,Central (BioHPC),BioHPC (26 A100 + 100 GPU nodes),biohpc.swmed.edu,partial
+44,University of Alabama at Birmingham,Medical,866,,0,unresolved,Central (Cheaha, unresolved),Cheaha,uabrc.github.io,unknown
+45,Rutgers University New Brunswick,Public,837,2.35,220,aggregate,Condo (Amarel),Amarel (220 GPUs),oarc.rutgers.edu,partial
+46,University of Virginia,Public,814,11.23,240,lower_bound,Central + buy-in + BasePOD,Afton/Rivanna (160 A100) + DGX BasePOD (80),rc.virginia.edu,high
+47,University of Utah,Public,789,2.07,80,lower_bound,Central + condo (CHPC),Notchpeak (~80 recent GPUs),chpc.utah.edu,partial
+48,Boston University,Private,784,4.02,500,aggregate,Condo (SCC),Shared Computing Cluster (500 cards),bu.edu/tech,partial
+49,University of Colorado Anschutz,Medical,742,,0,unresolved,Shared (CU Boulder Alpine),Alpine (hosted at CU Boulder),curc.readthedocs.io,unknown
+50,University of Cincinnati,Public,740,1.77,14,verified,Central (ARC),ARCC2 (14 A100),research.uc.edu,partial

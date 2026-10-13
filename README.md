@@ -5,7 +5,21 @@
 An interactive dashboard on AI compute across US research universities — who owns it,
 who can access it, and how it maps to institutional wealth and research spending.
 
-## Research output
+## Expanded dataset & findings (top 50 by R&D)
+
+- **[`herd50.csv`](herd50.csv)** — the full **50 highest-R&D US universities** (NSF HERD FY2024),
+  with documented GPU capacity (lower bounds), control model, endowment, sector, and primary
+  source. Coverage: **41/50 documented, 9 unresolved** (condo clusters / medical centers).
+- **[`RESEARCH_FINDINGS.md`](RESEARCH_FINDINGS.md)** — five observations on the 50-school set.
+  Headline: **research spending barely predicts documented GPU capacity** (r ≈ −0.05 with R&D,
+  0.19 with endowment), and **GPU capacity is ~2× more concentrated than R&D** (top-10 hold 62%
+  of documented GPUs vs 31% of R&D). ~24% of documented academic GPUs are federal/state shared
+  facilities, not institutional.
+- Dashboard themes: **capacity** (generation bar + ranking), **financial** ("Compute vs.
+  financial resources (HERD top-50)" scatter), **ownership/access** ("who can actually get the
+  compute?" allocation-regime chart).
+
+## Research output (methodology artifacts)
 
 - **[`DATA_INSIGHT_DRAFT.md`](DATA_INSIGHT_DRAFT.md)** — *"At most leading US research
   universities, the AI compute isn't the university's."* Of the 20 highest-R&D US

@@ -586,6 +586,15 @@ def main():
         'accelerator': n[5], 'top500': n[6], 'note': n[7], 'highlight': n[8],
     } for n in NATIONAL_LABS]
 
+    herd50 = []
+    if os.path.exists('herd50.csv'):
+        for h in csv.DictReader(open('herd50.csv')):
+            h['rank'] = int(h['rank'])
+            h['rd_fy2024_m'] = float(h['rd_fy2024_m'] or 0)
+            h['endowment_b'] = float(h['endowment_b']) if h['endowment_b'] else None
+            h['documented_gpus'] = int(h['documented_gpus'] or 0)
+            herd50.append(h)
+
     research_subset = []
     if os.path.exists('research_subset.csv'):
         for rr in csv.DictReader(open('research_subset.csv')):
@@ -596,7 +605,7 @@ def main():
     payload = {'meta': meta, 'schools': out, 'milestones': milestones,
                'generations': gens, 'national_labs': national_labs,
                'funding_models': FUNDING_MODELS, 'gens_order': GENS_ORDER,
-               'research_subset': research_subset}
+               'research_subset': research_subset, 'herd50': herd50}
     json.dump(payload, open('data.json', 'w'), indent=2)
 
     # archive a dated snapshot so the per-school series accumulates over rebuilds.
