@@ -595,6 +595,33 @@ def main():
             h['documented_gpus'] = int(h['documented_gpus'] or 0)
             herd50.append(h)
 
+    # headline metrics, recomputed from herd50 (reproducible, not hardcoded)
+    def _corr(xs, ys):
+        n = len(xs)
+        if n < 3:
+            return None
+        mx, my = sum(xs) / n, sum(ys) / n
+        cov = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+        sx = sum((x - mx) ** 2 for x in xs) ** 0.5
+        sy = sum((y - my) ** 2 for y in ys) ** 0.5
+        return round(cov / (sx * sy), 2) if sx and sy else None
+
+    doc = [h for h in herd50 if h['documented_gpus'] > 0]
+    rd_pairs = [(h['rd_fy2024_m'], h['documented_gpus']) for h in doc if h['rd_fy2024_m']]
+    en_pairs = [(h['endowment_b'], h['documented_gpus']) for h in doc if h['endowment_b']]
+    tot_doc = sum(h['documented_gpus'] for h in herd50)
+    top10 = sum(sorted((h['documented_gpus'] for h in herd50), reverse=True)[:10])
+    rd_sorted = sorted((h['rd_fy2024_m'] for h in herd50), reverse=True)
+    headline = {
+        'corr_rd_gpu': _corr([p[0] for p in rd_pairs], [p[1] for p in rd_pairs]),
+        'corr_rd_n': len(rd_pairs),
+        'corr_endow_gpu': _corr([p[0] for p in en_pairs], [p[1] for p in en_pairs]),
+        'corr_endow_n': len(en_pairs),
+        'top10_gpu_share': round(100 * top10 / tot_doc) if tot_doc else None,
+        'top10_rd_share': round(100 * sum(rd_sorted[:10]) / sum(rd_sorted)) if rd_sorted else None,
+        'n_documented': len(doc), 'n_total': len(herd50), 'total_documented_gpus': tot_doc,
+    }
+
     research_subset = []
     if os.path.exists('research_subset.csv'):
         for rr in csv.DictReader(open('research_subset.csv')):
@@ -605,7 +632,7 @@ def main():
     payload = {'meta': meta, 'schools': out, 'milestones': milestones,
                'generations': gens, 'national_labs': national_labs,
                'funding_models': FUNDING_MODELS, 'gens_order': GENS_ORDER,
-               'research_subset': research_subset, 'herd50': herd50}
+               'research_subset': research_subset, 'herd50': herd50, 'headline': headline}
     json.dump(payload, open('data.json', 'w'), indent=2)
 
     # archive a dated snapshot so the per-school series accumulates over rebuilds.

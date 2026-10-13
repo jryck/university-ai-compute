@@ -5576,5 +5576,16 @@
       "primary_source": "research.uc.edu",
       "completeness": "partial"
     }
-  ]
+  ],
+  "headline": {
+    "corr_rd_gpu": -0.04,
+    "corr_rd_n": 41,
+    "corr_endow_gpu": 0.19,
+    "corr_endow_n": 38,
+    "top10_gpu_share": 62,
+    "top10_rd_share": 31,
+    "n_documented": 41,
+    "n_total": 50,
+    "total_documented_gpus": 17808
+  }
 }
