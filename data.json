@@ -4936,7 +4936,9 @@
       "control_model": "Hybrid (institutional+NSF-MRI)",
       "key_systems": "Rockfish (+DSAI unresolved)",
       "primary_source": "docs.arch.jhu.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 2,
@@ -4949,7 +4951,9 @@
       "control_model": "Central + medical condo",
       "key_systems": "Betty DGX B200 (248) + CBICA (128)",
       "primary_source": "parcc.upenn.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 3,
@@ -4962,7 +4966,9 @@
       "control_model": "Condo (communal + contributed)",
       "key_systems": "Wynton (88 communal + 147 contributed)",
       "primary_source": "wynton.ucsf.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 4,
@@ -4975,7 +4981,9 @@
       "control_model": "Condo (cost-recovery)",
       "key_systems": "Great Lakes + Armis2",
       "primary_source": "documentation.its.umich.edu",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 5,
@@ -4988,7 +4996,9 @@
       "control_model": "Central (free shared)",
       "key_systems": "CHTC GPU Lab (40 A100 + 32 H100)",
       "primary_source": "chtc.cs.wisc.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 6,
@@ -5001,7 +5011,9 @@
       "control_model": "Condo",
       "key_systems": "Hoffman2",
       "primary_source": "hpc.oarc.ucla.edu",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 7,
@@ -5014,7 +5026,9 @@
       "control_model": "National facility (NSF)",
       "key_systems": "SDSC Expanse (208 V100 + 136 H100) + Voyager",
       "primary_source": "sdsc.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 344,
+      "residual_separable": false
     },
     {
       "rank": 8,
@@ -5027,7 +5041,9 @@
       "control_model": "Condo",
       "key_systems": "Hyak klone (954 cards)",
       "primary_source": "hyak.uw.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 9,
@@ -5040,7 +5056,9 @@
       "control_model": "Central (Marlowe) + condo (Sherlock)",
       "key_systems": "Marlowe (248 H100) + Sherlock",
       "primary_source": "marlowe.stanford.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 10,
@@ -5053,7 +5071,9 @@
       "control_model": "Condo (70 owners)",
       "key_systems": "G2/Unicorn (755 GPUs)",
       "primary_source": "it.coecis.cornell.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 11,
@@ -5066,7 +5086,9 @@
       "control_model": "Condo",
       "key_systems": "Longleaf / Dogwood",
       "primary_source": "help.rc.unc.edu",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 12,
@@ -5079,7 +5101,9 @@
       "control_model": "State facility",
       "key_systems": "OSC Ascend (776 A100) + Cardinal (128 H100)",
       "primary_source": "osc.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 904,
+      "residual_separable": false
     },
     {
       "rank": 13,
@@ -5092,7 +5116,9 @@
       "control_model": "Condo",
       "key_systems": "Duke Compute Cluster (28 A100 + condo)",
       "primary_source": "oit-rc.pages.oit.duke.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 14,
@@ -5105,7 +5131,9 @@
       "control_model": "Central",
       "key_systems": "Zaratan (80 A100)",
       "primary_source": "hpcc.umd.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 15,
@@ -5118,7 +5146,9 @@
       "control_model": "Central (AI Makerspace) + condo (PACE)",
       "key_systems": "AI Makerspace (160 H100 + 144 H200) + PACE",
       "primary_source": "ece.gatech.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 16,
@@ -5131,7 +5161,9 @@
       "control_model": "Central shared + buy-in",
       "key_systems": "Grace + McCleary + Misha",
       "primary_source": "docs.ycrc.yale.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 17,
@@ -5144,7 +5176,9 @@
       "control_model": "National facility (NSF)",
       "key_systems": "PSC Bridges-2 (264 V100)",
       "primary_source": "psc.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 264,
+      "residual_separable": false
     },
     {
       "rank": 18,
@@ -5157,7 +5191,9 @@
       "control_model": "Stakeholder-priority + public",
       "key_systems": "Torch (944) + Greene (332)",
       "primary_source": "github.com/NYU-RTS/rts-docs",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 19,
@@ -5170,7 +5206,9 @@
       "control_model": "Institute-priority (Kempner)",
       "key_systems": "Kempner (1144) + Cannon unresolved",
       "primary_source": "kempnerinstitute.harvard.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 20,
@@ -5183,7 +5221,9 @@
       "control_model": "Condo (ownership-fairshare)",
       "key_systems": "Insomnia (230 / 21 groups) + Ginsburg",
       "primary_source": "cuit.columbia.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 21,
@@ -5196,7 +5236,9 @@
       "control_model": "Central (MSI)",
       "key_systems": "MSI Agate (264 A100 + 32 H100 + 32 L40S + 80 A40)",
       "primary_source": "msi.umn.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 22,
@@ -5209,7 +5251,9 @@
       "control_model": "Central (DGX SuperPOD) + NSF (ACES)",
       "key_systems": "DGX SuperPOD (760 H200) + Grace/FASTER/ACES",
       "primary_source": "hprc.tamu.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 23,
@@ -5222,7 +5266,9 @@
       "control_model": "Medical (unresolved)",
       "key_systems": "Seadragon",
       "primary_source": "mdanderson.org",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 24,
@@ -5235,7 +5281,9 @@
       "control_model": "Condo + DSI",
       "key_systems": "ACCRE (~320 incl 4 DGX A100)",
       "primary_source": "vanderbilt.edu/accre",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 25,
@@ -5248,7 +5296,9 @@
       "control_model": "Condo (cost-recovery)",
       "key_systems": "Roar Collab",
       "primary_source": "icds.psu.edu",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 26,
@@ -5261,7 +5311,9 @@
       "control_model": "Central (vendor-donation lineage)",
       "key_systems": "HiPerGator 4.0 (504 B200 + 600 L4)",
       "primary_source": "news.ufl.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 27,
@@ -5274,7 +5326,9 @@
       "control_model": "Central + condo",
       "key_systems": "CARC Discovery (~180)",
       "primary_source": "carc.usc.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 28,
@@ -5287,7 +5341,9 @@
       "control_model": "Central (general) + condo",
       "key_systems": "Quest (104 A100 + 96 H100 general)",
       "primary_source": "rcdsdocs.it.northwestern.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 29,
@@ -5300,7 +5356,9 @@
       "control_model": "Cloud-reliant (AWS)",
       "key_systems": "Dept (8 H100) + AI.Humanity on AWS",
       "primary_source": "aws.amazon.com",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 30,
@@ -5313,7 +5371,9 @@
       "control_model": "Cost-recovery + condo (RIS)",
       "key_systems": "RIS Compute2 (64 H100) + Compute1 (242)",
       "primary_source": "ris.wustl.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 31,
@@ -5326,7 +5386,9 @@
       "control_model": "National facility (TACC)",
       "key_systems": "Vista (600 GH200) + Lonestar6",
       "primary_source": "docs.tacc.utexas.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 600,
+      "residual_separable": true
     },
     {
       "rank": 32,
@@ -5339,7 +5401,9 @@
       "control_model": "Condo (Savio); NERSC adjacent",
       "key_systems": "Savio (condo); NERSC=DOE separate",
       "primary_source": "research-it.berkeley.edu",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 33,
@@ -5352,7 +5416,9 @@
       "control_model": "Central-shared + Lincoln",
       "key_systems": "Engaging (>=1000) + SuperCloud (448)",
       "primary_source": "orcd.mit.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 34,
@@ -5365,7 +5431,9 @@
       "control_model": "Central (Minerva)",
       "key_systems": "Minerva (236 H100 + 40 A100 + 48 V100 + L40S)",
       "primary_source": "labs.icahn.mssm.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 35,
@@ -5378,7 +5446,9 @@
       "control_model": "Central + buy-in",
       "key_systems": "Puma + Ocelote (V100/P100 + A100 MIG)",
       "primary_source": "hpcdocs.hpc.arizona.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 36,
@@ -5391,7 +5461,9 @@
       "control_model": "Condo",
       "key_systems": "Hive + Franklin",
       "primary_source": "hpc.ucdavis.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 37,
@@ -5404,7 +5476,9 @@
       "control_model": "Central (Sol)",
       "key_systems": "Sol (~280 A100 + 8 H100 + A30)",
       "primary_source": "docs.rc.asu.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 38,
@@ -5417,7 +5491,9 @@
       "control_model": "Central + buy-in (ICER)",
       "key_systems": "HPCC (68 A100 + V100/L40S/H200)",
       "primary_source": "docs.icer.msu.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 39,
@@ -5430,7 +5506,9 @@
       "control_model": "National (Anvil) + central (Gautschi)",
       "key_systems": "Anvil (148 NSF) + Gautschi (160 H100)",
       "primary_source": "rcac.purdue.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 148,
+      "residual_separable": true
     },
     {
       "rank": 40,
@@ -5443,7 +5521,9 @@
       "control_model": "National facility (NCSA)",
       "key_systems": "Delta/DeltaAI (1512 NSF) + campus",
       "primary_source": "docs.ncsa.illinois.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 1512,
+      "residual_separable": true
     },
     {
       "rank": 41,
@@ -5456,7 +5536,9 @@
       "control_model": "Central (Big Red) + NSF (Jetstream2)",
       "key_systems": "Big Red 200 (256 A100 + 48 H100)",
       "primary_source": "kb.iu.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 42,
@@ -5469,7 +5551,9 @@
       "control_model": "Medical (unresolved)",
       "key_systems": "Dan L Duncan CCC cluster",
       "primary_source": "bcm.edu",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 43,
@@ -5482,7 +5566,9 @@
       "control_model": "Central (BioHPC)",
       "key_systems": "BioHPC (26 A100 + 100 GPU nodes)",
       "primary_source": "biohpc.swmed.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 44,
@@ -5498,7 +5584,9 @@
       "completeness": "uabrc.github.io",
       "null": [
         "unknown"
-      ]
+      ],
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 45,
@@ -5511,7 +5599,9 @@
       "control_model": "Condo (Amarel)",
       "key_systems": "Amarel (220 GPUs)",
       "primary_source": "oarc.rutgers.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 46,
@@ -5524,7 +5614,9 @@
       "control_model": "Central + buy-in + BasePOD",
       "key_systems": "Afton/Rivanna (160 A100) + DGX BasePOD (80)",
       "primary_source": "rc.virginia.edu",
-      "completeness": "high"
+      "completeness": "high",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 47,
@@ -5537,7 +5629,9 @@
       "control_model": "Central + condo (CHPC)",
       "key_systems": "Notchpeak (~80 recent GPUs)",
       "primary_source": "chpc.utah.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 48,
@@ -5550,7 +5644,9 @@
       "control_model": "Condo (SCC)",
       "key_systems": "Shared Computing Cluster (500 cards)",
       "primary_source": "bu.edu/tech",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 49,
@@ -5563,7 +5659,9 @@
       "control_model": "Shared (CU Boulder Alpine)",
       "key_systems": "Alpine (hosted at CU Boulder)",
       "primary_source": "curc.readthedocs.io",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "facility_gpus": 0,
+      "residual_separable": true
     },
     {
       "rank": 50,
@@ -5576,7 +5674,9 @@
       "control_model": "Central (ARC)",
       "key_systems": "ARCC2 (14 A100)",
       "primary_source": "research.uc.edu",
-      "completeness": "partial"
+      "completeness": "partial",
+      "facility_gpus": 0,
+      "residual_separable": true
     }
   ],
   "headline": {

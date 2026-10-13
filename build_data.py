@@ -587,6 +587,19 @@ def main():
         'accelerator': n[5], 'top500': n[6], 'note': n[7], 'highlight': n[8],
     } for n in NATIONAL_LABS]
 
+    # Documented national/state-facility capacity contained within the HERD-50 figure,
+    # from each school's primary facility source (herd50.csv key_systems) + RESEARCH_FINDINGS
+    # obs. 3. Lets the "exclude facilities" view SUBTRACT facility GPUs and keep the
+    # institutional residual. Where facility == documented, no institutional residual is
+    # separately documented (flagged, not shown as a misleading zero).
+    HERD_FACILITY_GPUS = {
+        'University of Illinois Urbana-Champaign': 1512,  # Delta/DeltaAI (NSF); campus residual 138
+        'University of Texas at Austin': 600,             # Vista GH200 (nationally allocated); Lonestar6 residual 260
+        'Purdue University': 148,                         # Anvil (NSF); Gautschi residual 160
+        'University of California San Diego': 344,        # SDSC Expanse+Voyager (all NSF) — no separable residual
+        'Ohio State University': 904,                     # OSC (Ohio state facility) — no separable residual
+        'University of Pittsburgh': 264,                  # PSC Bridges-2 (NSF) — no separable residual
+    }
     herd50 = []
     if os.path.exists('herd50.csv'):
         for h in csv.DictReader(open('herd50.csv')):
@@ -594,6 +607,10 @@ def main():
             h['rd_fy2024_m'] = float(h['rd_fy2024_m'] or 0)
             h['endowment_b'] = float(h['endowment_b']) if h['endowment_b'] else None
             h['documented_gpus'] = int(h['documented_gpus'] or 0)
+            fac = HERD_FACILITY_GPUS.get(h['institution'], 0)
+            h['facility_gpus'] = fac
+            # institutional residual is "separable" only when documented > facility capacity
+            h['residual_separable'] = fac == 0 or (h['documented_gpus'] - fac) > 0
             herd50.append(h)
     meta['n_herd50'] = len(herd50)
     meta['n_documented'] = len([h for h in herd50 if h['documented_gpus'] > 0])

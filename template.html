@@ -77,7 +77,7 @@
                 flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
   .chart-head .hint { color: var(--muted); font-size: 12.5px; }
   .chart-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .legend { display: flex; gap: 18px; margin: 2px 0 10px; font-size: 13px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 2px 0 10px; font-size: 13px; }
   .legend span { display: inline-flex; align-items: center; gap: 7px; color: var(--text-secondary); }
   .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
   svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -212,8 +212,9 @@
     <h2>Distribution &amp; concentration</h2>
     <p class="sub" style="margin-bottom:10px" id="conc-text"></p>
     <div class="card">
+      <div class="legend" id="herd-rank-legend"></div>
       <div class="hint" style="margin-bottom:10px">Documented GPUs (lower bound) — 50 top-R&amp;D universities, ranked by
-        documented capacity. Colored by sector; hatched = aggregate / not per-model; not-published shown as a marker.</div>
+        documented capacity.</div>
       <div class="bars" id="herd-ranking"></div>
     </div>
     <p class="sub" style="margin:24px 0 6px">Documented GPU capacity by generation — all 41 documented HERD-50 universities,
@@ -755,14 +756,20 @@ function renderResearch(){
 let finMode='rd', finNat='all', finRef='show';
 const SECTOR_COLORS = {Public:'#2a78d6', Private:'#1baf7a', Medical:'#eda100'};
 const REF_COLOR='#898781';
-const isFacility = r => /national|state facility/i.test(r.control_model||'');
 function renderFinance(){
   const h = (PAYLOAD.herd50||[]);
   const xf = finMode==='rd' ? (r=>r.rd_fy2024_m) : (r=>r.endowment_b);
+  const exfac = finNat==='exfac';
+  // in exfac view, plot the institutional residual (documented − national/state-facility capacity)
+  const yval = r => (exfac && r.facility_gpus>0) ? (r.documented_gpus - r.facility_gpus) : r.documented_gpus;
   let pts = h.filter(r=>r.documented_gpus>0 && xf(r));
   const unresolved = h.filter(r=>r.documented_gpus===0).length;
-  let exfacN = 0;
-  if(finNat==='exfac'){ const before=pts.length; pts = pts.filter(r=>!isFacility(r)); exfacN = before-pts.length; }
+  // facility hosts whose institutional residual is not separately documented → shown as a note, never a misleading 0
+  let notSep = [];
+  if(exfac){
+    notSep = pts.filter(r=>r.facility_gpus>0 && !r.residual_separable);
+    pts = pts.filter(r=>!(r.facility_gpus>0 && !r.residual_separable));
+  }
   // optional reference points — outside HERD-50, excluded from all stats
   const refAll = PAYLOAD.reference_points||[];
   const refPts = finRef==='show' ? refAll.filter(r=>r.documented_gpus>0 && xf(r)) : [];
@@ -771,12 +778,12 @@ function renderFinance(){
     `<span><i class="dot" style="background:${c}"></i>${k}</span>`).join('')
     + (finRef==='show' ? `<span><i class="dot" style="background:none;border:1.5px dashed ${REF_COLOR}"></i>Reference (outside HERD-50)</span>` : '');
   document.getElementById('fin-hint').textContent =
-    `log–log · documented GPUs are lower bounds · ${unresolved} unresolved excluded`
-    + (finNat==='exfac' ? ` · ${exfacN} NSF/state facilities excluded` : '')
+    `log–log · ${exfac?'institutional residual (facility capacity subtracted)':'documented GPUs'} are lower bounds · n=${pts.length} shown · ${unresolved} unresolved excluded`
+    + (exfac && notSep.length ? ` · ${notSep.length} facility host(s) with no separable residual not shown (${notSep.map(r=>shortName(r.institution)).join(', ')})` : '')
     + (finRef==='show' ? ` · reference schools shown (not in correlations)${refUnres.length?` · ${refUnres.join(', ')}: no published count`:''}` : '') + ` · hover for detail`;
   const W=1080,H=520,m={t:18,r:24,b:52,l:60}, iw=W-m.l-m.r, ih=H-m.t-m.b, lx=v=>Math.log10(v);
   const dom=pts.concat(refPts);
-  const xs=dom.map(xf), ys=dom.map(r=>r.documented_gpus);
+  const xs=dom.map(xf), ys=dom.map(yval);
   const x0=Math.floor(lx(Math.min(...xs))),x1=Math.ceil(lx(Math.max(...xs)));
   const y0=Math.floor(lx(Math.min(...ys))),y1=Math.ceil(lx(Math.max(...ys)));
   const X=v=>m.l+(lx(v)-x0)/(x1-x0)*iw, Y=v=>m.t+ih-(lx(v)-y0)/(y1-y0)*ih;
@@ -785,11 +792,11 @@ function renderFinance(){
   ticks([x0,x1]).filter(v=>v>=10**x0&&v<=10**x1).forEach(v=>{g+=`<g class="tick"><line x1="${X(v)}" y1="${m.t}" x2="${X(v)}" y2="${m.t+ih}"/><text x="${X(v)}" y="${m.t+ih+18}" text-anchor="middle">${finMode==='rd'?'$'+(v>=1000?(v/1000)+'B':v+'M'):'$'+v+'B'}</text></g>`;});
   ticks([y0,y1]).filter(v=>v>=10**y0&&v<=10**y1).forEach(v=>{g+=`<g class="tick"><line x1="${m.l}" y1="${Y(v)}" x2="${m.l+iw}" y2="${Y(v)}"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end">${v>=1000?(v/1000)+'k':v}</text></g>`;});
   g+=`<text class="axis-label" x="${m.l+iw/2}" y="${H-6}" text-anchor="middle">${finMode==='rd'?'R&D expenditure (log, NSF HERD FY2024)':'Endowment (log, $B)'}</text>`;
-  g+=`<text class="axis-label" transform="translate(16,${m.t+ih/2}) rotate(-90)" text-anchor="middle">Documented GPUs (log, lower bound)</text>`;
+  g+=`<text class="axis-label" transform="translate(16,${m.t+ih/2}) rotate(-90)" text-anchor="middle">${exfac?'Documented institutional GPUs (log, facility capacity removed)':'Documented GPUs (log, lower bound)'}</text>`;
   const labelSet=new Set(['University of Illinois Urbana-Champaign','Harvard University','New York University','Massachusetts Institute of Technology','University of California San Diego','Johns Hopkins University','Emory University','Icahn School of Medicine at Mount Sinai']);
-  pts.forEach(r=>{const c=SECTOR_COLORS[r.sector]||'#898781'; const rad=5+Math.sqrt(r.documented_gpus)/10;
-    g+=`<circle class="pt" cx="${X(xf(r))}" cy="${Y(r.documented_gpus)}" r="${rad}" fill="${c}" data-i="${PAYLOAD.herd50.indexOf(r)}"/>`;
-    if(labelSet.has(r.institution)) g+=`<text class="pt-label" x="${X(xf(r))+rad+4}" y="${Y(r.documented_gpus)+4}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${shortName(r.institution)}</text>`;});
+  pts.forEach(r=>{const c=SECTOR_COLORS[r.sector]||'#898781'; const yv=yval(r); const rad=5+Math.sqrt(yv)/10;
+    g+=`<circle class="pt" cx="${X(xf(r))}" cy="${Y(yv)}" r="${rad}" fill="${c}" data-i="${PAYLOAD.herd50.indexOf(r)}"/>`;
+    if(labelSet.has(r.institution)) g+=`<text class="pt-label" x="${X(xf(r))+rad+4}" y="${Y(yv)+4}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${shortName(r.institution)}</text>`;});
   // reference points — hollow dashed diamonds, always labeled, visually distinct from the HERD-50 sample
   refPts.forEach(r=>{const cx=X(xf(r)),cy=Y(r.documented_gpus),s=7;
     g+=`<rect class="refpt" x="${cx-s}" y="${cy-s}" width="${s*2}" height="${s*2}" transform="rotate(45 ${cx} ${cy})" fill="var(--surface)" stroke="${REF_COLOR}" stroke-width="1.5" stroke-dasharray="3 2" data-ri="${refAll.indexOf(r)}"/>`;
@@ -805,6 +812,8 @@ function renderFinance(){
   document.querySelectorAll('#finance .pt').forEach(el=>{el.addEventListener('mousemove',e=>{const r=PAYLOAD.herd50[+el.dataset.i];
     showTip(`<b>${r.institution}</b> (#${r.rank} R&D)<div class="row"><span>Sector</span><span>${r.sector}</span></div>`
     +`<div class="row"><span>Documented GPUs</span><span>≥${fmt(r.documented_gpus)} (${r.count_type})</span></div>`
+    +(exfac && r.facility_gpus>0 ? `<div class="row"><span>− National/state facility</span><span>${fmt(r.facility_gpus)}</span></div>`
+      +`<div class="row"><span>= Institutional residual</span><span>≥${fmt(r.documented_gpus-r.facility_gpus)}</span></div>` : '')
     +`<div class="row"><span>R&D</span><span>$${(r.rd_fy2024_m/1000).toFixed(1)}B</span></div>`
     +`<div class="row"><span>Endowment</span><span>${r.endowment_b?'$'+r.endowment_b+'B':'—'}</span></div>`
     +`<div class="row"><span>Model</span><span>${r.control_model}</span></div>`,e.clientX,e.clientY);});
@@ -825,6 +834,10 @@ function renderHerdRanking(){
   const h=(PAYLOAD.herd50||[]).slice().sort((a,b)=>b.documented_gpus-a.documented_gpus);
   const max=Math.max(...h.map(r=>r.documented_gpus),1);
   const el=document.getElementById('herd-ranking'); if(!el) return;
+  document.getElementById('herd-rank-legend').innerHTML =
+    Object.entries(SECTOR_COLORS).map(([k,c])=>`<span><i class="genkey" style="background:${c}"></i>${k}</span>`).join('')
+    +`<span><i class="genkey" style="background:#898781;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.55) 0 2px,transparent 2px 5px)"></i>Aggregate / not per-model</span>`
+    +`<span><i class="genkey" style="background:var(--border)"></i>Not published / unresolved</span>`;
   el.innerHTML = h.map(r=>{
     const c=SECTOR_COLORS[r.sector]||'#898781';
     const agg=/aggregate/.test(r.count_type);

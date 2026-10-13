@@ -182,6 +182,17 @@ def main():
     for rp in PAYLOAD.get('reference_points', []):
         check(rp['institution'] not in herd, f"[recon] reference point {rp['institution']} leaked into herd50")
 
+    # facility-capacity subtraction: never exceeds documented; separable flag is consistent
+    fac_hosts = [h for h in herd.values() if h.get('facility_gpus', 0) > 0]
+    check(len(fac_hosts) >= 6, f"[facility] expected >=6 facility hosts, got {len(fac_hosts)}")
+    for h in herd.values():
+        fac = h.get('facility_gpus', 0)
+        check(0 <= fac <= h['documented_gpus'],
+              f"[facility] {h['institution']}: facility_gpus {fac} out of range vs documented {h['documented_gpus']}")
+        exp_sep = (fac == 0) or ((h['documented_gpus'] - fac) > 0)
+        check(h.get('residual_separable') == exp_sep,
+              f"[facility] {h['institution']}: residual_separable flag inconsistent")
+
     if FAILS:
         print(f"VALIDATION FAILED — {len(FAILS)} issue(s):")
         for f in FAILS:
