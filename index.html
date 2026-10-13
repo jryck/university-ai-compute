@@ -197,8 +197,8 @@
           <button data-n="exfac">Exclude NSF/state facilities</button>
         </div>
         <div class="seg" id="finref-seg">
-          <button data-r="hide" class="on">HERD-50 only</button>
-          <button data-r="show">+ reference schools</button>
+          <button data-r="show" class="on">+ reference schools</button>
+          <button data-r="hide">HERD-50 only</button>
         </div>
       </div>
       <div class="chart-head"><div class="legend" id="fin-legend"></div>
@@ -296,8 +296,8 @@
       under-investment.</p>
     <p class="sub" style="margin-bottom:12px"><b>Reference schools.</b> A few notable endowment-heavy universities fall
       outside the HERD top-50 because their total R&amp;D is below the rank-50 cutoff (e.g. Princeton ≥612 documented GPUs,
-      $36B endowment; Rice ≥160, $8.5B). They can be toggled onto the scatter as clearly-marked reference points but are
-      <b>excluded from every correlation and aggregate statistic</b>, which use the HERD-50 sample only. Notre Dame and the
+      $36B endowment; Rice ≥160, $8.5B). They are shown on the scatter by default as clearly-marked reference points (toggle "HERD-50 only" to hide
+      them) but are <b>excluded from every correlation and aggregate statistic</b>, which use the HERD-50 sample only. Notre Dame and the
       University of Chicago are similarly endowment-heavy outsiders but publish no GPU count, so they are listed as
       unresolved rather than plotted (<a href="https://github.com/jryck/university-ai-compute/blob/main/reference_points.csv" target="_blank" rel="noopener">reference_points.csv</a>).</p>
     <p class="sub" style="margin-bottom:12px"><b>Data-quality audit.</b> A 10-university pilot was verified against primary
@@ -727,7 +727,7 @@ function renderResearch(){
 }
 
 /* ---- HERD-50 financial scatter (documented GPUs vs R&D / endowment) ---- */
-let finMode='rd', finNat='all', finRef='hide';
+let finMode='rd', finNat='all', finRef='show';
 const SECTOR_COLORS = {Public:'#2a78d6', Private:'#1baf7a', Medical:'#eda100'};
 const REF_COLOR='#898781';
 const isFacility = r => /national|state facility/i.test(r.control_model||'');
