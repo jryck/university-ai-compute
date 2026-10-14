@@ -106,7 +106,7 @@ def main():
         ('Massachusetts Institute of Technology (MIT)', 'documented_lower_bound', 1448),
         ('Harvard University', 'documented_lower_bound', 1144),
         ('Harvard University', 'aggregate_count', 2000),
-        ('Stanford University', 'documented_lower_bound', 248),
+        ('Stanford University', 'documented_lower_bound', 1504),  # Marlowe 248 + Sherlock 1256 (aggregate, distinct)
         ('Carnegie Mellon University', 'verified_model_count', 0),
         ('Carnegie Mellon University', 'cloud_gpus', 296),
         ('Oregon State University', 'planned_gpus', 150),

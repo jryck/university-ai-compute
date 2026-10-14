@@ -588,16 +588,16 @@
       "total_gpus": 248,
       "verified_model_count": 248,
       "legacy_estimate": 0,
-      "aggregate_count": 0,
-      "documented_lower_bound": 248,
-      "display_gpus": 248,
+      "aggregate_count": 1256,
+      "documented_lower_bound": 1504,
+      "display_gpus": 1504,
       "display_is_lower_bound": true,
       "inventory_completeness": "partial",
       "ownership_verification": "confirmed",
       "federal_funded_gpus": 0,
       "source_dates": [
         "2024-12",
-        "2025"
+        "2026-10"
       ],
       "h100_equivalent": 248.0,
       "institutional_gpus": 248,
@@ -613,15 +613,15 @@
       "verification": "partial",
       "sources": [
         "https://news.stanford.edu/stories/2024/12/stanford-welcomes-first-gpu-based-supercomputer",
-        "https://www.sherlock.stanford.edu/docs/overview/tech/"
+        "https://www.sherlock.stanford.edu/docs/tech/facts/"
       ],
       "aggregate_clusters": [
         {
           "cluster": "Sherlock",
-          "count": null,
-          "overlap": "unresolved",
-          "note": "Condo/PI-owned GPU nodes; aggregate count NOT published \u2014 unquantified",
-          "source": "https://www.sherlock.stanford.edu/docs/overview/tech/"
+          "count": 1256,
+          "overlap": "distinct",
+          "note": "1,256 physical GPUs across 5 generations / 14 models per the official facts page (no per-model breakdown published, so generation is unknown). Physically distinct from Marlowe: separate operator (SRCC vs Stanford Data Science) and separate hardware; Marlowe is not referenced on the Sherlock facts page.",
+          "source": "https://www.sherlock.stanford.edu/docs/tech/facts/"
         }
       ],
       "correction_source": "",
@@ -4709,7 +4709,7 @@
       "rd_rank": 9,
       "institution": "Stanford University",
       "rd_fy2024_m": "1600",
-      "documented_gpus": 248,
+      "documented_gpus": 1504,
       "count_type": "verified_lower_bound",
       "central_allocatable_gpus": "248",
       "scheduling_control": "central-allocation (Marlowe) + condo (Sherlock)",
@@ -4719,8 +4719,8 @@
       "financing": "institutional (Marlowe) + grants (Sherlock)",
       "operation": "Stanford Data Science / SRCC",
       "accessibility": "Stanford-wide (Marlowe: 500+ accounts)",
-      "key_systems": "Marlowe (248 H100) + Sherlock (condo)",
-      "primary_source": "marlowe.stanford.edu",
+      "key_systems": "Marlowe (248 H100) + Sherlock (1256 condo)",
+      "primary_source": "sherlock.stanford.edu/docs/tech/facts",
       "confidence": "partial"
     },
     {
@@ -5060,11 +5060,11 @@
       "sector": "Private",
       "rd_fy2024_m": 1600.0,
       "endowment_b": 40.79,
-      "documented_gpus": 248,
+      "documented_gpus": 1504,
       "count_type": "lower_bound",
       "control_model": "Central (Marlowe) + condo (Sherlock)",
-      "key_systems": "Marlowe (248 H100) + Sherlock",
-      "primary_source": "marlowe.stanford.edu",
+      "key_systems": "Marlowe (248 H100) + Sherlock (1256; 5 gens/14 models)",
+      "primary_source": "sherlock.stanford.edu/docs/tech/facts",
       "completeness": "partial",
       "facility_gpus": 0,
       "residual_separable": true,
@@ -5731,15 +5731,15 @@
     }
   ],
   "headline": {
-    "corr_rd_gpu": -0.04,
+    "corr_rd_gpu": -0.01,
     "corr_rd_n": 41,
-    "corr_endow_gpu": 0.19,
+    "corr_endow_gpu": 0.34,
     "corr_endow_n": 38,
     "top10_gpu_share": 62,
     "top10_rd_share": 31,
     "n_documented": 41,
     "n_total": 50,
-    "total_documented_gpus": 17808
+    "total_documented_gpus": 19064
   },
   "reference_points": [
     {
@@ -5985,7 +5985,7 @@
     {
       "name": "Stanford University",
       "sector": "Private",
-      "documented": 248,
+      "documented": 1504,
       "count_type": "lower_bound",
       "completeness": "partial",
       "gen_count": {
@@ -6010,7 +6010,7 @@
       },
       "classified_count": 248,
       "classified_h100e": 248.0,
-      "unknown_count": 0,
+      "unknown_count": 1256,
       "has_model_evidence": true
     },
     {

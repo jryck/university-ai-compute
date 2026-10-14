@@ -7,7 +7,7 @@ rank,institution,sector,rd_fy2024_m,endowment_b,documented_gpus,count_type,contr
 6,University of California Los Angeles,Public,1900,4.77,0,unresolved,Condo,Hoffman2,hpc.oarc.ucla.edu,unknown
 7,University of California San Diego,Public,1900,1.79,344,lower_bound,National facility (NSF),SDSC Expanse (208 V100 + 136 H100) + Voyager,sdsc.edu,high
 8,University of Washington Seattle,Public,1700,6.00,954,aggregate,Condo,Hyak klone (954 cards),hyak.uw.edu,partial
-9,Stanford University,Private,1600,40.79,248,lower_bound,Central (Marlowe) + condo (Sherlock),Marlowe (248 H100) + Sherlock,marlowe.stanford.edu,partial
+9,Stanford University,Private,1600,40.79,1504,lower_bound,Central (Marlowe) + condo (Sherlock),Marlowe (248 H100) + Sherlock (1256; 5 gens/14 models),sherlock.stanford.edu/docs/tech/facts,partial
 10,Cornell University,Private,1600,11.75,755,aggregate,Condo (70 owners),G2/Unicorn (755 GPUs),it.coecis.cornell.edu,partial
 11,University of North Carolina Chapel Hill,Public,1600,6.22,0,unresolved,Condo,Longleaf / Dogwood,help.rc.unc.edu,unknown
 12,Ohio State University,Public,1600,8.62,904,lower_bound,State facility,OSC Ascend (776 A100) + Cardinal (128 H100),osc.edu,high
