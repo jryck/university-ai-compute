@@ -203,6 +203,7 @@
       <div class="chart-controls">
         <div class="seg" id="fin-seg">
           <button data-f="rd" class="on">vs. R&amp;D spending</button>
+          <button data-f="cs">vs. CS R&amp;D</button>
           <button data-f="endow">vs. Endowment</button>
         </div>
         <div class="seg" id="finfac-seg">
@@ -770,13 +771,21 @@ function renderResearch(){
 let finMode='rd', finNat='all', finRef='show';
 const SECTOR_COLORS = {Public:'#2a78d6', Private:'#1baf7a', Medical:'#eda100'};
 const REF_COLOR='#898781';
+// descriptive correlation helpers (Pearson + rank-based Spearman)
+function _pearson(xs,ys){const n=xs.length;if(n<3)return null;const mx=xs.reduce((a,b)=>a+b,0)/n,my=ys.reduce((a,b)=>a+b,0)/n;let cov=0,sx=0,sy=0;for(let i=0;i<n;i++){cov+=(xs[i]-mx)*(ys[i]-my);sx+=(xs[i]-mx)**2;sy+=(ys[i]-my)**2;}return (sx&&sy)?cov/Math.sqrt(sx*sy):null;}
+function _rank(v){const idx=v.map((x,i)=>i).sort((a,b)=>v[a]-v[b]);const r=new Array(v.length);let i=0;while(i<v.length){let j=i;while(j+1<v.length&&v[idx[j+1]]===v[idx[i]])j++;const avg=(i+j)/2+1;for(let k=i;k<=j;k++)r[idx[k]]=avg;i=j+1;}return r;}
+function _spearman(xs,ys){if(xs.length<3)return null;return _pearson(_rank(xs),_rank(ys));}
+const _cfmt=v=>v==null?'—':(v>=0?'+':'')+v.toFixed(2);
+const X_LABEL={rd:'R&D expenditure (log, NSF HERD FY2024)',cs:'Computer & information sciences R&D (log, NSF HERD FY2024)',endow:'Endowment (log, $B)'};
 function renderFinance(){
   const h = (PAYLOAD.herd50||[]);
-  const xf = finMode==='rd' ? (r=>r.rd_fy2024_m) : (r=>r.endowment_b);
+  const XF = {rd:r=>r.rd_fy2024_m, cs:r=>r.cs_rd_fy2024_m, endow:r=>r.endowment_b};
+  const xf = XF[finMode];
   const exfac = finNat==='exfac';
   // in exfac view, plot the institutional residual (documented − national/state-facility capacity)
   const yval = r => (exfac && r.facility_gpus>0) ? (r.documented_gpus - r.facility_gpus) : r.documented_gpus;
-  let pts = h.filter(r=>r.documented_gpus>0 && xf(r));
+  // analysis sample: documented, x REPORTED (null = missing → excluded; a reported 0 is kept)
+  let pts = h.filter(r=>r.documented_gpus>0 && xf(r)!=null);
   const unresolved = h.filter(r=>r.documented_gpus===0).length;
   // facility hosts whose institutional residual is not separately documented → shown as a note, never a misleading 0
   let notSep = [];
@@ -784,31 +793,40 @@ function renderFinance(){
     notSep = pts.filter(r=>r.facility_gpus>0 && !r.residual_separable);
     pts = pts.filter(r=>!(r.facility_gpus>0 && !r.residual_separable));
   }
+  // correlations computed on the full analysis sample (valid 0s INCLUDED, never dropped for being 0)
+  const corrP=_pearson(pts.map(xf),pts.map(yval)), corrS=_spearman(pts.map(xf),pts.map(yval));
+  // log axis cannot show x=0; those valid zeros stay in the correlation but are noted, not plotted
+  const zeroX = pts.filter(r=>xf(r)===0);
+  const plot = pts.filter(r=>xf(r)>0 && yval(r)>0);
   // optional reference points — outside HERD-50, excluded from all stats
   const refAll = PAYLOAD.reference_points||[];
-  const refPts = finRef==='show' ? refAll.filter(r=>r.documented_gpus>0 && xf(r)) : [];
+  const refPts = finRef==='show' ? refAll.filter(r=>r.documented_gpus>0 && xf(r)!=null && xf(r)>0) : [];
   const refUnres = refAll.filter(r=>r.documented_gpus===0).map(r=>shortName(r.institution));
   document.getElementById('fin-legend').innerHTML = Object.entries(SECTOR_COLORS).map(([k,c])=>
     `<span><i class="dot" style="background:${c}"></i>${k}</span>`).join('')
     + (finRef==='show' ? `<span><i class="dot" style="background:none;border:1.5px dashed ${REF_COLOR}"></i>Reference (outside HERD-50)</span>` : '');
   document.getElementById('fin-hint').textContent =
-    `log–log · ${exfac?'institutional residual (facility capacity subtracted)':'documented GPUs'} are lower bounds · n=${pts.length} shown · ${unresolved} unresolved excluded`
+    `Pearson r=${_cfmt(corrP)} · Spearman ρ=${_cfmt(corrS)} · n=${pts.length}`
+    + (zeroX.length ? ` (incl. ${zeroX.length} reporting $0 CS R&D, in the correlation but not plottable on a log axis)` : '')
+    + ` · ${exfac?'institutional residual (facility capacity subtracted)':'documented GPUs'}, lower bounds · ${unresolved} unresolved excluded`
     + (exfac && notSep.length ? ` · ${notSep.length} facility host(s) with no separable residual not shown (${notSep.map(r=>shortName(r.institution)).join(', ')})` : '')
+    + (finMode==='cs' ? ` · CS R&D is a proxy for relevant research activity, not a comprehensive measure of AI-research demand (AI research is often classified under other fields)` : '')
     + (finRef==='show' ? ` · reference schools shown (not in correlations)${refUnres.length?` · ${refUnres.join(', ')}: no published count`:''}` : '') + ` · hover for detail`;
   const W=1080,H=520,m={t:18,r:24,b:52,l:60}, iw=W-m.l-m.r, ih=H-m.t-m.b, lx=v=>Math.log10(v);
-  const dom=pts.concat(refPts);
+  const dom=plot.concat(refPts);
   const xs=dom.map(xf), ys=dom.map(yval);
   const x0=Math.floor(lx(Math.min(...xs))),x1=Math.ceil(lx(Math.max(...xs)));
   const y0=Math.floor(lx(Math.min(...ys))),y1=Math.ceil(lx(Math.max(...ys)));
   const X=v=>m.l+(lx(v)-x0)/(x1-x0)*iw, Y=v=>m.t+ih-(lx(v)-y0)/(y1-y0)*ih;
   const ticks=e=>{const a=[];for(let p=e[0];p<=e[1];p++)for(const f of[1,2,5])a.push(f*10**p);return a;};
+  const moneyX = finMode!=='endow';
   let g='';
-  ticks([x0,x1]).filter(v=>v>=10**x0&&v<=10**x1).forEach(v=>{g+=`<g class="tick"><line x1="${X(v)}" y1="${m.t}" x2="${X(v)}" y2="${m.t+ih}"/><text x="${X(v)}" y="${m.t+ih+18}" text-anchor="middle">${finMode==='rd'?'$'+(v>=1000?(v/1000)+'B':v+'M'):'$'+v+'B'}</text></g>`;});
+  ticks([x0,x1]).filter(v=>v>=10**x0&&v<=10**x1).forEach(v=>{g+=`<g class="tick"><line x1="${X(v)}" y1="${m.t}" x2="${X(v)}" y2="${m.t+ih}"/><text x="${X(v)}" y="${m.t+ih+18}" text-anchor="middle">${moneyX?'$'+(v>=1000?(v/1000)+'B':v+'M'):'$'+v+'B'}</text></g>`;});
   ticks([y0,y1]).filter(v=>v>=10**y0&&v<=10**y1).forEach(v=>{g+=`<g class="tick"><line x1="${m.l}" y1="${Y(v)}" x2="${m.l+iw}" y2="${Y(v)}"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end">${v>=1000?(v/1000)+'k':v}</text></g>`;});
-  g+=`<text class="axis-label" x="${m.l+iw/2}" y="${H-6}" text-anchor="middle">${finMode==='rd'?'R&D expenditure (log, NSF HERD FY2024)':'Endowment (log, $B)'}</text>`;
+  g+=`<text class="axis-label" x="${m.l+iw/2}" y="${H-6}" text-anchor="middle">${X_LABEL[finMode]}</text>`;
   g+=`<text class="axis-label" transform="translate(16,${m.t+ih/2}) rotate(-90)" text-anchor="middle">${exfac?'Documented institutional GPUs (log, facility capacity removed)':'Documented GPUs (log, lower bound)'}</text>`;
   const labelSet=new Set(['University of Illinois Urbana-Champaign','Harvard University','New York University','Massachusetts Institute of Technology','University of California San Diego','Johns Hopkins University','Emory University','Icahn School of Medicine at Mount Sinai']);
-  pts.forEach(r=>{const c=SECTOR_COLORS[r.sector]||'#898781'; const yv=yval(r); const rad=5+Math.sqrt(yv)/10;
+  plot.forEach(r=>{const c=SECTOR_COLORS[r.sector]||'#898781'; const yv=yval(r); const rad=5+Math.sqrt(yv)/10;
     g+=`<circle class="pt" cx="${X(xf(r))}" cy="${Y(yv)}" r="${rad}" fill="${c}" data-i="${PAYLOAD.herd50.indexOf(r)}"/>`;
     if(labelSet.has(r.institution)) g+=`<text class="pt-label" x="${X(xf(r))+rad+4}" y="${Y(yv)+4}" paint-order="stroke" stroke="var(--surface)" stroke-width="3">${shortName(r.institution)}</text>`;});
   // reference points — hollow dashed diamonds, always labeled, visually distinct from the HERD-50 sample
@@ -820,6 +838,7 @@ function renderFinance(){
     showTip(`<b>${r.institution}</b> <span style="color:var(--muted)">· reference, outside NSF HERD top-50</span>`
     +`<div class="row"><span>Documented GPUs</span><span>≥${fmt(r.documented_gpus)} (${r.count_type})</span></div>`
     +`<div class="row"><span>R&D</span><span>$${(r.rd_fy2024_m/1000).toFixed(1)}B</span></div>`
+    +`<div class="row"><span>CS R&D</span><span>${r.cs_rd_fy2024_m==null?'—':'$'+r.cs_rd_fy2024_m+'M'}</span></div>`
     +`<div class="row"><span>Endowment</span><span>${r.endowment_b?'$'+r.endowment_b+'B':'—'}</span></div>`
     +`<div class="row"><span>Note</span><span>excluded from all correlations &amp; totals</span></div>`,e.clientX,e.clientY);});
     el.addEventListener('mouseleave',hideTip);});
@@ -829,6 +848,7 @@ function renderFinance(){
     +(exfac && r.facility_gpus>0 ? `<div class="row"><span>− National/state facility</span><span>${fmt(r.facility_gpus)}</span></div>`
       +`<div class="row"><span>= Institutional residual</span><span>≥${fmt(r.documented_gpus-r.facility_gpus)}</span></div>` : '')
     +`<div class="row"><span>R&D</span><span>$${(r.rd_fy2024_m/1000).toFixed(1)}B</span></div>`
+    +`<div class="row"><span>CS R&D</span><span>${r.cs_rd_fy2024_m==null?'—':'$'+r.cs_rd_fy2024_m+'M'}</span></div>`
     +`<div class="row"><span>Endowment</span><span>${r.endowment_b?'$'+r.endowment_b+'B':'—'}</span></div>`
     +`<div class="row"><span>Model</span><span>${r.control_model}</span></div>`,e.clientX,e.clientY);});
     el.addEventListener('mouseleave',hideTip);});

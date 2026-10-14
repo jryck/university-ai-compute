@@ -559,6 +559,7 @@ def main():
         'gpu_source': 'AUTHORITATIVE: herd50.csv (documented lower bounds) + independently documented cluster records (clusters.csv) for model-level / generation evidence. LEGACY (discovery only, never in headline figures): gpusperstudent.org via raw_gpus.csv.',
         'endowment_source': '2025 NACUBO-Commonfund Study; statranker/altss FY2025 compilations; university treasury reports',
         'rd_source': 'NSF HERD survey, FY2024 (total R&D expenditures; year ending ~June 30 2024)',
+        'cs_rd_source': 'NSF HERD FY2024 Table 15 (R&D expenditures by R&D field), "Computer and information sciences," institution-level; matched in herd_cs.csv. A reported $0 (e.g. medical centers) is kept distinct from missing.',
         'rd_data_asof': 'FY2024 (NSF HERD, released Nov 2025)',
         'alloc_source': 'DOE INCITE 2025 + ALCC 2025 — both complete across all facilities (Frontier/Aurora/Polaris/Perlmutter), parsed from the official ASCR/INCITE fact-sheet PDFs; NAIRR pilot project counts (nairrpilot.org awards CSV, 1,212 awards)',
         'alloc_caveat': 'Leadership node-hours = INCITE 2025 + ALCC 2025, both complete across all leadership facilities. NSF ACCESS and routine NERSC/ERCAP allocations are not quantified (no clean per-institution public totals). NAIRR is a project count (AI-specific national access), a distinct signal. Node-hours/project-counts are not comparable to owned-GPU counts.',
@@ -600,6 +601,14 @@ def main():
         'Ohio State University': 904,                     # OSC (Ohio state facility) — no separable residual
         'University of Pittsburgh': 264,                  # PSC Bridges-2 (NSF) — no separable residual
     }
+    # Computer & information sciences R&D (NSF HERD FY2024, Table 15), matched to our
+    # sample. A REPORTED 0 (e.g. medical centers with no CS-field R&D) is a real
+    # observation and is kept distinct from MISSING (institution absent from the table).
+    cs_rd = {}
+    if os.path.exists('herd_cs.csv'):
+        for c in csv.DictReader(open('herd_cs.csv')):
+            cs_rd[c['institution']] = float(c['cs_rd_fy2024_m'])
+
     herd50 = []
     if os.path.exists('herd50.csv'):
         for h in csv.DictReader(open('herd50.csv')):
@@ -611,6 +620,8 @@ def main():
             h['facility_gpus'] = fac
             # institutional residual is "separable" only when documented > facility capacity
             h['residual_separable'] = fac == 0 or (h['documented_gpus'] - fac) > 0
+            # None = missing (not in HERD table); a float (incl. 0.0) = reported value
+            h['cs_rd_fy2024_m'] = cs_rd.get(h['institution'])
             herd50.append(h)
     meta['n_herd50'] = len(herd50)
     meta['n_documented'] = len([h for h in herd50 if h['documented_gpus'] > 0])
@@ -703,6 +714,7 @@ def main():
             rp['rd_fy2024_m'] = float(rp['rd_fy2024_m'] or 0)
             rp['endowment_b'] = float(rp['endowment_b']) if rp['endowment_b'] else None
             rp['documented_gpus'] = int(rp['documented_gpus'] or 0)
+            rp['cs_rd_fy2024_m'] = cs_rd.get(rp['institution'])
             reference_points.append(rp)
 
     payload = {'meta': meta, 'schools': out, 'milestones': milestones,

@@ -182,6 +182,20 @@ def main():
     for rp in PAYLOAD.get('reference_points', []):
         check(rp['institution'] not in herd, f"[recon] reference point {rp['institution']} leaked into herd50")
 
+    # CS R&D (NSF HERD FY2024 field data): present for all herd50; reported 0 kept distinct from missing
+    cs_present = [h for h in herd.values() if h.get('cs_rd_fy2024_m') is not None]
+    check(len(cs_present) == len(herd), f"[cs] cs_rd present for {len(cs_present)}/{len(herd)} herd50 schools")
+    for h in herd.values():
+        v = h.get('cs_rd_fy2024_m')
+        check(v is None or (isinstance(v, (int, float)) and v >= 0),
+              f"[cs] {h['institution']}: bad cs_rd_fy2024_m {v!r}")
+    # medical centers with no CS-field R&D must be reported 0.0, NOT null (zero != missing)
+    for name in ['University of California San Francisco', 'Icahn School of Medicine at Mount Sinai',
+                 'UT Southwestern Medical Center']:
+        if name in herd:
+            check(herd[name].get('cs_rd_fy2024_m') == 0,
+                  f"[cs] {name}: expected reported 0 CS R&D, got {herd[name].get('cs_rd_fy2024_m')!r}")
+
     # facility-capacity subtraction: never exceeds documented; separable flag is consistent
     fac_hosts = [h for h in herd.values() if h.get('facility_gpus', 0) > 0]
     check(len(fac_hosts) >= 6, f"[facility] expected >=6 facility hosts, got {len(fac_hosts)}")

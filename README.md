@@ -111,6 +111,7 @@ and routine NERSC/ERCAP allocations are not quantified (no clean per-institution
 | `herd50.csv` | **Authoritative** 50-university inventory (documented lower bounds). |
 | `clusters.csv` | Cluster-level records — the model-level / generation evidence. |
 | `research_subset.csv` | Top-20 allocation-regime classification (matches herd50 totals). |
+| `herd_cs.csv` | Computer & information sciences R&D (NSF HERD FY2024, Table 15) per school, with the source HERD table name — the optional "vs. CS R&D" scatter axis. |
 | `reference_points.csv` | Endowment-heavy schools outside HERD-50 (scatter reference only). |
 | `data.json` | Built payload: `herd50`, `gen_chart`, `headline`, `research_subset`, `reference_points`, and legacy `schools`. |
 | `build_data.py` | Build script: assembles `data.json` and injects it into `template.html` → `index.html`. |
@@ -130,5 +131,9 @@ open index.html
 
 - **GPU capacity:** primary sources (university research-computing docs, NSF/DOE facility pages,
   official announcements), verified through Oct 2026. Documented lower bounds.
-- **R&D:** NSF HERD FY2024 (released Nov 2025). **Endowments:** 2025 NACUBO-Commonfund Study /
+- **R&D:** NSF HERD FY2024 (released Nov 2025). **CS R&D:** NSF HERD FY2024 Table 15 (R&D by
+  field), "Computer and information sciences," institution-level — an optional scatter axis; a
+  reported $0 (e.g. medical centers) is kept distinct from missing. CS R&D is a proxy for
+  relevant research activity, not a comprehensive measure of AI-research demand (AI research is
+  often classified under other fields). **Endowments:** 2025 NACUBO-Commonfund Study /
   FY2025 compilations where reported; FY2024 for a few smaller schools.

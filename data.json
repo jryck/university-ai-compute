@@ -10,6 +10,7 @@
     "gpu_source": "AUTHORITATIVE: herd50.csv (documented lower bounds) + independently documented cluster records (clusters.csv) for model-level / generation evidence. LEGACY (discovery only, never in headline figures): gpusperstudent.org via raw_gpus.csv.",
     "endowment_source": "2025 NACUBO-Commonfund Study; statranker/altss FY2025 compilations; university treasury reports",
     "rd_source": "NSF HERD survey, FY2024 (total R&D expenditures; year ending ~June 30 2024)",
+    "cs_rd_source": "NSF HERD FY2024 Table 15 (R&D expenditures by R&D field), \"Computer and information sciences,\" institution-level; matched in herd_cs.csv. A reported $0 (e.g. medical centers) is kept distinct from missing.",
     "rd_data_asof": "FY2024 (NSF HERD, released Nov 2025)",
     "alloc_source": "DOE INCITE 2025 + ALCC 2025 \u2014 both complete across all facilities (Frontier/Aurora/Polaris/Perlmutter), parsed from the official ASCR/INCITE fact-sheet PDFs; NAIRR pilot project counts (nairrpilot.org awards CSV, 1,212 awards)",
     "alloc_caveat": "Leadership node-hours = INCITE 2025 + ALCC 2025, both complete across all leadership facilities. NSF ACCESS and routine NERSC/ERCAP allocations are not quantified (no clean per-institution public totals). NAIRR is a project count (AI-specific national access), a distinct signal. Node-hours/project-counts are not comparable to owned-GPU counts.",
@@ -4938,7 +4939,8 @@
       "primary_source": "docs.arch.jhu.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 302.764
     },
     {
       "rank": 2,
@@ -4953,7 +4955,8 @@
       "primary_source": "parcc.upenn.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 27.96
     },
     {
       "rank": 3,
@@ -4968,7 +4971,8 @@
       "primary_source": "wynton.ucsf.edu",
       "completeness": "high",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 0.0
     },
     {
       "rank": 4,
@@ -4983,7 +4987,8 @@
       "primary_source": "documentation.its.umich.edu",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 20.917
     },
     {
       "rank": 5,
@@ -4998,7 +5003,8 @@
       "primary_source": "chtc.cs.wisc.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 38.851
     },
     {
       "rank": 6,
@@ -5013,7 +5019,8 @@
       "primary_source": "hpc.oarc.ucla.edu",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 20.823
     },
     {
       "rank": 7,
@@ -5028,7 +5035,8 @@
       "primary_source": "sdsc.edu",
       "completeness": "high",
       "facility_gpus": 344,
-      "residual_separable": false
+      "residual_separable": false,
+      "cs_rd_fy2024_m": 9.566
     },
     {
       "rank": 8,
@@ -5043,7 +5051,8 @@
       "primary_source": "hyak.uw.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 35.541
     },
     {
       "rank": 9,
@@ -5058,7 +5067,8 @@
       "primary_source": "marlowe.stanford.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 28.45
     },
     {
       "rank": 10,
@@ -5073,7 +5083,8 @@
       "primary_source": "it.coecis.cornell.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 42.783
     },
     {
       "rank": 11,
@@ -5088,7 +5099,8 @@
       "primary_source": "help.rc.unc.edu",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 50.246
     },
     {
       "rank": 12,
@@ -5103,7 +5115,8 @@
       "primary_source": "osc.edu",
       "completeness": "high",
       "facility_gpus": 904,
-      "residual_separable": false
+      "residual_separable": false,
+      "cs_rd_fy2024_m": 33.585
     },
     {
       "rank": 13,
@@ -5118,7 +5131,8 @@
       "primary_source": "oit-rc.pages.oit.duke.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 14.349
     },
     {
       "rank": 14,
@@ -5133,7 +5147,8 @@
       "primary_source": "hpcc.umd.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 94.066
     },
     {
       "rank": 15,
@@ -5148,7 +5163,8 @@
       "primary_source": "ece.gatech.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 235.289
     },
     {
       "rank": 16,
@@ -5163,7 +5179,8 @@
       "primary_source": "docs.ycrc.yale.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 12.775
     },
     {
       "rank": 17,
@@ -5178,7 +5195,8 @@
       "primary_source": "psc.edu",
       "completeness": "partial",
       "facility_gpus": 264,
-      "residual_separable": false
+      "residual_separable": false,
+      "cs_rd_fy2024_m": 11.311
     },
     {
       "rank": 18,
@@ -5193,7 +5211,8 @@
       "primary_source": "github.com/NYU-RTS/rts-docs",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 20.307
     },
     {
       "rank": 19,
@@ -5208,7 +5227,8 @@
       "primary_source": "kempnerinstitute.harvard.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 25.831
     },
     {
       "rank": 20,
@@ -5223,7 +5243,8 @@
       "primary_source": "cuit.columbia.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 36.053
     },
     {
       "rank": 21,
@@ -5238,7 +5259,8 @@
       "primary_source": "msi.umn.edu",
       "completeness": "high",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 29.109
     },
     {
       "rank": 22,
@@ -5253,7 +5275,8 @@
       "primary_source": "hprc.tamu.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 35.515
     },
     {
       "rank": 23,
@@ -5268,7 +5291,8 @@
       "primary_source": "mdanderson.org",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 0.0
     },
     {
       "rank": 24,
@@ -5283,7 +5307,8 @@
       "primary_source": "vanderbilt.edu/accre",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 28.126
     },
     {
       "rank": 25,
@@ -5298,7 +5323,8 @@
       "primary_source": "icds.psu.edu",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 125.328
     },
     {
       "rank": 26,
@@ -5313,7 +5339,8 @@
       "primary_source": "news.ufl.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 18.468
     },
     {
       "rank": 27,
@@ -5328,7 +5355,8 @@
       "primary_source": "carc.usc.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 125.806
     },
     {
       "rank": 28,
@@ -5343,7 +5371,8 @@
       "primary_source": "rcdsdocs.it.northwestern.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 14.917
     },
     {
       "rank": 29,
@@ -5358,7 +5387,8 @@
       "primary_source": "aws.amazon.com",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 4.103
     },
     {
       "rank": 30,
@@ -5373,7 +5403,8 @@
       "primary_source": "ris.wustl.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 5.731
     },
     {
       "rank": 31,
@@ -5388,7 +5419,8 @@
       "primary_source": "docs.tacc.utexas.edu",
       "completeness": "high",
       "facility_gpus": 600,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 155.613
     },
     {
       "rank": 32,
@@ -5403,7 +5435,8 @@
       "primary_source": "research-it.berkeley.edu",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 15.865
     },
     {
       "rank": 33,
@@ -5418,7 +5451,8 @@
       "primary_source": "orcd.mit.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 121.43
     },
     {
       "rank": 34,
@@ -5433,7 +5467,8 @@
       "primary_source": "labs.icahn.mssm.edu",
       "completeness": "high",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 0.0
     },
     {
       "rank": 35,
@@ -5448,7 +5483,8 @@
       "primary_source": "hpcdocs.hpc.arizona.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 15.77
     },
     {
       "rank": 36,
@@ -5463,7 +5499,8 @@
       "primary_source": "hpc.ucdavis.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 9.848
     },
     {
       "rank": 37,
@@ -5478,7 +5515,8 @@
       "primary_source": "docs.rc.asu.edu",
       "completeness": "high",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 47.71
     },
     {
       "rank": 38,
@@ -5493,7 +5531,8 @@
       "primary_source": "docs.icer.msu.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 22.279
     },
     {
       "rank": 39,
@@ -5508,7 +5547,8 @@
       "primary_source": "rcac.purdue.edu",
       "completeness": "high",
       "facility_gpus": 148,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 36.754
     },
     {
       "rank": 40,
@@ -5523,7 +5563,8 @@
       "primary_source": "docs.ncsa.illinois.edu",
       "completeness": "high",
       "facility_gpus": 1512,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 87.866
     },
     {
       "rank": 41,
@@ -5538,7 +5579,8 @@
       "primary_source": "kb.iu.edu",
       "completeness": "high",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 38.091
     },
     {
       "rank": 42,
@@ -5553,7 +5595,8 @@
       "primary_source": "bcm.edu",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 0.0
     },
     {
       "rank": 43,
@@ -5568,7 +5611,8 @@
       "primary_source": "biohpc.swmed.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 0.0
     },
     {
       "rank": 44,
@@ -5586,7 +5630,8 @@
         "unknown"
       ],
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 1.238
     },
     {
       "rank": 45,
@@ -5601,7 +5646,8 @@
       "primary_source": "oarc.rutgers.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 7.57
     },
     {
       "rank": 46,
@@ -5616,7 +5662,8 @@
       "primary_source": "rc.virginia.edu",
       "completeness": "high",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 20.769
     },
     {
       "rank": 47,
@@ -5631,7 +5678,8 @@
       "primary_source": "chpc.utah.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 5.279
     },
     {
       "rank": 48,
@@ -5646,7 +5694,8 @@
       "primary_source": "bu.edu/tech",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 25.666
     },
     {
       "rank": 49,
@@ -5661,7 +5710,8 @@
       "primary_source": "curc.readthedocs.io",
       "completeness": "unknown",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 0.0
     },
     {
       "rank": 50,
@@ -5676,7 +5726,8 @@
       "primary_source": "research.uc.edu",
       "completeness": "partial",
       "facility_gpus": 0,
-      "residual_separable": true
+      "residual_separable": true,
+      "cs_rd_fy2024_m": 5.655
     }
   ],
   "headline": {
@@ -5701,7 +5752,8 @@
       "control_model": "Central + PLI priority",
       "key_systems": "Della (336 H100 + 276 A100) + GH200 + H200 (PLI)",
       "primary_source": "researchcomputing.princeton.edu/systems/della",
-      "completeness": "partial"
+      "completeness": "partial",
+      "cs_rd_fy2024_m": 31.282
     },
     {
       "institution": "Rice University",
@@ -5713,7 +5765,8 @@
       "control_model": "Central (RANGE + NOTS)",
       "key_systems": "RANGE (16 H100 + 64 H200) + NOTS (32 V100 + 48 L40S)",
       "primary_source": "researchcomputing.rice.edu/high-performance-computing-resources",
-      "completeness": "partial"
+      "completeness": "partial",
+      "cs_rd_fy2024_m": 12.861
     },
     {
       "institution": "University of Notre Dame",
@@ -5725,7 +5778,8 @@
       "control_model": "Central (CRC)",
       "key_systems": "CRC clusters (count not published)",
       "primary_source": "crc.nd.edu",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "cs_rd_fy2024_m": null
     },
     {
       "institution": "University of Chicago",
@@ -5737,7 +5791,8 @@
       "control_model": "Central (RCC Midway3)",
       "key_systems": "Midway3 (A100/V100/RTX6000; count not published)",
       "primary_source": "rcc.uchicago.edu/support-and-services/midway3",
-      "completeness": "unknown"
+      "completeness": "unknown",
+      "cs_rd_fy2024_m": null
     }
   ],
   "gen_chart": [
