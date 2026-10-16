@@ -364,15 +364,16 @@ GEN_OF = {
     'A100_80GB': 'Ampere', 'A100_40GB': 'Ampere', 'A100': 'Ampere', 'A40': 'Ampere',
     'A10': 'Ampere', 'RTX_A6000': 'Ampere',
     'L40S': 'Ada', 'L4': 'Ada',
-    'H100_SXM': 'Hopper', 'H100_PCIe': 'Hopper', 'H100': 'Hopper', 'H200': 'Hopper', 'GH200': 'Hopper',
-    'B200': 'Blackwell', 'B100': 'Blackwell', 'RTX_PRO_6000': 'Blackwell', 'Rubin': 'Rubin',
+    'H100_SXM': 'Hopper', 'H100_PCIe': 'Hopper', 'H100': 'Hopper', 'H100_NVL': 'Hopper',
+    'H200': 'Hopper', 'GH200': 'Hopper',
+    'B200': 'Blackwell', 'B300': 'Blackwell', 'B100': 'Blackwell', 'RTX_PRO_6000': 'Blackwell', 'Rubin': 'Rubin',
 }
 # Price-based weights (NOT performance): approximate share of the value-derived
 # "H100 price-equivalent", used only to apportion that metric across generations.
 GEN_W = {'P100': 0.05, 'V100': 0.12, 'RTX8000': 0.1, 'A100_80GB': 0.6, 'A100_40GB': 0.5,
          'A100': 0.55, 'A40': 0.2, 'A10': 0.15, 'RTX_A6000': 0.25, 'L40S': 0.4, 'L4': 0.15,
-         'H100_SXM': 1.0, 'H100_PCIe': 0.9, 'H100': 1.0, 'H200': 1.1, 'GH200': 1.0,
-         'B200': 2.2, 'B100': 1.8, 'RTX_PRO_6000': 0.8, 'Rubin': 3.0}
+         'H100_SXM': 1.0, 'H100_PCIe': 0.9, 'H100': 1.0, 'H100_NVL': 1.0, 'H200': 1.1, 'GH200': 1.0,
+         'B200': 2.2, 'B300': 2.5, 'B100': 1.8, 'RTX_PRO_6000': 0.8, 'Rubin': 3.0}
 GENS_ORDER = ['Pascal', 'Volta', 'Turing', 'Ampere', 'Ada', 'Hopper', 'Blackwell', 'Rubin']
 
 

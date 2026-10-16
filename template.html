@@ -383,7 +383,7 @@ document.getElementById('headline-tiles').innerHTML = [
   [HL.top10_gpu_share+'%', `of documented GPUs held by the top-10 fleets (vs ${HL.top10_rd_share}% of R&D for the top-10 spenders)`],
 ].map(t=>`<div class="tile"><div class="v">${t[0]}</div><div class="l">${t[1]}</div></div>`).join('');
 document.getElementById('headline-takeaway').innerHTML =
-  `University wealth and research spending are <b>weak predictors of the GPU capacity universities publicly document</b> — both correlations sit near zero. `
+  `University wealth and research spending are <b>weak-to-moderate predictors of the GPU capacity universities publicly document</b> — the association is somewhat stronger for endowment than for research spending, and neither is deterministic. `
   +`And that documented capacity is <b>unevenly concentrated</b>: the ten largest documented fleets hold ${HL.top10_gpu_share}% of documented GPUs. `
   +`Because documentation is incomplete and uneven, this reflects differing research priorities, financing, documentation practices, and sources of access — not necessarily actual capacity.`;
 const docN = H50.filter(h=>h.documented_gpus>0).length;

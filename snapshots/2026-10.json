@@ -52,9 +52,9 @@
     },
     {
       "name": "Harvard University",
-      "total_gpus": 1144,
-      "h100_equivalent": 1076.0,
-      "gpu_value_usd": 37660000,
+      "total_gpus": 1384,
+      "h100_equivalent": 1253.6,
+      "gpu_value_usd": 43876000,
       "endowment_b": 56.9
     },
     {
@@ -94,9 +94,9 @@
     },
     {
       "name": "Johns Hopkins University",
-      "total_gpus": 144,
-      "h100_equivalent": 72.8,
-      "gpu_value_usd": 2548000,
+      "total_gpus": 636,
+      "h100_equivalent": 642.4,
+      "gpu_value_usd": 22484000,
       "endowment_b": 13.73
     },
     {

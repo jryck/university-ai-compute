@@ -1,5 +1,5 @@
 rank,institution,sector,rd_fy2024_m,endowment_b,documented_gpus,count_type,control_model,key_systems,primary_source,completeness
-1,Johns Hopkins University,Private,4100,13.73,144,lower_bound,Hybrid (institutional+NSF-MRI),Rockfish (+DSAI unresolved),docs.arch.jhu.edu,partial
+1,Johns Hopkins University,Private,4100,13.73,636,lower_bound,Hybrid (institutional+NSF-MRI),Rockfish (144) + Skipjack (492; supersedes DSAI),docs.arch.jhu.edu/en/latest/1_Clusters/Skipjack,partial
 2,University of Pennsylvania,Private,2200,24.81,376,lower_bound,Central + medical condo,Betty DGX B200 (248) + CBICA (128),parcc.upenn.edu,partial
 3,University of California San Francisco,Medical,2100,,235,verified,Condo (communal + contributed),Wynton (88 communal + 147 contributed),wynton.ucsf.edu,high
 4,University of Michigan Ann Arbor,Public,2100,21.20,0,unresolved,Condo (cost-recovery),Great Lakes + Armis2,documentation.its.umich.edu,unknown
@@ -17,7 +17,7 @@ rank,institution,sector,rd_fy2024_m,endowment_b,documented_gpus,count_type,contr
 16,Yale University,Private,1500,44.15,100,lower_bound,Central shared + buy-in,Grace + McCleary + Misha,docs.ycrc.yale.edu,partial
 17,University of Pittsburgh,Public,1500,6.15,264,lower_bound,National facility (NSF),PSC Bridges-2 (264 V100),psc.edu,partial
 18,New York University,Private,1500,7.28,1276,lower_bound,Stakeholder-priority + public,Torch (944) + Greene (332),github.com/NYU-RTS/rts-docs,partial
-19,Harvard University,Private,1500,56.90,1144,lower_bound,Institute-priority (Kempner),Kempner (1144) + Cannon unresolved,kempnerinstitute.harvard.edu,partial
+19,Harvard University,Private,1500,56.90,1384,lower_bound,Institute-priority (Kempner) + central (Cannon),Kempner (1144) + Cannon general (240: 144 A100 + 96 H200),kempnerinstitute.harvard.edu,partial
 20,Columbia University,Private,1400,15.92,230,lower_bound,Condo (ownership-fairshare),Insomnia (230 / 21 groups) + Ginsburg,cuit.columbia.edu,partial
 21,University of Minnesota Twin Cities,Public,1400,4.50,408,lower_bound,Central (MSI),MSI Agate (264 A100 + 32 H100 + 32 L40S + 80 A40),msi.umn.edu,high
 22,Texas A&M University,Public,1400,22.23,1000,aggregate,Central (DGX SuperPOD) + NSF (ACES),DGX SuperPOD (760 H200) + Grace/FASTER/ACES,hprc.tamu.edu,partial

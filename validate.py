@@ -104,8 +104,8 @@ def main():
         ('University of Illinois Urbana-Champaign', 'facility_gpus', 1512),
         ('University of Illinois Urbana-Champaign', 'federal_funded_gpus', 1576),
         ('Massachusetts Institute of Technology (MIT)', 'documented_lower_bound', 1448),
-        ('Harvard University', 'documented_lower_bound', 1144),
-        ('Harvard University', 'aggregate_count', 2000),
+        ('Harvard University', 'documented_lower_bound', 1384),  # Kempner 1144 + Cannon general 240 (144 A100 + 96 H200)
+        ('Harvard University', 'aggregate_count', 0),  # Cannon now model-level; ~2000 combined figure (incl MIG) not used
         ('Stanford University', 'documented_lower_bound', 1504),  # Marlowe 248 + Sherlock 1256 (aggregate, distinct)
         ('Carnegie Mellon University', 'verified_model_count', 0),
         ('Carnegie Mellon University', 'cloud_gpus', 296),
@@ -173,7 +173,7 @@ def main():
 
     # named cross-chart test schools: identical documented total in every structure
     for name, exp in [('Massachusetts Institute of Technology', 1448), ('New York University', 1276),
-                      ('Harvard University', 1144), ('University of Illinois Urbana-Champaign', 1650),
+                      ('Harvard University', 1384), ('University of Illinois Urbana-Champaign', 1650),
                       ('Cornell University', 755)]:
         check(herd.get(name, {}).get('documented_gpus') == exp, f"[recon] herd50 {name} != {exp}")
         check(gen.get(name, {}).get('documented') == exp, f"[recon] gen_chart {name} != {exp}")
