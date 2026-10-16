@@ -620,7 +620,7 @@
           "cluster": "Sherlock",
           "count": 1256,
           "overlap": "distinct",
-          "note": "1,256 physical GPUs across 5 generations / 14 models per the official facts page (no per-model breakdown published, so generation is unknown). Physically distinct from Marlowe: separate operator (SRCC vs Stanford Data Science) and separate hardware; Marlowe is not referenced on the Sherlock facts page.",
+          "note": "1,256 physical GPUs across 5 generations / 14 models per the official facts page (no per-model breakdown published, so generation is unknown). Physically distinct from Marlowe (separate operator SRCC vs Stanford Data Science; separate hardware). Hardware-generation note from DIRECT CORRESPONDENCE with Stanford Research Computing, Oct 2026 (not publicly published): >=600 GPUs across Marlowe + Sherlock are H100-class-or-better (Marlowe's 248 included); the specific models are not disclosed, so generation remains unknown here \u2014 this refines the fleet's modernity, not the documented total.",
           "source": "https://www.sherlock.stanford.edu/docs/tech/facts/"
         }
       ],
@@ -5054,7 +5054,7 @@
       "documented_gpus": 1504,
       "count_type": "lower_bound",
       "control_model": "Central (Marlowe) + condo (Sherlock)",
-      "key_systems": "Marlowe (248 H100) + Sherlock (1256; 5 gens/14 models)",
+      "key_systems": "Marlowe (248 H100) + Sherlock (1256; >=600 of the fleet are H100-class-or-better per direct corr.)",
       "primary_source": "sherlock.stanford.edu/docs/tech/facts",
       "completeness": "partial",
       "facility_gpus": 0,
@@ -5613,13 +5613,10 @@
       "endowment_b": null,
       "documented_gpus": 0,
       "count_type": "unresolved",
-      "control_model": "Central (Cheaha",
-      "key_systems": " unresolved)",
-      "primary_source": "Cheaha",
-      "completeness": "uabrc.github.io",
-      "null": [
-        "unknown"
-      ],
+      "control_model": "Central (Cheaha, unresolved)",
+      "key_systems": "Cheaha",
+      "primary_source": "uabrc.github.io",
+      "completeness": "unknown",
       "facility_gpus": 0,
       "residual_separable": true,
       "cs_rd_fy2024_m": 1.238

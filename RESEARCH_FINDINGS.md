@@ -18,10 +18,12 @@ highest-R&D institutions are *not* the highest-compute: Johns Hopkins (#1 in R&D
 documents ~144; the largest documented fleets are Illinois, MIT, NYU, Harvard, UCSD. *Robust
 in direction; magnitude is coverage-sensitive.*
 
-**2. GPU capacity is about twice as concentrated as research spending.** The top-10 schools
-hold **62% of documented GPUs but only 31% of R&D**; top-5, **37% vs 18%**. Academic AI
-compute is markedly more unequal than the research enterprise it serves. *Robust (lower
-bounds only compress this).*
+**2. Documented GPU capacity is more concentrated than research spending.** Among documented
+fleets, the top-10 schools hold **62% of documented GPUs but only 31% of R&D**; top-5, **37%
+vs 18%**. *This describes documented capacity, not necessarily actual capacity: documentation
+is incomplete and uneven, so the undocumented and lower-bound portions could move measured
+concentration in **either** direction. The descriptive figures stand; the inference to true
+concentration does not.*
 
 **3. Roughly a quarter of documented academic GPUs is federal/state shared infrastructure,
 not institutional.** Six national/state-facility hosts (UCSD/SDSC, UT Austin/TACC,
@@ -38,16 +40,16 @@ national/state facilities. But most central clusters are **small** (Cincinnati 1
 large institutional clusters (Harvard, NYU, MIT, Florida). **Model prevalence ≠ capacity** —
 a school can "have a central cluster" that is tiny. *Robust.*
 
-**5. Compute-per-wealth spans ~600×, and wealthy privates cluster at the bottom.** Documented
-GPUs per $B of endowment range from **~434 (Illinois), ~410 (Florida)** to **<1 (Emory
-0.7)**, with Yale, Duke, and Stanford also near the bottom. *Exploratory:* this partly
-reflects incomplete inventories and heavy cloud/national reliance (Emory runs AI.Humanity on
-AWS; Stanford's Sherlock is unresolved) — it is **not** evidence of underinvestment, and is
-the most coverage-sensitive observation here.
+**5. Compute-per-endowment ratios are not interpretable from current data.** Documented GPUs
+per $B of endowment vary widely across schools, but we do **not** report a specific range,
+ratio, or ranking: the spread is dominated by documentation gaps (some inventories are
+near-complete, others are lower bounds or unresolved) and by heavy cloud/national-facility
+reliance. Incomplete inventories undermine any per-wealth comparison, and the variation is
+**not** evidence of over- or under-investment.
 
 ## The five guiding questions, answered
 - **Q1 wealth→compute:** essentially decoupled (R&D r≈−0.05; endowment r≈0.19). See Obs. 1/5.
-- **Q2 concentration:** GPUs ~2× more concentrated than R&D. See Obs. 2.
+- **Q2 concentration:** *documented* GPUs are more concentrated than R&D (descriptive only; the inference to actual capacity does not hold — see Obs. 2). See Obs. 2.
 - **Q3 government infrastructure:** ≥24% of documented GPUs are national/state facilities. Obs. 3.
 - **Q4 hardware generations:** *partially answerable.* Per-generation data exists for the ~20
   audited schools (Hopper-dominant, with Florida on Blackwell and legacy V100/RTX8000 fleets at
@@ -56,9 +58,9 @@ the most coverage-sensitive observation here.
   most schools hybrid; central is most common by count, national facilities largest by capacity.
 
 ## Potential Data Insights
-1. **"Academic AI compute is more concentrated than, and decoupled from, research spending."**
-   (Obs. 1 + 2.) Novel, quantified on an unbiased sample, defensible with lower-bound framing.
-   Strongest candidate.
+1. **"Documented academic AI compute is more concentrated than, and weakly related to, research spending."**
+   (Obs. 1 + 2.) A descriptive statement about documented capacity, not actual capacity; quantified on an
+   unbiased sample. Strongest candidate, but see the Obs. 2 caveat on inference.
 2. **"Where you can get a guaranteed large allocation is a minority of the headline count"**
    (the Phase-4 allocation-regime finding, `DATA_INSIGHT_DRAFT.md`) — complementary and still valid.
 

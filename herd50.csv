@@ -7,7 +7,7 @@ rank,institution,sector,rd_fy2024_m,endowment_b,documented_gpus,count_type,contr
 6,University of California Los Angeles,Public,1900,4.77,0,unresolved,Condo,Hoffman2,hpc.oarc.ucla.edu,unknown
 7,University of California San Diego,Public,1900,1.79,344,lower_bound,National facility (NSF),SDSC Expanse (208 V100 + 136 H100) + Voyager,sdsc.edu,high
 8,University of Washington Seattle,Public,1700,6.00,954,aggregate,Condo,Hyak klone (954 cards),hyak.uw.edu,partial
-9,Stanford University,Private,1600,40.79,1504,lower_bound,Central (Marlowe) + condo (Sherlock),Marlowe (248 H100) + Sherlock (1256; 5 gens/14 models),sherlock.stanford.edu/docs/tech/facts,partial
+9,Stanford University,Private,1600,40.79,1504,lower_bound,Central (Marlowe) + condo (Sherlock),Marlowe (248 H100) + Sherlock (1256; >=600 of the fleet are H100-class-or-better per direct corr.),sherlock.stanford.edu/docs/tech/facts,partial
 10,Cornell University,Private,1600,11.75,755,aggregate,Condo (70 owners),G2/Unicorn (755 GPUs),it.coecis.cornell.edu,partial
 11,University of North Carolina Chapel Hill,Public,1600,6.22,0,unresolved,Condo,Longleaf / Dogwood,help.rc.unc.edu,unknown
 12,Ohio State University,Public,1600,8.62,904,lower_bound,State facility,OSC Ascend (776 A100) + Cardinal (128 H100),osc.edu,high
@@ -42,7 +42,7 @@ rank,institution,sector,rd_fy2024_m,endowment_b,documented_gpus,count_type,contr
 41,Indiana University Bloomington,Public,897,4.05,304,lower_bound,Central (Big Red) + NSF (Jetstream2),Big Red 200 (256 A100 + 48 H100),kb.iu.edu,high
 42,Baylor College of Medicine,Medical,881,,0,unresolved,Medical (unresolved),Dan L Duncan CCC cluster,bcm.edu,unknown
 43,UT Southwestern Medical Center,Medical,869,,100,aggregate,Central (BioHPC),BioHPC (26 A100 + 100 GPU nodes),biohpc.swmed.edu,partial
-44,University of Alabama at Birmingham,Medical,866,,0,unresolved,Central (Cheaha, unresolved),Cheaha,uabrc.github.io,unknown
+44,University of Alabama at Birmingham,Medical,866,,0,unresolved,"Central (Cheaha, unresolved)",Cheaha,uabrc.github.io,unknown
 45,Rutgers University New Brunswick,Public,837,2.35,220,aggregate,Condo (Amarel),Amarel (220 GPUs),oarc.rutgers.edu,partial
 46,University of Virginia,Public,814,11.23,240,lower_bound,Central + buy-in + BasePOD,Afton/Rivanna (160 A100) + DGX BasePOD (80),rc.virginia.edu,high
 47,University of Utah,Public,789,2.07,80,lower_bound,Central + condo (CHPC),Notchpeak (~80 recent GPUs),chpc.utah.edu,partial
