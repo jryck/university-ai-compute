@@ -21,7 +21,7 @@ chart draws on a **single source of truth**:
   (generation) evidence**.
 
 A given university reports the **same documented total everywhere** — e.g. MIT ≥1,448,
-NYU ≥1,276, Harvard ≥1,144, Illinois ≥1,650, Cornell ≥755. `validate.py` enforces this.
+NYU ≥1,276, Harvard ≥1,384, Illinois ≥1,650, Cornell ≥755. `validate.py` enforces this.
 
 The legacy **GPUs-Per-Student-derived** estimates (`raw_gpus.csv` → `data.json` `"schools"`)
 are retained **only** for historical comparison and data discovery. They are **never combined**
@@ -126,6 +126,22 @@ and routine NERSC/ERCAP allocations are not quantified (no clean per-institution
 python3 alloc_build.py && python3 build_data.py && python3 validate.py
 open index.html
 ```
+
+**Keeping prose in sync with the data.** Two helper scripts guard against stale numbers:
+
+```bash
+python3 scripts/recompute_findings.py   # recomputes Obs. 1-3 from the CSVs, with
+                                        # sensitivity variants (all documented;
+                                        # excl. national/state facilities; Horizon
+                                        # excluded vs included). Source of truth for prose.
+python3 scripts/check_numbers.py        # fails if a figure quoted in README.md /
+                                        # RESEARCH_FINDINGS.md / the site text disagrees
+                                        # with the current data. Run before committing.
+```
+
+Cluster `status` values and how each is treated in totals: `operational` (counted),
+`early-operations` (friendly-user/internal-only — **excluded** from the documented lower
+bound, like `planned`), `planned`/`retired`/`uncertain` (excluded).
 
 ## Data currency
 

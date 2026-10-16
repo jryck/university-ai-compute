@@ -160,7 +160,8 @@
         "2022",
         "2023",
         "2024-09",
-        "2026"
+        "2025-11",
+        "2026-08"
       ],
       "h100_equivalent": 733.2,
       "institutional_gpus": 260,
@@ -171,15 +172,16 @@
       "has_facility": true,
       "cloud_gpus": 0,
       "cloud_models": {},
-      "planned_gpus": 4032,
+      "planned_gpus": 4000,
       "planned_models": {
-        "B200": 4032
+        "GB200": 4000
       },
       "verification": "verified",
       "sources": [
+        "https://docs.tacc.utexas.edu/hpc/horizon/",
         "https://docs.tacc.utexas.edu/hpc/lonestar6/",
         "https://docs.tacc.utexas.edu/hpc/vista/",
-        "https://tacc.utexas.edu/systems/horizon/"
+        "https://news.utexas.edu/2025/11/17/ut-eclipses-5000-gpus-to-increase-dominance-in-open-source-ai-strengthen-nations-computing-power/"
       ],
       "aggregate_clusters": [],
       "correction_source": "",
