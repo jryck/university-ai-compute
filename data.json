@@ -5024,7 +5024,7 @@
       "control_model": "National facility (NSF)",
       "key_systems": "SDSC Expanse (208 V100 + 136 H100) + Voyager",
       "primary_source": "sdsc.edu",
-      "completeness": "high",
+      "completeness": "partial",
       "facility_gpus": 344,
       "residual_separable": false,
       "cs_rd_fy2024_m": 9.566
@@ -5913,7 +5913,7 @@
       "sector": "Public",
       "documented": 344,
       "count_type": "lower_bound",
-      "completeness": "high",
+      "completeness": "partial",
       "gen_count": {
         "Pascal": 0,
         "Volta": 0,

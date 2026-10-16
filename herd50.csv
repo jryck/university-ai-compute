@@ -5,7 +5,7 @@ rank,institution,sector,rd_fy2024_m,endowment_b,documented_gpus,count_type,contr
 4,University of Michigan Ann Arbor,Public,2100,21.20,0,unresolved,Condo (cost-recovery),Great Lakes + Armis2,documentation.its.umich.edu,unknown
 5,University of Wisconsin-Madison,Public,1900,4.92,72,lower_bound,Central (free shared),CHTC GPU Lab (40 A100 + 32 H100),chtc.cs.wisc.edu,partial
 6,University of California Los Angeles,Public,1900,4.77,0,unresolved,Condo,Hoffman2,hpc.oarc.ucla.edu,unknown
-7,University of California San Diego,Public,1900,1.79,344,lower_bound,National facility (NSF),SDSC Expanse (208 V100 + 136 H100) + Voyager,sdsc.edu,high
+7,University of California San Diego,Public,1900,1.79,344,lower_bound,National facility (NSF),SDSC Expanse (208 V100 + 136 H100) + Voyager,sdsc.edu,partial
 8,University of Washington Seattle,Public,1700,6.00,954,aggregate,Condo,Hyak klone (954 cards),hyak.uw.edu,partial
 9,Stanford University,Private,1600,40.79,1504,lower_bound,Central (Marlowe) + condo (Sherlock),Marlowe (248 H100) + Sherlock (1256; >=600 of the fleet are H100-class-or-better per direct corr.),sherlock.stanford.edu/docs/tech/facts,partial
 10,Cornell University,Private,1600,11.75,755,aggregate,Condo (70 owners),G2/Unicorn (755 GPUs),it.coecis.cornell.edu,partial
