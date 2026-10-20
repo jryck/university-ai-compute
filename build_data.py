@@ -267,7 +267,9 @@ def parse_clusters(path='clusters.csv'):
                                    'overlap': overlap, 'note': r['notes'], 'source': r['source_url']})
             continue
         cnt = int(cnt)
-        if status == 'planned':
+        if status in ('planned', 'early-operations'):
+            # 'early-operations' = friendly-user / internal-only, not yet generally
+            # available; excluded from the documented lower bound (tracked as planned)
             d['planned'][model] = d['planned'].get(model, 0) + cnt
             continue
         if status in ('retired', 'uncertain'):

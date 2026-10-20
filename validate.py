@@ -34,7 +34,7 @@ def reaggregate(path='clusters.csv'):
                     u['agg_distinct'] += int(cnt)
             continue
         c = int(cnt)
-        if status == 'planned':
+        if status in ('planned', 'early-operations'):
             u['planned'] += c; u['planned_models'].add(model); continue
         if status in ('retired', 'uncertain'):
             u['retired'] += c; continue
@@ -124,7 +124,7 @@ def main():
     check(len(ids) == len(set(ids)), "[dup] duplicate cluster_id")
     for r in rows:
         check(r['source_url'].startswith('http'), f"[src] {r['cluster_id']}: missing source_url")
-        check(r['status'] in ('operational', 'planned', 'retired', 'uncertain'), f"[status] {r['cluster_id']}: bad status")
+        check(r['status'] in ('operational', 'planned', 'early-operations', 'retired', 'uncertain'), f"[status] {r['cluster_id']}: bad status")
         check(r.get('count_basis', 'primary') in ('primary', 'legacy', 'aggregate'), f"[basis] {r['cluster_id']}: bad count_basis")
 
     # research_subset.csv internal consistency (central-allocatable <= documented; sources present)
