@@ -30,8 +30,9 @@ with the authoritative counts and drive no headline figure, ranking, or chart.
 ## The dashboard (six sections)
 
 1. **Key findings** — three relationships recomputed live from the data: R&D vs. documented
-   GPUs (Pearson r ≈ −0.04, n=41), endowment vs. documented GPUs (r ≈ +0.19, n=38), and
-   concentration (top-10 fleets hold **62%** of documented GPUs vs 31% of R&D).
+   GPUs (Pearson r ≈ +0.12, n=41), endowment vs. documented GPUs (r ≈ +0.39, n=38), and
+   concentration (top-10 fleets hold **61%** of documented GPUs vs 31% of R&D). Correlations
+   are documentation-sensitive — they strengthened as large fleets became better documented.
 2. **Compute vs. university resources** — the principal log–log scatter of documented GPUs
    against R&D spending / endowment, with an *exclude NSF/state facilities* toggle and optional,
    clearly-marked **reference points** for endowment-heavy schools outside the HERD-50
